@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QFileDialog
 import random
 
 from example_ui import Ui_MainWindow
+from FF import FF
 
 nodeList = []
 fireList = []
@@ -55,6 +56,8 @@ fire_spread_time = [[],
     [[6,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1]],#15  
 ]
 
+
+
 class MainWindow_controller(QtWidgets.QMainWindow):
 
     def __init__(self):
@@ -72,35 +75,36 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.initNode()
         self.randomFireAndDepot()
         
+        
 
     def initNode(self):
-        nodeList.append([self.ui.pushButton, self.ui.image_1])
-        nodeList.append([self.ui.pushButton_2, self.ui.image_2])
-        nodeList.append([self.ui.pushButton_3, self.ui.image_3])
-        nodeList.append([self.ui.pushButton_4, self.ui.image_4])
-        nodeList.append([self.ui.pushButton_5, self.ui.image_5])
-        nodeList.append([self.ui.pushButton_6, self.ui.image_6])
-        nodeList.append([self.ui.pushButton_7, self.ui.image_7])
-        nodeList.append([self.ui.pushButton_8, self.ui.image_8])
-        nodeList.append([self.ui.pushButton_9, self.ui.image_9])
-        nodeList.append([self.ui.pushButton_10, self.ui.image_10])
-        nodeList.append([self.ui.pushButton_11, self.ui.image_11])
-        nodeList.append([self.ui.pushButton_12, self.ui.image_12])
-        nodeList.append([self.ui.pushButton_13, self.ui.image_13])
-        #nodeList.append([self.ui.pushButton_14, self.ui.image_14])
-        nodeList.append([self.ui.pushButton_15, self.ui.image_15])
+        nodeList.append(FF(self.ui.pushButton, self.ui.image_1))
+        nodeList.append(FF(self.ui.pushButton_2, self.ui.image_2))
+        nodeList.append(FF(self.ui.pushButton_3, self.ui.image_3))
+        nodeList.append(FF(self.ui.pushButton_4, self.ui.image_4))
+        nodeList.append(FF(self.ui.pushButton_5, self.ui.image_5))
+        nodeList.append(FF(self.ui.pushButton_6, self.ui.image_6))
+        nodeList.append(FF(self.ui.pushButton_7, self.ui.image_7))
+        nodeList.append(FF(self.ui.pushButton_8, self.ui.image_8))
+        nodeList.append(FF(self.ui.pushButton_9, self.ui.image_9))
+        nodeList.append(FF(self.ui.pushButton_10, self.ui.image_10))
+        nodeList.append(FF(self.ui.pushButton_11, self.ui.image_11))
+        nodeList.append(FF(self.ui.pushButton_12, self.ui.image_12))
+        nodeList.append(FF(self.ui.pushButton_13, self.ui.image_13))
+        nodeList.append(FF(self.ui.pushButton_14, self.ui.image_14))
+        nodeList.append(FF(self.ui.pushButton_15, self.ui.image_15))
         for i in range(len(nodeList)):
-            nodeList[i][0].clicked.connect(self.choose)
-            nodeList[i][0].setProperty("no.", i+1)
-            nodeList[i][0].setProperty("burned", 0)
-            nodeList[i][0].setProperty("protected", 0)
+            nodeList[i].pushButton.clicked.connect(self.choose)
+            nodeList[i].pushButton.setProperty("no.", i+1)
+            nodeList[i].pushButton.setProperty("burned", 0)
+            nodeList[i].pushButton.setProperty("protected", 0)
         self.ui.pushButton_16.clicked.connect(self.nextTime)
 
     def randomFireAndDepot(self):
         a = random.sample(nodeList,1)
-        a[0][0].setStyleSheet("background-color: red;")
-        a[0][0].setProperty("burned", 1)
-        fireList.append(a[0][0])
+        a[0].pushButton.setStyleSheet("background-color: red;")
+        a[0].pushButton.setProperty("burned", 1)
+        fireList.append(a[0].pushButton)
         self.ui.pushButton_14.setStyleSheet("background-color: black;")
         self.ui.pushButton_14.setProperty("protected", 1)
         self.ui.pushButton_14.setProperty("depot", 1)
@@ -120,8 +124,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             if(self.sender().property("no.") == j[0].property("no.")):
                 selectedFF.append(self.sender()) 
                 for i in nodeList:
-                    if(i[0].property("no.") in travel_time[selectedFF[0].property("no.")] and i[0].property("burned")==0):
-                        i[0].setStyleSheet("background-color: grey")
+                    if(i.pushButton.property("no.") in travel_time[selectedFF[0].property("no.")] and i.pushButton.property("burned")==0):
+                        i.pushButton.setStyleSheet("background-color: grey")
                     break
 
         for i in selectList:
@@ -175,10 +179,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in fireList:
             for j in nodeList:
                 for k in fire_spread_time[i.property("no.")]:
-                    if(j[0].property("no.")==k[0] and j[0].property("protected")==0):
-                        j[0].setProperty("burned",1)
-                        j[0].setStyleSheet("background-color: red")
-                        tempList.append(j[0])
+                    if(j.pushButton.property("no.")==k[0] and j.pushButton.property("protected")==0):
+                        j.pushButton.setProperty("burned",1)
+                        j.pushButton.setStyleSheet("background-color: red")
+                        tempList.append(j.pushButton)
         if(len(tempList)==0):
             self.ui.label_2.setText("finished")
         for k in tempList:
@@ -194,11 +198,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.setProperty("protected",1)
                 i.setStyleSheet("background-color: green")
                 for k in nodeList:
-                    if(i==k[0]):
+                    if(i==k.pushButton):
                         global image_path
                         pixmap = QPixmap(image_path)
-                        k[1].setPixmap(pixmap)
-                        firefighterList.append([i,k[1]])
+                        k.label.setPixmap(pixmap)
+                        firefighterList.append([i,k.label])
             for i in range(firefighterNum):
                  selectList.pop()
             self.fire_spread()
