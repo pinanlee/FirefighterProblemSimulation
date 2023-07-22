@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="image">
+    <file>R.png</file>
+    <file>firefighter.png</file>
+    <file>network.png</file>
+  </qresource>
+</RCC>
