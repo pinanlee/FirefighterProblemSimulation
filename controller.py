@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QFileDialog
 import random
 
 from example_ui import Ui_MainWindow
+<<<<<<< HEAD
 from FF import Node, FireFighter
 
 #parameter settings
@@ -35,6 +36,9 @@ dynamic_fireArriveCountdown = [[],
     [[7,10],[11,10],[13,10],[15,10]],#14
     [[6,10],[9,10],[10,10],[11,10],[12,10],[13,10],[14,10]],#15
 ]
+=======
+from FF import FF
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
 
 #Data structure settings
 nodeList = [] #store all existing Node except Depot (class: Node)
@@ -86,8 +90,12 @@ fire_spread_time = [[],
 ]
 
 
+<<<<<<< HEAD
 #travel_time fire spread可以整合成distance matrix
 #解決消防員各自node選擇問題
+=======
+
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
 class MainWindow_controller(QtWidgets.QMainWindow):
 
     def __init__(self):
@@ -112,6 +120,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.label_2.setText("select 2 vertices and push \" t++\"")
         self.initNode()
         self.randomFireAndDepot()
+<<<<<<< HEAD
 
     def initNode(self):
         ctr = 1
@@ -122,16 +131,51 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             initial_Capacity.append(temp)
             print("node ",nodeList[-1].getNum(),end="")
             print(nodeList[-1].getAmount())
+=======
+        
+        
+
+    def initNode(self):
+        nodeList.append(FF(self.ui.pushButton, self.ui.image_1))
+        nodeList.append(FF(self.ui.pushButton_2, self.ui.image_2))
+        nodeList.append(FF(self.ui.pushButton_3, self.ui.image_3))
+        nodeList.append(FF(self.ui.pushButton_4, self.ui.image_4))
+        nodeList.append(FF(self.ui.pushButton_5, self.ui.image_5))
+        nodeList.append(FF(self.ui.pushButton_6, self.ui.image_6))
+        nodeList.append(FF(self.ui.pushButton_7, self.ui.image_7))
+        nodeList.append(FF(self.ui.pushButton_8, self.ui.image_8))
+        nodeList.append(FF(self.ui.pushButton_9, self.ui.image_9))
+        nodeList.append(FF(self.ui.pushButton_10, self.ui.image_10))
+        nodeList.append(FF(self.ui.pushButton_11, self.ui.image_11))
+        nodeList.append(FF(self.ui.pushButton_12, self.ui.image_12))
+        nodeList.append(FF(self.ui.pushButton_13, self.ui.image_13))
+        nodeList.append(FF(self.ui.pushButton_14, self.ui.image_14))
+        nodeList.append(FF(self.ui.pushButton_15, self.ui.image_15))
+        for i in range(len(nodeList)):
+            nodeList[i].pushButton.clicked.connect(self.choose)
+            nodeList[i].pushButton.setProperty("no.", i+1)
+            nodeList[i].pushButton.setProperty("burned", 0)
+            nodeList[i].pushButton.setProperty("protected", 0)
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
         self.ui.pushButton_16.clicked.connect(self.nextTime)
 
     def randomFireAndDepot(self):
         #random fire depot
         a = random.sample(nodeList,1)
+<<<<<<< HEAD
         a[0].onFire()
         fireList.append(a[0])
         #init depot
         depot = Node(self.ui.pushButton_15, self.ui.image_15, 15, self.choose, 0)
         depot.depotSetting()
+=======
+        a[0].pushButton.setStyleSheet("background-color: red;")
+        a[0].pushButton.setProperty("burned", 1)
+        fireList.append(a[0].pushButton)
+        self.ui.pushButton_14.setStyleSheet("background-color: black;")
+        self.ui.pushButton_14.setProperty("protected", 1)
+        self.ui.pushButton_14.setProperty("depot", 1)
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
         for i in range(firefighterNum):
             ff = FireFighter(i+1)
             ff.move(depot)
@@ -139,6 +183,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
     def choose(self):
+<<<<<<< HEAD
         global selectList, firefighterNum, selectedFF, firefighterList
 
         #check if FireFighter is selected before choosing Node to travel
@@ -161,6 +206,33 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     #check assigned node's status (burned or not burned)
     def statusDetection(self, node):
         if(node.isBurned()):
+=======
+        global selectList, firefighterNum, selectedFF,firefighterList
+        #print(self.sender())
+        for j in firefighterList:
+            if(self.sender().property("no.") == j[0].property("no.")):
+                selectedFF.append(self.sender()) 
+                for i in nodeList:
+                    if(i.pushButton.property("no.") in travel_time[selectedFF[0].property("no.")] and i.pushButton.property("burned")==0):
+                        i.pushButton.setStyleSheet("background-color: grey")
+                    break
+
+        for i in selectList:
+            if(self.sender()==i):
+                self.sender().setStyleSheet("background-color: white")
+                selectList.remove(i)
+                return
+        if(self.statusDetection() and self.distanceDetection()):
+            if(len(selectList)<firefighterNum):
+                #self.ui.label_2.setText("select vertex " + str(self.sender().property("no.")))
+                self.sender().setStyleSheet("background-color: grey")
+                selectList.append(self.sender())
+
+                    
+
+    def statusDetection(self):
+        if(self.sender().property("burned")==1):
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
             self.ui.label_2.setText("cannot choose this vertex: (burned)")
             return 0
         return 1
@@ -177,11 +249,20 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         tempList=[]
         for i in fireList:
             for j in nodeList:
+<<<<<<< HEAD
                 for k in dynamic_fireArriveCountdown[i.getNum()]:
                     if(j.getNum() == k[0] and not j.isProtected() and i.getAmount()<=0 and not j.isBurned() and k[1] <= 0 ):
                         j.onFire()
                         tempList.append(j)
         if(not tempList):
+=======
+                for k in fire_spread_time[i.property("no.")]:
+                    if(j.pushButton.property("no.")==k[0] and j.pushButton.property("protected")==0):
+                        j.pushButton.setProperty("burned",1)
+                        j.pushButton.setStyleSheet("background-color: red")
+                        tempList.append(j.pushButton)
+        if(len(tempList)==0):
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
             self.ui.label_2.setText("finished")
         for k in tempList:
             fireList.append(k)
@@ -232,8 +313,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def nextTime(self):
         if(len(selectList) == firefighterNum):
             for i in selectList:
+<<<<<<< HEAD
                 i["node"].defend()
                 i["firefighter"].move(i["node"])
+=======
+                i.setProperty("protected",1)
+                i.setStyleSheet("background-color: green")
+                for k in nodeList:
+                    if(i==k.pushButton):
+                        global image_path
+                        pixmap = QPixmap(image_path)
+                        k.label.setPixmap(pixmap)
+                        firefighterList.append([i,k.label])
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
             for i in range(firefighterNum):
                  selectList.pop()
             #self.fire_spread()     

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from PyQt5.QtGui import QImage, QPixmap
 
 class Node:
@@ -58,3 +59,11 @@ class FireFighter:
         self.__select = True
     def isSelected(self):
         return self.__select
+=======
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class FF:
+    def __init__(self, pushButton, label):
+        self.pushButton = pushButton
+        self.label = label
+>>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
