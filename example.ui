@@ -218,7 +218,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_14">
+   <widget class="QPushButton" name="pushButton_15">
     <property name="geometry">
      <rect>
       <x>620</x>
@@ -234,7 +234,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_15">
+   <widget class="QPushButton" name="pushButton_14">
     <property name="geometry">
      <rect>
       <x>960</x>
@@ -338,7 +338,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="image_14">
+   <widget class="QLabel" name="image_15">
     <property name="geometry">
      <rect>
       <x>560</x>
@@ -377,7 +377,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="image_15">
+   <widget class="QLabel" name="image_14">
     <property name="geometry">
      <rect>
       <x>890</x>
@@ -479,10 +479,10 @@
    <zorder>image_12</zorder>
    <zorder>image_13</zorder>
    <zorder>image_9</zorder>
-   <zorder>image_14</zorder>
+   <zorder>image_15</zorder>
    <zorder>image_10</zorder>
    <zorder>image_5</zorder>
-   <zorder>image_15</zorder>
+   <zorder>image_14</zorder>
    <zorder>image_11</zorder>
    <zorder>image_7</zorder>
    <zorder>image_3</zorder>
@@ -493,7 +493,7 @@
    <zorder>pushButton_12</zorder>
    <zorder>pushButton_9</zorder>
    <zorder>pushButton_13</zorder>
-   <zorder>pushButton_14</zorder>
+   <zorder>pushButton_15</zorder>
    <zorder>pushButton_10</zorder>
    <zorder>pushButton_5</zorder>
    <zorder>pushButton_2</zorder>
@@ -501,7 +501,7 @@
    <zorder>pushButton_3</zorder>
    <zorder>pushButton_7</zorder>
    <zorder>pushButton_11</zorder>
-   <zorder>pushButton_15</zorder>
+   <zorder>pushButton_14</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
