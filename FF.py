@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from PyQt5.QtGui import QImage, QPixmap
 
 class Node:
@@ -10,6 +9,7 @@ class Node:
         self.__pushButton.setProperty("protected", False)
         self.__pushButton.setProperty("amount", temp)
         self.__pushButton.clicked.connect(func)
+        self.__processingTime = 3
     def getNum(self):
         return self.__pushButton.property("no.")
     def onFire(self):
@@ -17,6 +17,9 @@ class Node:
         self.__pushButton.setProperty("burned", True)
     def isBurned(self):
         return self.__pushButton.property("burned")
+    def preDefend(self):
+        #self.__pushButton.setProperty("protected",True)
+        self.__pushButton.setStyleSheet("background-color: grey")
     def defend(self):
         self.__pushButton.setProperty("protected",True)
         self.__pushButton.setStyleSheet("background-color: green")
@@ -37,6 +40,8 @@ class Node:
         return False
     def mark(self, s):
         self.__pushButton.setText(s)
+    def getProcessingTime(self):
+        return self.__processingTime
 
 class FireFighter:
     def __init__(self, num):
@@ -44,26 +49,40 @@ class FireFighter:
         self.__path = []
         self.__select = False
         self.__arrivalTime = 0
-    def move(self, node):
-        self.__image_path = "firefighter.png"
-        pixmap = QPixmap(self.__image_path)
-        if(self.__path):
-            self.curPos().setImage(QPixmap())
-            self.curPos().mark("")
-        self.__path.append(node)
-        self.curPos().setImage(pixmap)
-        self.__select = False
+        self.cumArrivalTime = 0
+        self.__travel = False
+
+    def move(self, node, arrive, timer):
+        self.__arrivalTime = arrive
+        self.cumArrivalTime += self.__arrivalTime
+        self.destNode = node
+        self.checkArrival(timer)
+
+    def isTraveling(self):
+        return self.__travel
+    def traveling(self):
+        self.__travel = True
+    def checkArrival(self, timer):
+        print("hi")
+        if(self.cumArrivalTime==timer):
+            print("j")
+            self.__image_path = "firefighter.png"
+            pixmap = QPixmap(self.__image_path)
+            if(self.__path):
+                self.curPos().setImage(QPixmap())
+                self.curPos().mark("")
+            self.__path.append(self.destNode)
+            self.curPos().defend()
+            self.curPos().setImage(pixmap)
+            self.__select = False
+            return True
+        elif(self.cumArrivalTime < timer):
+            cumArrivalTime = timer
+            return True
+        return False
     def curPos(self):
         return self.__path[-1]
     def selected(self):
         self.__select = True
     def isSelected(self):
         return self.__select
-=======
-from PyQt5 import QtCore, QtGui, QtWidgets
-
-class FF:
-    def __init__(self, pushButton, label):
-        self.pushButton = pushButton
-        self.label = label
->>>>>>> 0568b2f1f55c3360a3fe8c67c877c91ab402cd6f
