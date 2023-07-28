@@ -89,6 +89,12 @@ class Ui_MainWindow(object):
         self.pushButton_16 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_16.setGeometry(QtCore.QRect(10, 500, 81, 51))
         self.pushButton_16.setObjectName("pushButton_16")
+
+        self.informationButton = QtWidgets.QPushButton(self.centralwidget)
+        self.informationButton.setText('Information Window')
+        self.informationButton.setStyleSheet('font-size:16px;')
+        self.informationButton.setGeometry(20, 670, 200, 40)
+
         self.image_1 = QtWidgets.QLabel(self.centralwidget)
         self.image_1.setGeometry(QtCore.QRect(230, 0, 101, 101))
         self.image_1.setText("")
