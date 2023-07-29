@@ -1,88 +1,101 @@
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QPixmap
+from node import Node
 
-class Node:
-    def __init__(self, pushButton, label, i, func, temp):
-        self.__pushButton = pushButton
-        self.__label = label
-        self.__pushButton.setProperty("no.", i)
-        self.__pushButton.setProperty("burned", False)
-        self.__pushButton.setProperty("protected", False)
-        self.__pushButton.setProperty("amount", temp)
-        self.__pushButton.clicked.connect(func)
-        self.__processingTime = 3
-    def getNum(self):
-        return self.__pushButton.property("no.")
-    def onFire(self):
-        self.__pushButton.setStyleSheet("background-color: red;")
-        self.__pushButton.setProperty("burned", True)
-    def isBurned(self):
-        return self.__pushButton.property("burned")
-    def preDefend(self):
-        #self.__pushButton.setProperty("protected",True)
-        self.__pushButton.setStyleSheet("background-color: grey")
-    def defend(self):
-        self.__pushButton.setProperty("protected",True)
-        self.__pushButton.setStyleSheet("background-color: green")
-    def isProtected(self):
-        return self.__pushButton.property("protected")
-    def depotSetting(self):
-        self.__pushButton.setStyleSheet("background-color: black;")
-        self.__pushButton.setProperty("protected", True)
-    def updateAmount(self, remain):
-        self.__pushButton.setProperty("amount", remain)
-    def getAmount(self):
-        return self.__pushButton.property("amount")
-    def setImage(self, image):
-        self.__label.setPixmap(image)
-    def has(self, node):
-        if(self.__pushButton == node):
-            return True
-        return False
-    def mark(self, s):
-        self.__pushButton.setText(s)
-    def getProcessingTime(self):
-        return self.__processingTime
+'''
+calculateCurrentCapacity和wateringVisualize沒用到 (processing未實作完成)
+'''
 
 class FireFighter:
-    def __init__(self, num):
-        self.__name = "firefighter " + str(num)
-        self.__path = []
-        self.__select = False
-        self.__arrivalTime = 0
-        self.cumArrivalTime = 0
-        self.__travel = False
+    def __init__(self, num, depot):
+        self.__name = "firefighter " + str(num) #消防員編號
+        self.__path = [depot] #紀錄FF經過的node
+      
+        #變數
+        self.__arrivalTime = 0 #下一個arc所需移動時間
+        self.__cumArrivalTime = 0 #消防員抵達目的預計時間
+        self.__select = False #是否被指派
+        self.__travel = False #是否在移動
+        self.__process = False #是否在澆水
+        self.rate_extinguish = 2 #澆水速率
+        self.move_man = 1 #移動速率
+        self.destNode = depot #下一個目的
 
-    def move(self, node, arrive, timer):
-        self.__arrivalTime = arrive
-        self.cumArrivalTime += self.__arrivalTime
-        self.destNode = node
+        #UI設定
+        self.pixmap = QPixmap("firefighter.png")
+        self.curPos().defend()
+        self.curPos().setImage(self.pixmap)  
+
+    def move(self, timer): #開始移動至目的地
+        self.__cumArrivalTime += self.__arrivalTime
         self.checkArrival(timer)
 
-    def isTraveling(self):
+    def process(self): #消防員標記為澆水中
+        self.__process = True
+
+    def isProcess(self): #回傳是否消防員在澆水
+        return self.__process
+
+    def isTraveling(self): #消防員標記為移動中
         return self.__travel
-    def traveling(self):
+
+    def traveling(self): #回傳是否消防員在移動
         self.__travel = True
-    def checkArrival(self, timer):
-        print("hi")
-        if(self.cumArrivalTime==timer):
-            print("j")
-            self.__image_path = "firefighter.png"
-            pixmap = QPixmap(self.__image_path)
-            if(self.__path):
-                self.curPos().setImage(QPixmap())
-                self.curPos().mark("")
+
+    def selected(self): #消防員標記為被指派
+        self.__select = True
+
+    def isSelected(self): #回傳是否消防員被指派
+        return self.__select
+
+    def checkArrival(self, timer): #是否在timer時抵達目的地
+        if(self.__cumArrivalTime<=timer):
+            self.__cumArrivalTime = timer
+            self.destNode = self.curPos() if self.destNode == None else self.destNode
             self.__path.append(self.destNode)
-            self.curPos().defend()
-            self.curPos().setImage(pixmap)
+            #self.curPos().defend()
+            self.curPos().setImage(self.pixmap)
             self.__select = False
-            return True
-        elif(self.cumArrivalTime < timer):
-            cumArrivalTime = timer
+            self.__travel = False
             return True
         return False
-    def curPos(self):
+
+    def curPos(self): #回傳現在位置
         return self.__path[-1]
-    def selected(self):
-        self.__select = True
-    def isSelected(self):
-        return self.__select
+
+    def next_Pos_Accessment(self, node): #判斷消防員是否可以指派去給定的目的地 
+        if(self.__statusDetection(node) and self.__distanceDetection(node)):
+            self.selected()
+            node.preDefend()
+            self.destNode = node
+            self.__arrivalTime = self.curPos().getArc(node)["length"] / self.move_man
+            return "vaild choose"
+        elif (self.statusDetection(node)):
+            return "cannot choose this vertex: (burned)"
+        elif (self.distanceDetection(node)):
+            return "this vertex doesn't meet distance restrictions"
+        else:
+            return ""
+
+    def __statusDetection(self, node): #check assigned node's status (burned or not burned)
+        return not node.isBurned()
+    
+    def __distanceDetection(self, node): #check if assigned node is adjacent to selected FireFighter
+        return node in self.curPos().getNeighbors()
+
+    def __calculateCurrentCapacity(self): #更新消防員在該node上的保護情況
+        if(self.isProcess()):
+            remain = self.curPos().getWaterAmount() - self.rate_extinguish
+            if (remain < 0):
+                self.curPos().defend()
+            updateWaterAmount(remain)
+            
+        #print("node: ",i.getNum()+1,end="")
+        #print(" at time", timer,end="")
+        #print(": ",i.getAmount())
+
+    def __wateringVisualize(self): #UI設定
+        if(self.curPos().isProcess()):
+            opacity = 1 - self.curPos().getNodePercentage_FF()
+            print(opacity)
+            i.setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
+    
