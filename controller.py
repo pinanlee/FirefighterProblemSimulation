@@ -2,8 +2,8 @@
 # coding: utf-8
 
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QImage, QPixmap, QFont
-from PyQt5.QtWidgets import QFileDialog, QTableWidget, QTableWidgetItem, QMainWindow, QApplication
+from PyQt5.QtGui import QImage, QPixmap, QFont, QColor
+from PyQt5.QtWidgets import QFileDialog, QTableWidget, QTableWidgetItem, QGraphicsOpacityEffect
 import random
 import math
 
@@ -52,23 +52,7 @@ travel_time = [[],
     [[7,10],[11,10],[13,10],[15,10]],#14
     [[6,10],[9,10],[10,10],[11,10],[12,10],[13,10],[14,10]],#15
 ]
-gameOvercheck = [[],
-    [[2,0],[4,0],[5,0]],#1
-    [[1,0],[3,0],[5,0],[6,0],[10,0]],#2
-    [[2,0],[6,0],[7,0],[11,0]],#3
-    [[1,0],[5,0],[8,0],[9,0]],#4
-    [[1,0],[2,0],[4,0],[9,0],[10,0]],#5
-    [[2,0],[3,0],[10,0],[11,0]],#6
-    [[3,0],[11,0],[14,0]],#7
-    [[4,0],[9,0],[12,0]],#8
-    [[4,0],[5,0],[8,0],[10,0],[12,0],[13,0],[15,0]],#9
-    [[2,0],[5,0],[6,0],[9,0],[13,0],[15,0]],#10
-    [[3,0],[6,0],[7,0],[13,0],[14,0],[15,0]],#11
-    [[8,0],[9,0],[13,0],[15,0]],#12
-    [[9,0],[10,0],[11,0],[12,0],[14,0],[15,0]],#13
-    [[7,0],[11,0],[13,0],[15,0]],#14
-    [[6,0],[9,0],[10,0],[11,0],[12,0],[13,0],[14,0]],#15
-]
+
 
 
 class MainWindow_controller(QtWidgets.QMainWindow):
@@ -93,6 +77,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.initNode()
         self.randomFireAndDepot()
         self.NodeConnection()
+        #self.showAllRoute()
 
     def initUIFunction(self):
         self.setWindowTitle("Firefighter Problem Simulation")
@@ -130,9 +115,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         #fireList.append(a[0])
         #init depot
         depot = self.ui.nodeButton_15
-        depot.depotSetting()
         for i in range(firefighterNum):
             ff = FireFighter(i+1, depot)
+            depot.depotSetting()
             firefighterList.append(ff)
 
     def NodeConnection(self):
@@ -149,11 +134,21 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 text += str(firefighterList[FFindex].curPos().getArc(j)["length"])
         self.ui.node_info_label.setText(text)
 
+    def showAllRoute(self):
+        for i in (firefighterList[FFindex].curPos().getNeighbors()):
+            if (not i.isBurned()):
+                i.preDefend()
 
     def selectFireFighter(self): #選擇消防員
         global FFindex
         FFindex = (FFindex + 1) % firefighterNum
         self.ui.FFlabel.setText("selected FireFighter: {}".format(FFindex+1))
+        self.opacitySet()
+    
+    def opacitySet(self):
+        for i in firefighterList:
+            i.curPos().setOpacity(0.3)
+        firefighterList[FFindex].curPos().setOpacity(1)
 
     def choose(self): #指派消防員移動至給定node
         global selectedNode
@@ -180,15 +175,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             else:
                 self.ui.descriptionLabel.setText("Fire will arrive early")
         else:
-            self.ui.descriptionLabel.setText("this firefighter is processing")
+            self.ui.descriptionLabel.setText("this firefighter is processing") 
 
     def tryDefend(self): #指派消防員在原地澆水
-        return 0
+        if(not firefighterList[FFindex].isSelected()):
+            text = firefighterList[FFindex].process_Accessment()
+            self.ui.descriptionLabel.setText(text)
 
 
     def nextTime(self): #跳轉至下一個時間點
         global timer
         for i in firefighterList:
+            if(i.isIdle()):
+                i.idle(timer)
             i.move(timer) 
         spreading = True
         while(spreading):
@@ -197,6 +196,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             for i in firefighterList:
                 if(i.checkArrival(timer)):
                     spreading =  False
+        self.opacitySet()
         self.ui.timeIndexLabel.setText("t= "+str(timer))
 
     def showInformationWindow(self):
@@ -308,55 +308,3 @@ class InformationWindow(QtWidgets.QMainWindow):
 
         self.setCentralWidget(table_widget)
         self.resize(400, 800)
-
-    '''def showInformationWindow(self):
-        self.nw = InformationWindow()
-        self.nw.show()
-        x = self.nw.pos().x()
-        y = self.nw.pos().y()
-        self.nw.move(x+100, y+100)
-
-
-
-class InformationWindow(QtWidgets.QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('Information Window')
-
-        matrix = [
-            [1, 2, 3],
-            [2, 5, 6],
-            [3, 8, 9],
-            [4, 0, 0],
-            [5, 0, 0],
-            [6, 0, 0],
-            [7, 0, 0],
-            [8, 0, 0],
-            [9, 0, 0],
-            [10, 0, 0],
-            [11, 0, 0],
-            [12, 0, 0],
-            [13, 0, 0],
-            [14, 0, 0],
-        ]
-
-
-        self.matrix = matrix
-
-        self.ui()
-
-    def ui(self):
-        table_widget = QTableWidget()
-        table_widget.setRowCount(len(self.matrix))
-        table_widget.setColumnCount(len(self.matrix[0]))
-        for i, row in enumerate(self.matrix):
-            for j, value in enumerate(row):
-                item = QTableWidgetItem(str(value))
-                table_widget.setItem(i, j, item)
-
-        title_name=["Status","Amount","Remain"]  # 這裡可以更換您想要的標題名稱
-        table_widget.setHorizontalHeaderLabels(title_name)
-
-        self.setCentralWidget(table_widget)
-        self.resize(400, 800)'''
-

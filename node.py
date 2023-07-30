@@ -1,4 +1,5 @@
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5 import QtWidgets
 import math
 
@@ -46,6 +47,9 @@ class Node(QtWidgets.QPushButton):
     def depotSetting(self):
         self.setStyleSheet("background-color: black;")
         self.setProperty("protected", True)
+        self.setProperty("depot",True)
+    def isDepot(self):
+        return self.property("depot")
 
     #update變數
     def updateGrassAmount(self, remain):
@@ -55,7 +59,10 @@ class Node(QtWidgets.QPushButton):
     def updateWaterAmount(self, remain):
         remain = 0 if remain < 0 else remain
         self.setProperty("water-amount", remain)    
-    
+    def setOpacity(self, num):
+        self.opacity_effect = QGraphicsOpacityEffect()
+        self.opacity_effect.setOpacity(num)
+        self.__label.setGraphicsEffect(self.opacity_effect)
     #get functions
     def isBurned(self):
         return self.property("burned")
