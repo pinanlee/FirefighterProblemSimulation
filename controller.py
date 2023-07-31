@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QImage, QPixmap, QFont, QColor
-from PyQt5.QtWidgets import QFileDialog, QTableWidget, QTableWidgetItem, QGraphicsOpacityEffect
+from PyQt5 import QtWidgets
 import random
 import math
 
@@ -11,6 +9,7 @@ from example_ui import Ui_MainWindow
 from FF import FireFighter
 from node import Node 
 from fire import Fire
+from InformationWindow import InformationWindow
 
 '''
 choose function需要再改
@@ -21,20 +20,17 @@ information table跑不出來
 
 
 #parameter settings
-firefighterNum = 2
+
 timer = 0
 FFindex = 0
-
+labelList = []
 
 #Data structure settings
 nodeList = [] #store all existing Node except Depot (class: Node)
-#fireList = [] #store all Node affected by fire (class: Node)
 firefighterList = [] #store all firefighter (class: FireFighter)
-#initial_Capacity = [0]
-#dynamic_Capacity = [0]
 fire = None
 selectedNode = None
-nodeUI = []
+FFNum = 2
 travel_time = [[],
     [[2,20],[4,7],[5,8]],#1
     [[1,20],[3,10],[5,10],[6,10],[10,10]],#2
@@ -61,12 +57,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        global nodeUI
-        nodeUI = [self.ui.nodeButton_1, self.ui.nodeButton_2, self.ui.nodeButton_3, 
+        self.nodeUI = [self.ui.nodeButton_1, self.ui.nodeButton_2, self.ui.nodeButton_3, 
         self.ui.nodeButton_4, self.ui.nodeButton_5, self.ui.nodeButton_6, 
         self.ui.nodeButton_7, self.ui.nodeButton_8, self.ui.nodeButton_9, 
         self.ui.nodeButton_10, self.ui.nodeButton_11, self.ui.nodeButton_12, 
         self.ui.nodeButton_13, self.ui.nodeButton_14, self.ui.nodeButton_15 ]
+        global FFNum
+
+        self.firefighterNum = FFNum
         self.setup_control()
 
     def setup_control(self):
@@ -92,7 +90,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.processButton.clicked.connect(self.tryDefend)
 
     def initNode(self):
-        for i in nodeUI:
+        for i in self.nodeUI:
             temp = random.randrange(5,11)
             i.clicked.connect(self.viewProperty)
             #i.updateAmount(temp)
@@ -110,12 +108,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         a = random.randint(0,13)
         global fire
         fire = Fire(nodeList[a])
-        #for i in nodeList:
-        #    print("{}: {}".format(i.getNum(), i.isBurned()))
-        #fireList.append(a[0])
         #init depot
         depot = self.ui.nodeButton_15
-        for i in range(firefighterNum):
+        for i in range(self.firefighterNum):
             ff = FireFighter(i+1, depot)
             depot.depotSetting()
             firefighterList.append(ff)
@@ -141,11 +136,23 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def selectFireFighter(self): #選擇消防員
         global FFindex
-        FFindex = (FFindex + 1) % firefighterNum
+        #former_FFindex = FFindex 
+        FFindex = (FFindex + 1) % self.firefighterNum
+        
         self.ui.FFlabel.setText("selected FireFighter: {}".format(FFindex+1))
-        self.opacitySet()
+        self.__opacitySet()
+        global selectedNode
+        selectedNode = None
+
+        #Flash effect
+        '''for i in nodeList:
+            i.stopFlashing()
+        firefighterList[former_FFindex].curPos().stopFlashing()
+        firefighterList[FFindex].curPos().startFlashing()
+        print(FFindex + 1," Flash!!")
+        print(former_FFindex + 1," Stop!!")'''
     
-    def opacitySet(self):
+    def __opacitySet(self):
         for i in firefighterList:
             i.curPos().setOpacity(0.3)
         firefighterList[FFindex].curPos().setOpacity(1)
@@ -155,25 +162,17 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if(selectedNode == None):
             self.ui.descriptionLabel.setText("you haven't select node")
             return
-        temp_currentnode = firefighterList[FFindex].curPos().getWaterAmount()
         if(not firefighterList[FFindex].isProcess()):
-            ff_to_selectednode = math.ceil(temp_currentnode/ firefighterList[FFindex].rate_extinguish) +  math.ceil(firefighterList[FFindex].curPos().getArc(selectedNode)["length"] / firefighterList[FFindex].move_man)
-            #fire_to_selectednode = fire.minTimeFireArrival(selectedNode)
-            print(ff_to_selectednode)
-            #print(fire_to_selectednode)
-            #if(fire_to_selectednode >= ff_to_selectednode):
-            if(True):
-                if(not firefighterList[FFindex].isSelected()):
-                    print("Firefighter : ",[firefighterList[FFindex], selectedNode.getNum()])
-                    #check if selected FireFighter can move to assigned Node
-                    print("distanceDetection Verify" + str(firefighterList[FFindex].curPos().getArc(selectedNode)))
-                    text = firefighterList[FFindex].next_Pos_Accessment(selectedNode)
-                    self.ui.descriptionLabel.setText(text)
-                    selectedNode = None
-                else:
-                    self.ui.descriptionLabel.setText("this firefighter is moving")
+            fire.minTimeFireArrival(selectedNode)
+            if(not firefighterList[FFindex].isSelected()):
+                print("Firefighter : ",[firefighterList[FFindex], selectedNode.getNum()])
+                #check if selected FireFighter can move to assigned Node
+                print("distanceDetection Verify" + str(firefighterList[FFindex].curPos().getArc(selectedNode)))
+                text = firefighterList[FFindex].next_Pos_Accessment(selectedNode)
+                self.ui.descriptionLabel.setText(text)
+                selectedNode = None
             else:
-                self.ui.descriptionLabel.setText("Fire will arrive early")
+                self.ui.descriptionLabel.setText("this firefighter is moving")
         else:
             self.ui.descriptionLabel.setText("this firefighter is processing") 
 
@@ -191,120 +190,24 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.move(timer) 
         spreading = True
         while(spreading):
-            fire.fire_spread(timer)
             timer+=1
+            fire.fire_spread(timer)
             for i in firefighterList:
                 if(i.checkArrival(timer)):
                     spreading =  False
-        self.opacitySet()
+        self.__opacitySet()
         self.ui.timeIndexLabel.setText("t= "+str(timer))
 
     def showInformationWindow(self):
         self.nw = InformationWindow()
-        temp = self.calculateMatrix()
-        self.nw.matrix = temp
+        temp = self.nw.updateOutputMatrix(nodeList)
+        temp2 =self.nw.setSetupMatrix(nodeList,self.firefighterNum,firefighterList[FFindex].rate_extinguish,firefighterList[FFindex].move_man,fire.rate_fireburn,fire.move_fire)
+        self.nw.inputmatrix = temp
+        self.nw.setupmatrix = temp2
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
-        # self.nw.move(x + 100, y + 100)
-        self.nw.show()
         self.nw.ui()
+        self.nw.show()
 
 
-    def calculateMatrix(self):
-        temp = []
-        for i in range(0, 15):
-            temp.append(["", "", ""])
-
-        for i in nodeList:
-            matrix[i.getNum()-1][0] = i.isProtected()
-            matrix[i.getNum()-1][1] = i.isBurned()
-            matrix[i.getNum()-1][2] = i.getGrassAmount()
-            temp[i.getNum()-1][1] = i.getGrassAmount()
-            if(matrix[i.getNum()-1][0] == 1):
-                temp[i.getNum() - 1][1] = i.initialGrassAmount - i.getGrassAmount()
-                temp_percent = round((i.initialGrassAmount - i.getGrassAmount() )/ i.initialGrassAmount ,4)
-                temp[i.getNum() - 1][2] = str(temp_percent*100) + "%"
-            elif(matrix[i.getNum()-1][1] == 1):
-                temp[i.getNum() - 1][1] = i.getGrassAmount()
-                temp_percent = round((i.initialGrassAmount  - i.getGrassAmount()) / i.initialGrassAmount ,4)
-                temp[i.getNum() - 1][2] = str(temp_percent*100) + "%"
-            elif (matrix[i.getNum()-1][1] == 0 and matrix[i.getNum()-1][0] == 0):
-                temp[i.getNum() - 1][2] = "0 %"
-
-        for i in nodeList:
-            if (matrix[i.getNum()-1][0] == 1 and matrix[i.getNum()-1][2] <= 0  ):
-                temp[i.getNum() - 1][0] = "Save Success"
-            elif (matrix[i.getNum()-1][0] == 1 and matrix[i.getNum()-1][2] < i.initialGrassAmount ):
-                temp[i.getNum() - 1][0] = "Protecting..."
-            elif(matrix[i.getNum()-1][1] == 1 and matrix[i.getNum()-1][2] <= 0):
-                temp[i.getNum() - 1][0] = "Damage"
-            elif (matrix[i.getNum()-1][1] == 1 and matrix[i.getNum()-1][2] < i.initialGrassAmount ):
-                temp[i.getNum() - 1][0] = "Burning..."
-            elif (matrix[i.getNum()-1][1] == 0 and matrix[i.getNum()-1][0] == 0):
-                temp[i.getNum() - 1][0] = "Normal"
-        return temp
-
-
-class InformationWindow(QtWidgets.QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('Information Window')
-        global matrix
-        matrix = [
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
-        ]
-        self.matrix = matrix
-        self.ui()
-
-    def ui(self):
-        table_widget = QTableWidget()
-        table_widget.setRowCount(len(self.matrix))
-        table_widget.setColumnCount(len(self.matrix[0]))
-        for i, row in enumerate(self.matrix):
-            for j, value in enumerate(row):
-                item = QTableWidgetItem(str(value))
-                if (value == "Burning..."):
-                    item.setBackground(QColor(255, 192, 203))
-                    font = QFont()
-                    font.setBold(True)
-                    item.setFont(font)
-                elif (value == "Protecting..."):
-                    item.setBackground(QColor("lightgreen"))
-                    font = QFont()
-                    font.setBold(True)
-                    item.setFont(font)
-                elif (value == "Save Success"):
-                    font = QFont()
-                    font.setBold(True)
-                    item.setFont(font)
-                    item.setBackground(QColor("darkgreen"))
-                    item.setForeground(QColor("white"))
-                elif (value == "Damage"):
-                    font = QFont()
-                    font.setBold(True)
-                    item.setFont(font)
-                    item.setBackground(QColor("darkred"))
-                    item.setForeground(QColor("white"))
-
-                table_widget.setItem(i, j, item)
-
-        title_name=["Status","Amount","Burned/Recovery Percentage"]  # 這裡可以更換您想要的標題名稱
-        table_widget.setHorizontalHeaderLabels(title_name)
-
-        self.setCentralWidget(table_widget)
-        self.resize(400, 800)

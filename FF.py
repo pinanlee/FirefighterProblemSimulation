@@ -17,7 +17,7 @@ class FireFighter:
         self.__travel = False #是否在移動
         self.__process = False #是否在澆水
         self.rate_extinguish = 2 #澆水速率
-        self.move_man = 10 #移動速率
+        self.move_man = 1 #移動速率
         self.destNode = depot #下一個目的
 
         #UI設定
@@ -70,7 +70,6 @@ class FireFighter:
             self.curPos().setImage(QPixmap())
             prev = self.curPos()
             self.__path.append(self.destNode)
-            #self.curPos().defend()
             if(prev != self.curPos()):
                 self.curPos().setStyleSheet("")
             if(self.curPos().isDepot()):
@@ -83,22 +82,29 @@ class FireFighter:
             self.__wateringVisualize()
         return False
 
-    def curPos(self): #回傳現在位置
+    def curPos(self) -> Node: #回傳現在位置
         return self.__path[-1]
 
+    
     def next_Pos_Accessment(self, node): #判斷消防員是否可以指派去給定的目的地 
-        if(self.__statusDetection(node) and self.__distanceDetection(node)):
+        if(self.__statusDetection(node) and self.__distanceDetection(node) and self.__safeDetection(node)):
             self.selected()
             node.preDefend()
             self.destNode = node
             self.__arrivalTime = self.curPos().getArc(node)["length"] / self.move_man
             return "vaild choose"
-        elif (self.statusDetection(node)):
+        elif (not self.__statusDetection(node)):
             return "cannot choose this vertex: (burned)"
-        elif (self.distanceDetection(node)):
+        elif (not self.__distanceDetection(node)):
             return "this vertex doesn't meet distance restrictions"
+        elif (not self.__safeDetection(node)):
+            return "fire will arrive early"
         else:
             return ""
+    def __safeDetection(self, node: Node):
+        if(node.fireMinArrivalTime >= self.curPos().getArc(node)["length"] / self.move_man):
+            return True
+        return False
 
     def process_Accessment(self): #判斷消防員是否可以指派去給定的目的地 
         if(not self.curPos().isProtected()):

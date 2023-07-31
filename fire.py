@@ -52,33 +52,24 @@ class Fire:
             if(arc["fire-travel"] < arc["length"]):
                 arc["fire-travel"] += self.move_fire
     
-    def minTimeFireArrival(self, node):
-        global min_node
-        minTimeFireArrival = 1000
-        choice = []
+    def minTimeFireArrival(self, node: Node):
+        if(node.isProtected() or node.isBurned()):
+            return
         for i in self.fireList:
-            choice.append(self.__calculateMinTime(i, node, 0))
-            for j in i.adjArc:
-                if(not j["node"] != node):
-                    tempTimeFireArrival = math.ceil(j["length"]/self.move_fire) + math.ceil(i.getGrassAmount()/self.rate_fireburn )
-                    
-                    # print("dynamic_fireArriveCountdown correct",j[1] )
-                    # print("fire travel time",math.ceil(j[1]/move_fire))
-                    # print("fire burn time",math.ceil(i.getAmount()/rate_fireburn ))
-                    # print("tempTimeFireArrival",tempTimeFireArrival)
-                    if(tempTimeFireArrival <= minTimeFireArrival):
-                        min_node = i #node
-                        minTimeFireArrival = tempTimeFireArrival
-                        # print("result",minTimeFireArrival)
-        return minTimeFireArrival
+            self.__calculateMinTime(i, node, 0)
+        print(node.fireMinArrivalTime)
+        
 
     def __calculateMinTime(self, start, end, time):
-        for i in start.adjArc:
-            tempTimeFireArrival = time + math.ceil(i["length"]/self.move_fire) + math.ceil(start.getGrassAmount()/self.rate_fireburn)
-            if(i["node"] != end):
-                self.calculateMinTime(i["node"], end, time)
-            else:
-                return tempTimeFireArrival
+        for arc in start.getArcs():
+            if(arc["node"].isProtected() or arc["node"].isBurned()):
+                return
+            temp = time + start.getGrassAmount() / self.rate_fireburn + (arc["length"] - arc["fire-travel"]) / self.move_fire
+            if(arc["node"].fireMinArrivalTime > temp):
+                arc["node"].fireMinArrivalTime = temp
+                if(arc["node"] != end):
+                    self.__calculateMinTime(arc["node"], end, temp)
+        
 
     def __burningVisualize(self): #UI設定
         for i in self.fireList:

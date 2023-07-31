@@ -1,4 +1,5 @@
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5 import QtWidgets
 import math
@@ -9,18 +10,18 @@ class Node(QtWidgets.QPushButton):
         self.UIsettings(label, pos)
         #variables
         self.setProperty("no.", i) #node編號
-
+        self.fireMinArrivalTime = 10000
         self.setProperty("water-amount",3) #即時澆水量 (目前是用減法計算)
         self.initialWaterAmount = 3   #消防員需澆多少水才能保護
         self.setProperty("grass-amount", 3) #即時燃燒量
         self.initialGrassAmount = 3   #火需要燒多少量才能移動
-     
         self.setProperty("burned", False) #是否燒起
         self.setProperty("protected", False) #是否被保護
 
         self.__neighbors = [] #表示與那些node有相鄰關係
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
-
+        self.flashingtimer = QTimer(self)
+        self.flashing_interval = 500
     #UI設定function
     def UIsettings(self, label, pos):
         self.__label = label
@@ -90,7 +91,24 @@ class Node(QtWidgets.QPushButton):
 
     def getArcs(self):
         return self.__adjArc
-        
+
+    def getLable(self):
+        return self.__label
+    
+    def setLabelVisibility(self):
+        if self.__label.isVisible():
+            self.__label.setVisible(False)
+        else:
+            self.__label.setVisible(True)
+
+    def startFlashing(self):
+        self.flashingtimer.start(self.flashing_interval)
+        self.flashingtimer.timeout.connect(self.setLabelVisibility)
+
+
+    def stopFlashing(self):
+        self.flashingtimer.stop()
+        self.__label.setVisible(True) 
     #get function (計算獲得)
 
     def getArcPercentage_Fire(self, node): #獲得火在arc上的移動進度
