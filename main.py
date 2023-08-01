@@ -44,14 +44,21 @@ class MyWidget(QWidget):
         with open("data.json", 'r') as file:
             data = file.read()
         data = json.loads(data)
-        N = data['N']
-        N_D = data['N_D']
-        N_F = data['N_F']
-        NODE_POS = data['NODE_POS']
+        self.N = data['N']
+        self.N_D = data['N_D']
+        self.N_F = data['N_F']
+        self.A_p = data['A_p']
+        self.A_f = data['A_f']
+        self.A_p = list([tuple(map(int, i[1:-1].split(','))) for i in data['A_p']])
+        self.A_f = list([tuple(map(int, i[1:-1].split(','))) for i in data['A_f']])
+        
+        
+        
+        self.NODE_POS = data['NODE_POS']
         node_btn = []
-        for i in N:
+        for i in self.N:
             node_btn.append(Node(self))
-            node_btn[i-1].move(NODE_POS[str(i)][0], NODE_POS[str(i)][1])
+            node_btn[i-1].move(self.NODE_POS[str(i)][0], self.NODE_POS[str(i)][1])
             node_btn[i-1].setText(str(i))
 
 
@@ -73,19 +80,29 @@ class MyWidget(QWidget):
 
         qpen = QPen(Qt.black, 2, Qt.SolidLine)
         qpainter.setPen(qpen)
-        qpainter.drawLine(20, 40, 180, 40)
+        # qpainter.drawLine(20, 40, 180, 40)
 
-        qpen.setStyle(Qt.DashLine)
-        qpainter.setPen(qpen)
-        qpainter.drawLine(20, 60, 180, 60)
+        # qpen.setStyle(Qt.DashLine)
+        # qpainter.setPen(qpen)
+        # qpainter.drawLine(20, 60, 180, 60)
 
-        qpen.setStyle(Qt.DashDotLine)
-        qpainter.setPen(qpen)
-        qpainter.drawLine(20, 80, 180, 80)
+        # qpen.setStyle(Qt.DashDotLine)
+        # qpainter.setPen(qpen)
+        # qpainter.drawLine(20, 80, 180, 80)
 
-        qpen.setStyle(Qt.DashDotDotLine)
+        # qpen.setStyle(Qt.DashDotDotLine)
+        # qpainter.setPen(qpen)
+        # qpainter.drawLine(20, 100, 180, 100)
+
+        for i in self.A_p:
+            if i[0] < i[1]:
+                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+25,self.NODE_POS[str(i[0])][1]+25, self.NODE_POS[str(i[1])][0]+25, self.NODE_POS[str(i[1])][1]+25)
+        
+        qpen.setStyle(Qt.DotLine)
         qpainter.setPen(qpen)
-        qpainter.drawLine(20, 100, 180, 100)
+        for i in self.A_f:
+            if i[0] < i[1]:
+                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+20,self.NODE_POS[str(i[0])][1]+20, self.NODE_POS[str(i[1])][0]+20, self.NODE_POS[str(i[1])][1]+20)
 
         qpainter.end()
 
@@ -100,10 +117,10 @@ if __name__ == "__main__":
     # label.move(100,130)
     # label.show()
     
-    t_plus = Deactivated_Node(w)
-    t_plus.setText('next time step')
-    t_plus.move(10,850)
-    t_plus.show()
+    # t_plus = Deactivated_Node(w)
+    # t_plus.setText('next time step')
+    # t_plus.move(10,850)
+    # t_plus.show()
 
     with open("./stylesheet.qss") as f:
         qss = f.read()
