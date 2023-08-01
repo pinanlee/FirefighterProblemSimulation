@@ -77,7 +77,7 @@ class MyWidget(QWidget):
     def paintEvent(self, event):
         qpainter = QPainter()
         qpainter.begin(self)
-
+ 
         qpen = QPen(Qt.black, 2, Qt.SolidLine)
         qpainter.setPen(qpen)
         # qpainter.drawLine(20, 40, 180, 40)
