@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QTimer
 import random
 import math
 
@@ -33,22 +34,21 @@ selectedNode = None
 FFNum = 2
 travel_time = [[],
     [[2,20],[4,7],[5,8]],#1
-    [[1,20],[3,10],[5,10],[6,10],[10,10]],#2
-    [[2,10],[6,10],[7,10],[11,10]],#3
+    [[1,20],[3,5],[5,17],[6,21],[10,30]],#2
+    [[2,5],[6,25],[7,9],[11,10]],#3
     [[1,7],[5,10],[8,10],[9,10]],#4
-    [[1,8],[2,10],[4,10],[9,7],[10,10]],#5
-    [[2,10],[3,10],[10,10],[11,10]],#6
-    [[3,10],[11,10],[14,10]],#7
-    [[4,10],[9,10],[12,10]],#8
-    [[4,10],[5,7],[8,10],[10,10],[12,10],[13,10],[15,10]],#9
-    [[2,10],[5,10],[6,10],[9,10],[13,10],[15,10]],#10
-    [[3,10],[6,10],[7,10],[13,10],[14,10],[15,10]],#11
-    [[8,10],[9,10],[13,10],[15,10]],#12
-    [[9,10],[10,10],[11,10],[12,10],[14,10],[15,10]],#13
-    [[7,10],[11,10],[13,10],[15,10]],#14
-    [[6,10],[9,10],[10,10],[11,10],[12,10],[13,10],[14,10]],#15
+    [[1,8],[2,17],[4,10],[9,7],[10,10]],#5
+    [[2,21],[3,25],[10,19],[11,27]],#6
+    [[3,9],[11,10],[14,3]],#7
+    [[4,10],[9,13],[12,10]],#8
+    [[4,10],[5,7],[8,13],[10,16],[12,14],[13,29],[15,6]],#9
+    [[2,30],[5,10],[6,19],[9,16],[13,12],[15,10]],#10
+    [[3,10],[6,27],[7,10],[13,6],[14,10],[15,10]],#11
+    [[8,10],[9,14],[13,10],[15,10]],#12
+    [[9,29],[10,12],[11,6],[12,10],[14,22],[15,10]],#13
+    [[7,3],[11,10],[13,22],[15,10]],#14
+    [[6,10],[9,6],[10,10],[11,10],[12,10],[13,10],[14,10]],#15
 ]
-
 
 
 class MainWindow_controller(QtWidgets.QMainWindow):
@@ -157,8 +157,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.curPos().setOpacity(0.3)
         firefighterList[FFindex].curPos().setOpacity(1)
 
+
+    def printStatus(func):
+        print(func)
+        def aa(self):
+            text = func(self)
+            #self.choose()
+            self.ui.descriptionLabel.setText(text)
+            print("hi")
+        return aa
+    @printStatus
     def choose(self): #指派消防員移動至給定node
-        global selectedNode
+        '''global selectedNode
         if(selectedNode == None):
             self.ui.descriptionLabel.setText("you haven't select node")
             return
@@ -174,7 +184,40 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             else:
                 self.ui.descriptionLabel.setText("this firefighter is moving")
         else:
-            self.ui.descriptionLabel.setText("this firefighter is processing") 
+            self.ui.descriptionLabel.setText("this firefighter is processing")'''
+        global selectedNode
+        if(selectedNode == None):
+            return "you haven't select node"
+            
+        if(not firefighterList[FFindex].isProcess()):
+            fire.minTimeFireArrival(selectedNode)
+            if(not firefighterList[FFindex].isSelected()):
+                print("Firefighter : ",[firefighterList[FFindex], selectedNode.getNum()])
+                #check if selected FireFighter can move to assigned Node
+                print("distanceDetection Verify" + str(firefighterList[FFindex].curPos().getArc(selectedNode)))
+                text = firefighterList[FFindex].next_Pos_Accessment(selectedNode)
+                return text
+            else:
+                return "this firefighter is moving"
+        else:
+            return "this firefighter is processing"
+    def moveVertify(self):
+        global selectedNode
+        if(selectedNode == None):
+            return "you haven't select node"
+            
+        if(not firefighterList[FFindex].isProcess()):
+            fire.minTimeFireArrival(selectedNode)
+            if(not firefighterList[FFindex].isSelected()):
+                print("Firefighter : ",[firefighterList[FFindex], selectedNode.getNum()])
+                #check if selected FireFighter can move to assigned Node
+                print("distanceDetection Verify" + str(firefighterList[FFindex].curPos().getArc(selectedNode)))
+                text = firefighterList[FFindex].next_Pos_Accessment(selectedNode)
+                return text
+            else:
+                return "this firefighter is moving"
+        else:
+            return "this firefighter is processing"
 
     def tryDefend(self): #指派消防員在原地澆水
         if(not firefighterList[FFindex].isSelected()):
@@ -183,20 +226,29 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
     def nextTime(self): #跳轉至下一個時間點
+        def timeSkip():
+            text = "moving"
+            global timer
+            timer+=1
+            fire.fire_spread(timer)
+            for i in firefighterList:
+                if(i.checkArrival(timer)):
+                    time.stop()
+            self.__opacitySet()
+            self.ui.timeIndexLabel.setText("t= "+str(timer))
+            self.ui.descriptionLabel.setText("moving.")
         global timer
         for i in firefighterList:
             if(i.isIdle()):
                 i.idle(timer)
             i.move(timer) 
-        spreading = True
-        while(spreading):
-            timer+=1
-            fire.fire_spread(timer)
-            for i in firefighterList:
-                if(i.checkArrival(timer)):
-                    spreading =  False
-        self.__opacitySet()
-        self.ui.timeIndexLabel.setText("t= "+str(timer))
+        time = QTimer()
+        time.setInterval(500)
+        time.timeout.connect(timeSkip)
+        time.start()
+
+
+
 
     def showInformationWindow(self):
         self.nw = InformationWindow()

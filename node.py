@@ -11,10 +11,10 @@ class Node(QtWidgets.QPushButton):
         #variables
         self.setProperty("no.", i) #node編號
         self.fireMinArrivalTime = 10000
-        self.setProperty("water-amount",3) #即時澆水量 (目前是用減法計算)
-        self.initialWaterAmount = 3   #消防員需澆多少水才能保護
-        self.setProperty("grass-amount", 3) #即時燃燒量
-        self.initialGrassAmount = 3   #火需要燒多少量才能移動
+        self.setProperty("water-amount",20) #即時澆水量 (目前是用減法計算)
+        self.initialWaterAmount = 20   #消防員需澆多少水才能保護
+        self.setProperty("grass-amount", 20) #即時燃燒量
+        self.initialGrassAmount = 20   #火需要燒多少量才能移動
         self.setProperty("burned", False) #是否燒起
         self.setProperty("protected", False) #是否被保護
 
