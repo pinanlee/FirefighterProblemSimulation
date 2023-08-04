@@ -1,12 +1,14 @@
 from PyQt5.QtGui import QPixmap
 from node import Node
-
+from PyQt5.QtCore import QTimer, pyqtSignal,QObject
 '''
 calculateCurrentCapacity和wateringVisualize沒用到 (processing未實作完成)
 '''
 
-class FireFighter:
+class FireFighter(QObject):
+    doneSignal = pyqtSignal(str)
     def __init__(self, num, depot):
+        super().__init__()
         self.__name = "firefighter " + str(num) #消防員編號
         self.__path = [depot] #紀錄FF經過的node
       
@@ -34,8 +36,11 @@ class FireFighter:
 
     def move(self, timer): #開始移動至目的地
         self.__cumArrivalTime += self.__arrivalTime
-        if(self.isProcess()):
+        if(self.destNode == self.curPos()):
             self.curPos().defend()
+            self.process()
+        else:
+            self.traveling()
         self.checkArrival(timer)
 
     def idle(self, timer):
@@ -59,7 +64,7 @@ class FireFighter:
 
     def isSelected(self): #回傳是否消防員被指派
         return self.__select
-
+    
     def isIdle(self):
         return not (self.__select or self.__process or self.__travel or self.destNode != None)
 
@@ -76,6 +81,7 @@ class FireFighter:
                 self.curPos().setStyleSheet("background-color: black;")
             self.curPos().setImage(self.pixmap)
             self.reset()
+            self.doneSignal.emit("done")
             return True
         else:
             self.__calculateCurrentCapacity()
@@ -85,22 +91,29 @@ class FireFighter:
     def curPos(self) -> Node: #回傳現在位置
         return self.__path[-1]
 
-    
+    def getName(self):
+        return self.__name
+
     def next_Pos_Accessment(self, node): #判斷消防員是否可以指派去給定的目的地 
+        
         if(self.__statusDetection(node) and self.__distanceDetection(node) and self.__safeDetection(node)):
+            return "vaild choose"
+        elif (not self.__statusDetection(node)):
+            return "Error(burned)"
+        elif (not self.__distanceDetection(node)):
+            return "Error(not neighbor)"
+        elif (not self.__safeDetection(node)):
+            return "Error(will burned)"
+        else:
+            return ""
+
+    def processAccept(self, node, text):
+        if(text == "vaild choose"):
             self.selected()
             node.preDefend()
             self.destNode = node
             self.__arrivalTime = self.curPos().getArc(node)["length"] / self.move_man
-            return "vaild choose"
-        elif (not self.__statusDetection(node)):
-            return "cannot choose this vertex: (burned)"
-        elif (not self.__distanceDetection(node)):
-            return "this vertex doesn't meet distance restrictions"
-        elif (not self.__safeDetection(node)):
-            return "fire will arrive early"
-        else:
-            return ""
+
     def __safeDetection(self, node: Node):
         if(node.fireMinArrivalTime >= self.curPos().getArc(node)["length"] / self.move_man):
             return True
@@ -109,12 +122,13 @@ class FireFighter:
     def process_Accessment(self): #判斷消防員是否可以指派去給定的目的地 
         if(not self.curPos().isProtected()):
             self.selected()
-            self.process()
+            #self.process()
+            self.curPos().preDefend()
             self.destNode = self.curPos()
             self.__arrivalTime = self.curPos().getWaterAmount() / self.rate_extinguish
             return "vaild choose!"
         elif(self.curPos().isProtected()):
-            return "this vertex is already protected"
+            return "already protected"
         else:
             return ""
 
@@ -128,14 +142,9 @@ class FireFighter:
         if(self.isProcess()):
             remain = self.curPos().getWaterAmount() - self.rate_extinguish
             self.curPos().updateWaterAmount(remain)
-            
-        #print("node: ",i.getNum()+1,end="")
-        #print(" at time", timer,end="")
-        #print(": ",i.getAmount())
 
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
             opacity = 1 - self.curPos().getNodePercentage_FF()
-            print(opacity)
             self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 0, {opacity}); color: white;')
     

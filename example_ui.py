@@ -29,7 +29,7 @@ class Ui_MainWindow(object):
 
         self.descriptionLabel = QtWidgets.QLabel(self.centralwidget)
         self.descriptionLabel.setGeometry(QtCore.QRect(380, 510, 661, 61))
-
+        '''
         self.image_1 = QtWidgets.QLabel(self.centralwidget)
         self.image_1.setGeometry(QtCore.QRect(230, 0, 101, 101))
         node1Pos = QtCore.QRect(310, 20, 61, 51)
@@ -103,7 +103,7 @@ class Ui_MainWindow(object):
         self.image_15 = QtWidgets.QLabel(self.centralwidget)
         self.image_15.setGeometry(QtCore.QRect(560, 430, 101, 101))
         node15Pos = QtCore.QRect(620, 470, 61, 51)
-        self.nodeButton_15 = Node(self.centralwidget, self.image_15, 15, node15Pos)
+        self.nodeButton_15 = Node(self.centralwidget, self.image_15, 15, node15Pos)'''
 
         self.timeButton = QtWidgets.QPushButton(self.centralwidget)
         self.timeButton.setGeometry(QtCore.QRect(10, 500, 81, 51))
@@ -139,7 +139,7 @@ class Ui_MainWindow(object):
         self.descriptionLabel.raise_()
         self.timeButton.raise_()
 
-        self.nodeButton_1.raise_()
+        '''self.nodeButton_1.raise_()
         self.nodeButton_2.raise_()
         self.nodeButton_3.raise_()
         self.nodeButton_4.raise_()
@@ -153,7 +153,7 @@ class Ui_MainWindow(object):
         self.nodeButton_12.raise_()
         self.nodeButton_13.raise_()
         self.nodeButton_14.raise_()
-        self.nodeButton_15.raise_()
+        self.nodeButton_15.raise_()'''
 
         self.node_info_label.raise_()
         self.moveFF.raise_()

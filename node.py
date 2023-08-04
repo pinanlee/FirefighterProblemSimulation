@@ -1,10 +1,13 @@
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSignal
 from PyQt5.QtWidgets import QGraphicsOpacityEffect
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets,QtCore,QtGui
 import math
 
 class Node(QtWidgets.QPushButton):
+    customSignal = pyqtSignal(str)
+    leaveSignal = pyqtSignal(str)
+
     def __init__(self, widgets, label, i, pos):
         super().__init__(widgets)
         self.UIsettings(label, pos)
@@ -22,6 +25,8 @@ class Node(QtWidgets.QPushButton):
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
         self.flashingtimer = QTimer(self)
         self.flashing_interval = 500
+
+
     #UI設定function
     def UIsettings(self, label, pos):
         self.__label = label
@@ -32,6 +37,14 @@ class Node(QtWidgets.QPushButton):
     def setImage(self, image):
         self.__label.setPixmap(image)
     
+    def enterEvent(self, a0: QtCore.QEvent) -> None:
+        self.customSignal.emit("self")
+    
+    def leaveEvent(self, a0: QtCore.QEvent) -> None:
+        self.leaveSignal.emit("self")
+
+      
+
     #設置node狀態
     def onFire(self):
         #onFire setting
@@ -39,11 +52,11 @@ class Node(QtWidgets.QPushButton):
         self.setStyleSheet(f'background-color: rgba(255, 0, 0, {0.1});')
 
     def preDefend(self):
-        self.setStyleSheet("background-color: grey")
+        self.setStyleSheet("background-color: grey;" + "border: 2px solid blue;")
 
     def defend(self):
         self.setProperty("protected",True)
-        self.setStyleSheet(f'background-color: rgba(0, 255, 0, {0.1});')
+        self.setStyleSheet(f'background-color: rgba(0, 255, 0, {0.1});' + "border: 2px solid blue;")
 
     def depotSetting(self):
         self.setStyleSheet("background-color: black;")

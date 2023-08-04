@@ -1,9 +1,6 @@
 from node import Node
 import math
-'''
-問題:
-mintimearrival和calculatemintime未完成 
-'''
+
 
 
 class Fire:
@@ -30,8 +27,8 @@ class Fire:
                         tempList.append(j["node"])
                     ctr+=1
                 else: #還沒抵達，繼續移動
-                    self.__calculateCurrentCapacity(i, timer)
                     self.__calculateCurrentFireArrive(i, j)
+            self.__calculateCurrentCapacity(i, timer)
             if(ctr == len(i.getNeighbors())): #如果該火點的相鄰arc均已移動過，移除該火點
                 self.burnedList.append(i)
                 self.fireList.remove(i)
@@ -57,7 +54,7 @@ class Fire:
             return
         for i in self.fireList:
             self.__calculateMinTime(i, node, 0)
-        print(node.fireMinArrivalTime)
+        #print(node.fireMinArrivalTime)
         
 
     def __calculateMinTime(self, start, end, time):
@@ -76,6 +73,6 @@ class Fire:
             if(i.isBurned()):
                 print(i.getGrassAmount())
                 opacity = 1 - i.getNodePercentage_Fire()
-                print(opacity)
+                #print(opacity)
                 i.setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
                 #nodeUI[i.getNum()-1].setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
