@@ -1,5 +1,6 @@
-from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QTimer, QPointF
+from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5 import QtWidgets
 import math
 
@@ -9,22 +10,19 @@ class Node(QtWidgets.QPushButton):
         self.UIsettings(label, pos)
         #variables
         self.setProperty("no.", i) #node編號
-
-        self.setProperty("water-amount",3) #即時澆水量 (目前是用減法計算)
-        self.initialWaterAmount = 10   #消防員需澆多少水才能保護
-        self.setProperty("grass-amount", 3) #即時燃燒量
-        self.initialGrassAmount = 10   #火需要燒多少量才能移動
-     
+        self.fireMinArrivalTime = 10000
+        self.setProperty("water-amount",20) #即時澆水量 (目前是用減法計算)
+        self.initialWaterAmount = 20   #消防員需澆多少水才能保護
+        self.setProperty("grass-amount", 20) #即時燃燒量
+        self.initialGrassAmount = 20   #火需要燒多少量才能移動
         self.setProperty("burned", False) #是否燒起
         self.setProperty("protected", False) #是否被保護
+        self.setProperty("accessible", False) #是否可到達
 
         self.__neighbors = [] #表示與那些node有相鄰關係
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
         self.flashingtimer = QTimer(self)
-        self.flashing_interval = 500
-
-
-
+        self.flashing_interval = 300
     #UI設定function
     def UIsettings(self, label, pos):
         self.__label = label
@@ -34,9 +32,13 @@ class Node(QtWidgets.QPushButton):
 
     def setImage(self, image):
         self.__label.setPixmap(image)
-
     
     #設置node狀態
+    def turnOnFFaccessible(self):
+        self.setProperty("accessible", True)
+    def turnOfFFaccessible(self):
+        self.setProperty("accessible", False)
+
     def onFire(self):
         #onFire setting
         self.setProperty("burned", True)
@@ -52,6 +54,9 @@ class Node(QtWidgets.QPushButton):
     def depotSetting(self):
         self.setStyleSheet("background-color: black;")
         self.setProperty("protected", True)
+        self.setProperty("depot",True)
+    def isDepot(self):
+        return self.property("depot")
 
     #update變數
     def updateGrassAmount(self, remain):
@@ -61,7 +66,10 @@ class Node(QtWidgets.QPushButton):
     def updateWaterAmount(self, remain):
         remain = 0 if remain < 0 else remain
         self.setProperty("water-amount", remain)    
-    
+    def setOpacity(self, num):
+        self.opacity_effect = QGraphicsOpacityEffect()
+        self.opacity_effect.setOpacity(num)
+        self.__label.setGraphicsEffect(self.opacity_effect)
     #get functions
     def isBurned(self):
         return self.property("burned")
@@ -93,29 +101,47 @@ class Node(QtWidgets.QPushButton):
     def getLable(self):
         return self.__label
 
+    def getXposition(self):
+        return self.pos().x()
+
+    def getYposition(self):
+        return self.pos().y()
+
     def setLabelVisibility(self):
         if self.__label.isVisible():
             self.__label.setVisible(False)
         else:
             self.__label.setVisible(True)
 
-    def startFlashing(self):
+    def setButtonVisibility(self):
+        if self.isVisible():
+            self.setVisible(False)
+        else:
+            self.setVisible(True)
+
+
+    def startButtonFlashing(self): #消防員開啟閃爍特效(無使用)
+        self.flashingtimer.start(self.flashing_interval)
+        self.flashingtimer.timeout.connect(self.setButtonVisibility)
+
+    def startFlashing(self): #消防員開啟閃爍特效(無使用)
         self.flashingtimer.start(self.flashing_interval)
         self.flashingtimer.timeout.connect(self.setLabelVisibility)
 
 
-    def stopFlashing(self):
+    def stopFlashing(self): #消防員關閉閃爍特效(無使用)
         self.flashingtimer.stop()
-        self.__label.setVisible(True)
-
+        self.__label.setVisible(True) 
     #get function (計算獲得)
+
+
 
     def getArcPercentage_Fire(self, node): #獲得火在arc上的移動進度
         if(not node in self.__neighbors):
             return -1
         for i in self.__adjArc:
             if(i["node"] == node): 
-                ratio = i["FF-travel"]/i["length"]
+                ratio = i["fire-travel"]/i["length"]
                 return ratio if ratio <= 1 else 1 
     
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
@@ -124,15 +150,15 @@ class Node(QtWidgets.QPushButton):
         for i in self.__adjArc:
             if(i["node"] == node): 
                 ratio = i["FF-travel"]/i["length"]
-                return ratio if ratio <= 1 else 1 
+                return ratio if ratio <= 1 else 1
 
     def getNodePercentage_Fire(self): #獲得火在該node的燃燒進度
         ratio = self.property("grass-amount")/self.initialGrassAmount
-        return ratio if ratio > 0 else 1
+        return ratio if ratio >= 0 else 0
     
-    def getNodePercentage_FF(self): #獲得消防員在該node的澆水進度
+    def getNodePercentage_FF(self): #獲得消防員在該node的燃燒進度
         ratio = self.property("water-amount")/self.initialWaterAmount
-        return ratio if ratio > 0 else 1
+        return ratio if ratio >= 0 else 0
 
     def arc_finish_spread(self, Arc): #回傳是否火在該arc已完成移動
         if(self.getGrassAmount() > 0):

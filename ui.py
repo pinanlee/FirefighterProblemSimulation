@@ -7,14 +7,47 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QPainter, QPen
-from PyQt5.QtCore import Qt
-
-
+import pandas as pd
 from FF import Node
+import math
+
+def aa():
+    df = pd.read_excel("firefighter_route.xlsx")
+    df_num = len(df.index)
+    print(df)
+    '''for i in N:
+        A_p.append((i,i))
+    for i in range(0,df_num):
+        u = df.iloc[i]['i']
+        v = df.iloc[i]['j']
+        fighterIndex = df.iloc[i]['k']
+        time = df.iloc[i]['travel time']
+        A_p.append((u,v))
+        tau[u,v,fighterIndex] = time
+    df = pd.read_excel("fire_route.xlsx")
+    df_num = len(df.index)
+    for i in range(0,df_num):
+        u = df.iloc[i]['i']
+        v = df.iloc[i]['j']
+        time = df.iloc[i]['travel time']
+        A_f.append((u,v))
+        lamb[u,v] = time
+    for i in Q:
+        process[i] = math.ceil(Q[i]*H[i]/P)'''
+
+traveltime = [[]]
 
 class Ui_MainWindow(object):
+    def aa(self):
+        global traveltime
+        df = pd.read_excel("firefighter_route.xlsx")
+        df_num = len(df.index)
+        for i in range(df_num):
+        #print(df_num)
+            traveltime.append([df.iloc[i]["j"],df.iloc[i]["travel time"]])
+        print(traveltime)
     def setupUi(self, MainWindow):
+        self.aa()
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1050, 741)
         font = QtGui.QFont()
@@ -182,16 +215,13 @@ class Ui_MainWindow(object):
         self.descriptionLabel.setText(_translate("MainWindow", "choose vertices to save"))
         self.timeButton.setText(_translate("MainWindow", "t++"))
         self.background_label.setText(_translate("MainWindow", "TextLabel"))
-        #self.background_label.setPixmap(QtGui.QPixmap("network.png"))
+        self.background_label.setPixmap(QtGui.QPixmap("network.png"))  
         self.node_info_label.setText(_translate("MainWindow", "TextLabel"))
         self.moveFF.setText(_translate("MainWindow", "change Firefighter"))
         self.moveButton.setText(_translate("MainWindow", "move to this node"))
         self.FFlabel.setText(_translate("MainWindow", "selected FireFighter: 1"))
         self.processButton.setText(_translate("MainWindow", "defend"))
 
-
-
-import resource_rc
 
 if __name__ == "__main__":
     import sys
