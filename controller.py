@@ -41,7 +41,6 @@ labelList = []
 windowList = []
 xPositionList=[[]]
 yPositionList=[[]]
-nodePositionList=[[]]
 
 #Data structure settings
 nodeList = [] #store all existing Node except Depot (class: Node)
@@ -114,7 +113,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             nodeList.append(i)
             xPositionList.append(i.getXposition() + i.width()/2)
             yPositionList.append(i.getYposition() + i.width()/2)
-            nodePositionList.append([i.getXposition() + i.width()/2 , i.getYposition() + i.width()/2])
             #initial_Capacity.append(temp)
             #print("node ",nodeList[-1].getNum(),end="")
             #print(" amount ",nodeList[-1].getAmount())
