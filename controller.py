@@ -50,13 +50,13 @@ travel_time = [[],
 class MainWindow_controller(QtWidgets.QMainWindow):
     fire : Fire = None
     focusIndex = 14
-    #nodeList : list[Node] = []
-    nodeList = []
+    nodeList : list[Node] = []
+    #nodeList = []
     firefighterNum = 2
     selectedStyle : str = "border: 2px solid blue;"
     FFindex = 0
-    #firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
-    firefighterList = []
+    firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
+    #firefighterList = []
     timer = QTimer()
     currentTime = 0
     xPositionList = [[]]
