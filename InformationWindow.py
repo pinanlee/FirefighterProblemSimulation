@@ -1,5 +1,4 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QFont, QPainter, QPen
+from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout, QSizePolicy
 from PyQt5 import QtWidgets
 
@@ -29,7 +28,6 @@ class InformationWindow(QtWidgets.QMainWindow):
         setupmatrix = [[0,1,2],[0,1,2]]
         self.inputmatrix = inputmatrix
         self.setupmatrix = setupmatrix
-        self.setProperty("opened", False)
         self.ui()
 
     def ui(self):
@@ -156,11 +154,6 @@ class InformationWindow(QtWidgets.QMainWindow):
             for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
                 table_widget_basicsetup.setItem(i, j, item)
-
-
-
-
-
 
 
 

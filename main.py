@@ -68,25 +68,24 @@ class MyWidget(QWidget):
         self.setGeometry(50, 50, 200, 150)
 
     def paintEvent(self, event):
-        super().paintEvent(event)
         qpainter = QPainter()
         qpainter.begin(self)
+
         qpen = QPen(Qt.black, 2, Qt.SolidLine)
         qpainter.setPen(qpen)
         qpainter.drawLine(20, 40, 180, 40)
 
+        qpen.setStyle(Qt.DashLine)
+        qpainter.setPen(qpen)
+        qpainter.drawLine(20, 60, 180, 60)
+
+        qpen.setStyle(Qt.DashDotLine)
+        qpainter.setPen(qpen)
         qpainter.drawLine(20, 80, 180, 80)
-        # qpen.setStyle(Qt.DashLine)
-        # qpainter.setPen(qpen)
-        # qpainter.drawLine(20, 60, 180, 60)
-        #
-        # qpen.setStyle(Qt.DashDotLine)
-        # qpainter.setPen(qpen)
-        # qpainter.drawLine(20, 80, 180, 80)
-        #
-        # qpen.setStyle(Qt.DashDotDotLine)
-        # qpainter.setPen(qpen)
-        # qpainter.drawLine(20, 100, 180, 100)
+
+        qpen.setStyle(Qt.DashDotDotLine)
+        qpainter.setPen(qpen)
+        qpainter.drawLine(20, 100, 180, 100)
 
         qpainter.end()
 

@@ -2,13 +2,14 @@ from node import Node
 import math
 
 
+
 class Fire:
     def __init__(self, begin):
         self.fireList = [begin] #燃燒中的node
 
         self.burnedList = [] #已經擴散完成的node
         self.rate_fireburn = 2 #火燃燒速率
-        self.move_fire=5 #火擴散速率
+        self.move_fire=2 #火擴散速率
 
         self.fireList[0].onFire()
 
@@ -53,7 +54,7 @@ class Fire:
             return
         for i in self.fireList:
             self.__calculateMinTime(i, node, 0)
-        print("fireMinArrivalTime",node.fireMinArrivalTime)
+        #print(node.fireMinArrivalTime)
         
 
     def __calculateMinTime(self, start, end, time):
@@ -72,6 +73,6 @@ class Fire:
             if(i.isBurned()):
                 print(i.getGrassAmount())
                 opacity = 1 - i.getNodePercentage_Fire()
-                print(opacity)
+                #print(opacity)
                 i.setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
                 #nodeUI[i.getNum()-1].setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')

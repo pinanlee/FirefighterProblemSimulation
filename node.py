@@ -1,10 +1,13 @@
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QTimer, QPointF
+from PyQt5.QtCore import QTimer, pyqtSignal
 from PyQt5.QtWidgets import QGraphicsOpacityEffect
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets,QtCore,QtGui
 import math
 
 class Node(QtWidgets.QPushButton):
+    customSignal = pyqtSignal(str)
+    leaveSignal = pyqtSignal(str)
+
     def __init__(self, widgets, label, i, pos):
         super().__init__(widgets)
         self.UIsettings(label, pos)
@@ -17,12 +20,13 @@ class Node(QtWidgets.QPushButton):
         self.initialGrassAmount = 20   #火需要燒多少量才能移動
         self.setProperty("burned", False) #是否燒起
         self.setProperty("protected", False) #是否被保護
-        self.setProperty("accessible", False) #是否可到達
 
         self.__neighbors = [] #表示與那些node有相鄰關係
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
         self.flashingtimer = QTimer(self)
-        self.flashing_interval = 300
+        self.flashing_interval = 500
+
+
     #UI設定function
     def UIsettings(self, label, pos):
         self.__label = label
@@ -33,23 +37,26 @@ class Node(QtWidgets.QPushButton):
     def setImage(self, image):
         self.__label.setPixmap(image)
     
-    #設置node狀態
-    def turnOnFFaccessible(self):
-        self.setProperty("accessible", True)
-    def turnOfFFaccessible(self):
-        self.setProperty("accessible", False)
+    def enterEvent(self, a0: QtCore.QEvent) -> None:
+        self.customSignal.emit("self")
+    
+    def leaveEvent(self, a0: QtCore.QEvent) -> None:
+        self.leaveSignal.emit("self")
 
+      
+
+    #設置node狀態
     def onFire(self):
         #onFire setting
         self.setProperty("burned", True)
         self.setStyleSheet(f'background-color: rgba(255, 0, 0, {0.1});')
 
     def preDefend(self):
-        self.setStyleSheet("background-color: grey")
+        self.setStyleSheet("background-color: grey;" + "border: 2px solid blue;")
 
     def defend(self):
         self.setProperty("protected",True)
-        self.setStyleSheet(f'background-color: rgba(0, 255, 0, {0.1});')
+        self.setStyleSheet(f'background-color: rgba(0, 255, 0, {0.1});' + "border: 2px solid blue;")
 
     def depotSetting(self):
         self.setStyleSheet("background-color: black;")
@@ -106,35 +113,22 @@ class Node(QtWidgets.QPushButton):
 
     def getYposition(self):
         return self.pos().y()
-
+    
     def setLabelVisibility(self):
         if self.__label.isVisible():
             self.__label.setVisible(False)
         else:
             self.__label.setVisible(True)
 
-    def setButtonVisibility(self):
-        if self.isVisible():
-            self.setVisible(False)
-        else:
-            self.setVisible(True)
-
-
-    def startButtonFlashing(self): #消防員開啟閃爍特效(無使用)
-        self.flashingtimer.start(self.flashing_interval)
-        self.flashingtimer.timeout.connect(self.setButtonVisibility)
-
-    def startFlashing(self): #消防員開啟閃爍特效(無使用)
+    def startFlashing(self):
         self.flashingtimer.start(self.flashing_interval)
         self.flashingtimer.timeout.connect(self.setLabelVisibility)
 
 
-    def stopFlashing(self): #消防員關閉閃爍特效(無使用)
+    def stopFlashing(self):
         self.flashingtimer.stop()
         self.__label.setVisible(True) 
     #get function (計算獲得)
-
-
 
     def getArcPercentage_Fire(self, node): #獲得火在arc上的移動進度
         if(not node in self.__neighbors):
@@ -150,7 +144,7 @@ class Node(QtWidgets.QPushButton):
         for i in self.__adjArc:
             if(i["node"] == node): 
                 ratio = i["FF-travel"]/i["length"]
-                return ratio if ratio <= 1 else 1
+                return ratio if ratio <= 1 else 1 
 
     def getNodePercentage_Fire(self): #獲得火在該node的燃燒進度
         ratio = self.property("grass-amount")/self.initialGrassAmount
