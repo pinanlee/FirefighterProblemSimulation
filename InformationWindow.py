@@ -1,9 +1,12 @@
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QFont
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout, QSizePolicy
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout, QSizePolicy, QTabWidget
 from PyQt5 import QtWidgets
 
 
 class InformationWindow(QtWidgets.QMainWindow):
+    pageChanged = pyqtSignal(int)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Information Window')
@@ -28,13 +31,25 @@ class InformationWindow(QtWidgets.QMainWindow):
         setupmatrix = [[0,1,2],[0,1,2]]
         self.inputmatrix = inputmatrix
         self.setupmatrix = setupmatrix
+        self.currentIndex = 0
         self.ui()
 
     def ui(self):
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-        layout = QVBoxLayout(self.central_widget)
 
+        # new a QTabWidget
+        self.tab_widget = QTabWidget(self)
+        self.setCentralWidget(self.tab_widget)
+        #增加分頁
+        self.pageBasicSetup = QWidget()
+        self.pageNode = QWidget()
+        self.pageFF = QWidget()
+        self.tab_widget.addTab(self.pageBasicSetup, "Basic Setup")
+        self.tab_widget.addTab(self.pageNode, "Node Information")
+        self.tab_widget.addTab(self.pageFF, "FireFighter Information")
+
+        #Page : Basic Setup
+        #Basic Setup table
+        layoutBasic = QVBoxLayout(self.tab_widget)
         table_widget_basicsetup = QTableWidget()
         table_widget_basicsetup.setRowCount(2)
         table_widget_basicsetup.setColumnCount(3)
@@ -43,21 +58,42 @@ class InformationWindow(QtWidgets.QMainWindow):
         title_name_basic=["Fire","Firefighter"]  # 這裡可以更換成想要的行標題名稱
         table_widget_basicsetup.setHorizontalHeaderLabels(title_name_basicsetup)
         table_widget_basicsetup.setVerticalHeaderLabels(title_name_basic)  # 設定垂直標題（行名稱）
-        layout.addWidget(table_widget_basicsetup,1)
+        layoutBasic.addWidget(table_widget_basicsetup,1)
         table_widget_basicsetup.resizeColumnsToContents()
+        #把layout 增加在分頁上面
+        self.pageFF.setLayout(layoutBasic)
 
 
-        table_widget = QTableWidget()
-        table_widget.setRowCount(len(self.inputmatrix))
-        table_widget.setColumnCount(len(self.inputmatrix[0]))
-        self.tableVisualizeSetting(table_widget)
-        layout.addWidget(table_widget,5)
+        #Page : Node Information
+        #Node Status table
+        layoutNode = QVBoxLayout(self.tab_widget)
+        table_widget_Node = QTableWidget()
+        table_widget_Node.setRowCount(len(self.inputmatrix))
+        table_widget_Node.setColumnCount(len(self.inputmatrix[0]))
+        self.tableVisualizeSetting(table_widget_Node)
+        #layoutBasic.addWidget(table_widget_Node,5)
+        layoutNode.addWidget(table_widget_Node,5)
         title_name=["Status","Amount","Burned/Recovery Percentage",""]  # 這裡可以更換成想要的標題名稱
-        table_widget.setHorizontalHeaderLabels(title_name)
-        table_widget.resizeColumnsToContents()
+        table_widget_Node.setHorizontalHeaderLabels(title_name)
+        table_widget_Node.resizeColumnsToContents()
+        self.pageNode.setLayout(layoutNode)
+        self.pageBasicSetup.setLayout(layoutNode)
 
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        #Page : FireFighter Information
+
+
+        #For Windows setting
+        #self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.tab_widget.currentChanged.connect(self.onTabChanged)
+        self.currentIndex = self.tab_widget.currentIndex()
+
         self.resize(450, 800)
+
+    def onTabChanged(self, index):
+        print("分頁index：", index)
+        self.pageChanged.emit(index)
+
 
     #將node information紀錄至InputMatrix
     # [[isProtected,isBurned,getGrassAmount,getWaterAmount] #node 1 with index 0,[,,,]#node 2 with index 1... [,,,]#node 14 with index 13]
@@ -152,7 +188,6 @@ class InformationWindow(QtWidgets.QMainWindow):
             for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
                 table_widget_basicsetup.setItem(i, j, item)
-
 
 
 

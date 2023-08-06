@@ -41,6 +41,10 @@ class FireFighter(QObject):
             self.process()
         else:
             self.traveling()
+            for i in self.curPos().getArcs(): #對於現在位置的相鄰點
+                if(i["node"] == self.destNode):
+                    self.__calculateCurrentFFArrive(i)
+
         self.checkArrival(timer)
 
     def idle(self, timer):
@@ -94,6 +98,7 @@ class FireFighter(QObject):
     def getName(self):
         return self.__name
 
+
     def next_Pos_Accessment(self, node): #判斷消防員是否可以指派去給定的目的地 
         
         if(self.__statusDetection(node) and self.__distanceDetection(node) and self.__safeDetection(node)):
@@ -142,6 +147,10 @@ class FireFighter(QObject):
         if(self.isProcess()):
             remain = self.curPos().getWaterAmount() - self.rate_extinguish
             self.curPos().updateWaterAmount(remain)
+
+    def __calculateCurrentFFArrive(self, arc): #更新消防員在arc上的移動情況
+        if(arc["FF-travel"] < arc["length"]):
+            arc["FF-travel"] += self.move_man
 
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):

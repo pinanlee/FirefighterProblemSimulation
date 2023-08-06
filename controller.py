@@ -139,6 +139,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         node11Pos = QtCore.QRect(820, 300, 61, 61)
         self.ui.nodeButton_11 = Node(self.ui.centralwidget, self.ui.image_11, 11, node11Pos)
 
+
         self.ui.image_12 = QtWidgets.QLabel(self.ui.centralwidget)
         self.ui.image_12.setGeometry(QtCore.QRect(140, 450, 101, 101))
         node12Pos = QtCore.QRect(120, 480, 61, 51)
@@ -167,6 +168,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         global FFNum
         self.firefighterNum = FFNum
         self.setup_control()
+        self.nw = InformationWindow()
+
 
     def setup_control(self):
         # init UI
@@ -215,6 +218,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             temp = random.randrange(5,11)
             i.clicked.connect(self.choose)       
             #i.updateAmount(temp)
+            #紀錄按鈕的位置，因為位置預設在左上，後面值為調整座標至中間
             self.xPositionList.append(i.getXposition() + i.width() / 2)
             self.yPositionList.append(i.getYposition() + i.width() / 2)
 
@@ -399,14 +403,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.currentTime+=1
             self.fire.fire_spread(self.currentTime)
             for i in self.firefighterList:
+                i.move(self.currentTime)
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
             self.__opacitySet()
             self.ui.timeIndexLabel.setText("t= "+str(self.currentTime))
             self.ui.descriptionLabel.setText("moving.")
 
-            self.upadateInformation()
-            #self.activateWindow()
 
         for i in self.firefighterList:
             if(not (i.isTraveling() or i.isProcess())):
@@ -415,17 +418,28 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.move(self.currentTime)
 
 
+
+
         self.timer.setInterval(500)
         self.timer.timeout.connect(timeSkip)
         self.timer.start()
         
 
     def showInformationWindow(self):
-        self.nw = InformationWindow()
+        #self.nw = InformationWindow()
         self.upadateInformation()
         self.nw.show()
 
+
+    def onSubWindowPageChanged(self, index):
+        print("現在選中的index：", index)
+        self.nw.tab_widget.setCurrentIndex(index)
+
+
     def upadateInformation(self):
+        #self.nw.pageChanged.connect(self.onSubWindowPageChanged)
+
+
         temp = self.nw.updateOutputMatrix(self.nodeList)
         temp2 = self.nw.setSetupMatrix(self.nodeList, self.firefighterNum,
                                        self.firefighterList[self.FFindex].rate_extinguish,
@@ -442,7 +456,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def paintEvent(self, event):
         qpainter = QPainter()
         qpainter.begin(self)
-        qpen = QPen(Qt.black, 2, Qt.SolidLine)
+        qpen = QPen(Qt.darkGray, 2, Qt.SolidLine)
         qpainter.setPen(qpen)
 
 
@@ -451,9 +465,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[j.getNum()], self.yPositionList[j.getNum()]))
                 i.getXposition() + i.width()/2
 
-        qpen.setColor(Qt.red)
-        qpainter.setPen(qpen)
-
         for i in self.nodeList:
             if(i.isBurned()):
                 for j in i.getNeighbors():
@@ -461,20 +472,20 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     tempYpercent = (self.yPositionList[j.getNum()] - self.yPositionList[i.getNum()]) * i.getArcPercentage_Fire(j)
 
                     qpen.setColor(Qt.red)
-                    qpen.setWidth(4)
+                    qpen.setWidth(6)
                     qpainter.setPen(qpen)
                     qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[i.getNum()]+tempXpercent ,self.yPositionList[i.getNum()]+tempYpercent))
 
-        # for i in self.nodeList:
-        #     if(i.isProtected()):
-        #         for j in i.getNeighbors():
-        #             tempXpercent = (self.xPositionList[j.getNum()] - self.xPositionList[i.getNum()]) * i.getArcPercentage_FF(j)
-        #             tempYpercent = (self.yPositionList[j.getNum()] - self.yPositionList[i.getNum()]) * i.getArcPercentage_FF(j)
-        #
-        #             qpen.setColor(Qt.darkGreen)
-        #             qpen.setWidth(4)
-        #             qpainter.setPen(qpen)
-        #             qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[i.getNum()]+tempXpercent ,self.yPositionList[i.getNum()]+tempYpercent))
+        for i in self.nodeList:
+            #if(i.isProtected()):
+                for j in i.getNeighbors():
+                    tempXpercent = (self.xPositionList[j.getNum()] - self.xPositionList[i.getNum()]) * i.getArcPercentage_FF(j)
+                    tempYpercent = (self.yPositionList[j.getNum()] - self.yPositionList[i.getNum()]) * i.getArcPercentage_FF(j)
+
+                    qpen.setColor(Qt.darkGreen)
+                    qpen.setWidth(6)
+                    qpainter.setPen(qpen)
+                    qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[i.getNum()]+tempXpercent ,self.yPositionList[i.getNum()]+tempYpercent))
 
         self.update()
         qpainter.end()
