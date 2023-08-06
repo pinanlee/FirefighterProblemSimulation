@@ -175,7 +175,7 @@
      <x>0</x>
      <y>0</y>
      <width>1195</width>
-     <height>18</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuinfromations">
@@ -183,6 +183,7 @@
      <string>Status</string>
     </property>
     <addaction name="actionnodes"/>
+    <addaction name="actionInformation_Windows"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -214,6 +215,11 @@
   <action name="actionNew">
    <property name="text">
     <string>New</string>
+   </property>
+  </action>
+  <action name="actionInformation_Windows">
+   <property name="text">
+    <string>Information Windows</string>
    </property>
   </action>
  </widget>

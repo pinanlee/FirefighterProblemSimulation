@@ -145,8 +145,6 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.setupmatrix[1][1] = rate_extinguish
         self.setupmatrix[1][2] = move_man
 
-
-
         return self.setupmatrix
 
     def basicSetuptableVisualizeSetting(self,table_widget_basicsetup,):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\Users\Yung-li\Desktop\ff\new\UIv.2.ui'
+# Form implementation generated from reading ui file 'UIv.2.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -71,7 +71,7 @@ class Ui_MainWindow(object):
         self.statuslabel_2.setObjectName("statuslabel_2")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1195, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1195, 25))
         self.menubar.setObjectName("menubar")
         self.menuinfromations = QtWidgets.QMenu(self.menubar)
         self.menuinfromations.setObjectName("menuinfromations")
@@ -83,15 +83,26 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+
         self.actionnodes = QtWidgets.QAction(MainWindow)
         self.actionnodes.setObjectName("actionnodes")
+
         self.actionAnimation = QtWidgets.QAction(MainWindow)
         self.actionAnimation.setObjectName("actionAnimation")
+
         self.actionNew = QtWidgets.QAction(MainWindow)
         self.actionNew.setObjectName("actionNew")
+
+        self.actionInformation_Windows = QtWidgets.QAction(MainWindow)
+        self.actionInformation_Windows.setObjectName("actionInformation_Windows")
+
         self.menuinfromations.addAction(self.actionnodes)
+        self.menuinfromations.addAction(self.actionInformation_Windows)
+
         self.menuFile.addAction(self.actionNew)
+
         self.menuSettings.addAction(self.actionAnimation)
+
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuinfromations.menuAction())
         self.menubar.addAction(self.menuSettings.menuAction())
@@ -116,3 +127,14 @@ class Ui_MainWindow(object):
         self.actionnodes.setText(_translate("MainWindow", "Nodes"))
         self.actionAnimation.setText(_translate("MainWindow", "Animation"))
         self.actionNew.setText(_translate("MainWindow", "New"))
+        self.actionInformation_Windows.setText(_translate("MainWindow", "Information Windows"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())

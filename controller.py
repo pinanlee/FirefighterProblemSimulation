@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-from PyQt5.QtCore import QTimer, QPointF
+from PyQt5.QtCore import QTimer, QPointF, pyqtSignal
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import QTimer
 import random
@@ -15,10 +15,26 @@ from PyQt5.QtCore import QPropertyAnimation, QPoint, Qt
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 
 '''
-information table跑不出來 
-可以試試自訂網路(?)
-取消選取功能
-提示視窗有誤
+Bug or improvement:
+消防員個數自定義
+status 顯示可以更完整: 去...node ,在... node processing
+
+
+Latest task : 
+增加消防員可選點可視化 完成 (需要修飾code)
+arc進度條 消防員還沒有好
+
+未來更新 : 
+跟li合併
+火燒過來消防員怎麼辦
+idle的標示
+動態更新information window 
+自定義生成網路
+結算畫面
+
+有時間做:
+Readme 版本紀錄資訊、簡介
+UI Designed
 '''
 
 
@@ -61,6 +77,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     currentTime = 0
     xPositionList = [[]]
     yPositionList = [[]]
+
+
     def __init__(self):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
         self.ui = Ui_MainWindow()
@@ -170,6 +188,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.nodeList[self.focusIndex].setFocus()
         self.ui.FFlabel.setPixmap(QPixmap("firefighter.png"))
         self.ui.FFlabel_2.setPixmap(QPixmap("fireman.png"))
+
+
 
     def updateStatus(self):
         if(self.firefighterList[0].isTraveling()):
@@ -384,14 +404,17 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.__opacitySet()
             self.ui.timeIndexLabel.setText("t= "+str(self.currentTime))
             self.ui.descriptionLabel.setText("moving.")
-        
-        
+
+            self.upadateInformation()
+            #self.activateWindow()
+
         for i in self.firefighterList:
             if(not (i.isTraveling() or i.isProcess())):
                 if(i.isIdle()):
                     i.idle(self.currentTime)
-                i.move(self.currentTime) 
-        
+                i.move(self.currentTime)
+
+
         self.timer.setInterval(500)
         self.timer.timeout.connect(timeSkip)
         self.timer.start()
@@ -399,15 +422,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def showInformationWindow(self):
         self.nw = InformationWindow()
+        self.upadateInformation()
+        self.nw.show()
+
+    def upadateInformation(self):
         temp = self.nw.updateOutputMatrix(self.nodeList)
-        temp2 =self.nw.setSetupMatrix(self.nodeList,self.firefighterNum,self.firefighterList[self.FFindex].rate_extinguish,self.firefighterList[self.FFindex].move_man,self.fire.rate_fireburn,self.fire.move_fire)
+        temp2 = self.nw.setSetupMatrix(self.nodeList, self.firefighterNum,
+                                       self.firefighterList[self.FFindex].rate_extinguish,
+                                       self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,
+                                       self.fire.move_fire)
         self.nw.inputmatrix = temp
         self.nw.setupmatrix = temp2
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
         self.nw.ui()
-        self.nw.show()
+
 
     def paintEvent(self, event):
         qpainter = QPainter()
