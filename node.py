@@ -73,10 +73,6 @@ class Node(QtWidgets.QPushButton):
     def updateWaterAmount(self, remain):
         remain = 0 if remain < 0 else remain
         self.setProperty("water-amount", remain)    
-    def setOpacity(self, num):
-        self.opacity_effect = QGraphicsOpacityEffect()
-        self.opacity_effect.setOpacity(num)
-        self.__label.setGraphicsEffect(self.opacity_effect)
     #get functions
     def isBurned(self):
         return self.property("burned")
@@ -105,7 +101,7 @@ class Node(QtWidgets.QPushButton):
     def getArcs(self):
         return self.__adjArc
 
-    def getLable(self):
+    def getLabel(self):
         return self.__label
     
     def setLabelVisibility(self):

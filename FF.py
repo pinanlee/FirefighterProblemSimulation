@@ -9,6 +9,7 @@ class FireFighter(QObject):
     doneSignal = pyqtSignal(str)
     def __init__(self, num, depot):
         super().__init__()
+        self.num = num
         self.__name = "firefighter " + str(num) #消防員編號
         self.__path = [depot] #紀錄FF經過的node
       
@@ -23,7 +24,7 @@ class FireFighter(QObject):
         self.destNode = depot #下一個目的
 
         #UI設定
-        self.pixmap = QPixmap("firefighter.png")
+        self.pixmap = QPixmap("./image/firefighter.png")
         self.curPos().defend()
         self.curPos().setImage(self.pixmap)  
 
@@ -31,8 +32,10 @@ class FireFighter(QObject):
         self.__select = False 
         self.__travel = False 
         self.__process = False
+        self.destNode.setText("")
         self.destNode = None
         self.__arrivalTime = 0
+
 
     def move(self, timer): #開始移動至目的地
         self.__cumArrivalTime += self.__arrivalTime
