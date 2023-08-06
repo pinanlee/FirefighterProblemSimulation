@@ -11,6 +11,7 @@ class FireFighter(QObject):
         super().__init__()
         self.__name = "firefighter " + str(num) #消防員編號
         self.__path = [depot] #紀錄FF經過的node
+        self.num = num
       
         #變數
         self.__arrivalTime = 0 #下一個arc所需移動時間
@@ -31,11 +32,17 @@ class FireFighter(QObject):
         self.__select = False 
         self.__travel = False 
         self.__process = False
+        self.destNode.setText("")
         self.destNode = None
         self.__arrivalTime = 0
 
-    def move(self, timer): #開始移動至目的地
+
+    def finishTimeSet(self):
+        if(self.isIdle()):
+            self.__arrivalTime = 1
         self.__cumArrivalTime += self.__arrivalTime
+    def move(self, timer): #開始移動至目的地
+        #self.__cumArrivalTime += self.__arrivalTime
         if(self.destNode == self.curPos()):
             self.curPos().defend()
             self.process()
@@ -165,9 +172,9 @@ class FireFighter(QObject):
         for i in (self.curPos().getNeighbors()):
             if (i.isBurned() == False and i.isProtected() == False):
                 if (i.fireMinArrivalTime >= self.curPos().getArc(i)["length"] / self.move_man):
-                    i.setStyleSheet(f'background-color: rgba(0, 255, 255, {1}); color: white;')
+                    i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
-    def closeaccessibleVisualize(self): #消防員可以前往的點可視化
+    def closeaccessibleVisualize(self): #用於清除前一個消防員可以前往點的顏色
         for i in (self.curPos().getNeighbors()):
             if (i.isBurned() == False and i.isProtected() == False):
                 if (i.fireMinArrivalTime >= self.curPos().getArc(i)["length"] / self.move_man):

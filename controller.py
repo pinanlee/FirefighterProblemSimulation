@@ -68,7 +68,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     focusIndex = 14
     nodeList : list[Node] = []
     #nodeList = []
-    firefighterNum = 2
+    firefighterNum = 3
     selectedStyle : str = "border: 2px solid blue;"
     FFindex = 0
     firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
@@ -166,7 +166,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.nodeButton_10, self.ui.nodeButton_11, self.ui.nodeButton_12, 
         self.ui.nodeButton_13, self.ui.nodeButton_14, self.ui.nodeButton_15 ]
         global FFNum
-        self.firefighterNum = FFNum
+        #self.firefighterNum = FFNum
         self.setup_control()
         self.nw = InformationWindow()
 
@@ -350,7 +350,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def printStatus(func):
         def aa(self):
-            text = func(self)
+            if (self.firefighterList[self.FFindex].isSelected() and self.sender() != self.firefighterList[
+                self.FFindex].destNode):
+                text = "already selected"
+            else:
+                self.sender().setText(str(self.firefighterList[self.FFindex].num))
+                text = func(self)
+            self.updateStatus()
             self.descriptionAnimate(text)
         return aa
     @printStatus
@@ -399,11 +405,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
             text = "moving"
+            print("func")
             self.upadateInformation()
             self.currentTime+=1
             self.fire.fire_spread(self.currentTime)
             for i in self.firefighterList:
-                #i.move(self.currentTime)
+                i.move(self.currentTime)
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
             self.__opacitySet()
@@ -413,10 +420,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         for i in self.firefighterList:
             if(not (i.isTraveling() or i.isProcess())):
-                if(i.isIdle()):
+                '''if(i.isIdle()):
                     i.idle(self.currentTime)
-                i.move(self.currentTime)
-
+                i.move(self.currentTime)'''
+                i.finishTimeSet()
+        self.timer = QTimer()
         self.timer.setInterval(500)
         self.timer.timeout.connect(timeSkip)
         self.timer.start()
@@ -474,7 +482,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[i.getNum()]+tempXpercent ,self.yPositionList[i.getNum()]+tempYpercent))
 
         for i in self.nodeList:
-            #if(i.isProtected()):
                 for j in i.getNeighbors():
                     tempXpercent = (self.xPositionList[j.getNum()] - self.xPositionList[i.getNum()]) * i.getArcPercentage_FF(j)
                     tempYpercent = (self.yPositionList[j.getNum()] - self.yPositionList[i.getNum()]) * i.getArcPercentage_FF(j)

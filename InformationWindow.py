@@ -109,7 +109,6 @@ class InformationWindow(QtWidgets.QMainWindow):
             for j in firefighterList:
                 if(j.isIdle()):
                     self.inputmatrix[j.curPos().getNum() - 1 ][4] = 1
-                    print("j.isIdle()",j.isIdle())
                 else:
                     self.inputmatrix[j.curPos().getNum() - 1 ][4] = 0
 
