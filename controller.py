@@ -399,11 +399,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
             text = "moving"
-            
+            self.upadateInformation()
             self.currentTime+=1
             self.fire.fire_spread(self.currentTime)
             for i in self.firefighterList:
-                i.move(self.currentTime)
+                #i.move(self.currentTime)
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
             self.__opacitySet()
@@ -416,9 +416,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if(i.isIdle()):
                     i.idle(self.currentTime)
                 i.move(self.currentTime)
-
-
-
 
         self.timer.setInterval(500)
         self.timer.timeout.connect(timeSkip)
@@ -440,7 +437,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         #self.nw.pageChanged.connect(self.onSubWindowPageChanged)
 
 
-        temp = self.nw.updateOutputMatrix(self.nodeList)
+        temp = self.nw.updateOutputMatrix(self.nodeList,self.firefighterList)
         temp2 = self.nw.setSetupMatrix(self.nodeList, self.firefighterNum,
                                        self.firefighterList[self.FFindex].rate_extinguish,
                                        self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,

@@ -11,25 +11,28 @@ class InformationWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.setWindowTitle('Information Window')
         inputmatrix = [
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+
         ] #InputMatrix紀錄node information ; row數量代表節點數目, column數量代表想要呈現的數據名稱數量 0無意義 (目前為手動增加)
         outputmatrix =[] #OutputMatrix為使用者看到的table
         setupmatrix = [[0,1,2],[0,1,2]]
         self.inputmatrix = inputmatrix
+        self.outputmatrix = outputmatrix
         self.setupmatrix = setupmatrix
         self.currentIndex = 0
         self.ui()
@@ -97,20 +100,27 @@ class InformationWindow(QtWidgets.QMainWindow):
 
     #將node information紀錄至InputMatrix
     # [[isProtected,isBurned,getGrassAmount,getWaterAmount] #node 1 with index 0,[,,,]#node 2 with index 1... [,,,]#node 14 with index 13]
-    def calculateInputMatrix(self, nodeList):
+    def calculateInputMatrix(self, nodeList,firefighterList):
         for i in nodeList:
             self.inputmatrix[i.getNum() - 1][0] = i.isProtected()
             self.inputmatrix[i.getNum() - 1][1] = i.isBurned()
             self.inputmatrix[i.getNum() - 1][2] = i.getGrassAmount()
             self.inputmatrix[i.getNum() - 1][3] = i.getWaterAmount()
+            for j in firefighterList:
+                if(j.isIdle()):
+                    self.inputmatrix[j.curPos().getNum() - 1 ][4] = 1
+                    print("j.isIdle()",j.isIdle())
+                else:
+                    self.inputmatrix[j.curPos().getNum() - 1 ][4] = 0
+
 
     #更新OutputMatrix
-    def updateOutputMatrix(self, nodeList):
+    def updateOutputMatrix(self, nodeList,firefighterList):
         outputmatrix =[]
         for i in range(0, 15):
-            outputmatrix.append(["", "", "", ""])
+            outputmatrix.append(["", "", "", "", ""])
 
-        self.calculateInputMatrix(nodeList)
+        self.calculateInputMatrix(nodeList,firefighterList)
 
         #條件判斷的顯示
         #title index=[   0   ,   1    ,            2               ,3]
@@ -133,6 +143,8 @@ class InformationWindow(QtWidgets.QMainWindow):
 
             if (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] <= 0):
                 outputmatrix[i.getNum() - 1][0] = "Save Success"
+            elif (self.inputmatrix[i.getNum() - 1][4] == 1):
+                outputmatrix[i.getNum() - 1][0] = "Idle"
             elif (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] < i.initialGrassAmount):
                 outputmatrix[i.getNum() - 1][0] = "Protecting..."
             elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] <= 0):
@@ -141,6 +153,7 @@ class InformationWindow(QtWidgets.QMainWindow):
                 outputmatrix[i.getNum() - 1][0] = "Burning..."
             elif (self.inputmatrix[i.getNum() - 1][1] == 0 and self.inputmatrix[i.getNum() - 1][0] == 0):
                 outputmatrix[i.getNum() - 1][0] = "Normal"
+
         return outputmatrix
 
     #Information Table的單元格著色、字體設定都在這邊修改
@@ -170,6 +183,11 @@ class InformationWindow(QtWidgets.QMainWindow):
                     item.setFont(font)
                     item.setBackground(QColor("darkred"))
                     item.setForeground(QColor("white"))
+                elif (value == "Idle"):
+                    font = QFont()
+                    font.setBold(True)
+                    item.setFont(font)
+                    item.setBackground(QColor("yellow"))
 
                 table_widget.setItem(i, j, item)
 
