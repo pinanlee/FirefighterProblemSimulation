@@ -64,7 +64,7 @@ class InformationWindow(QtWidgets.QMainWindow):
         layoutBasic.addWidget(table_widget_basicsetup,1)
         table_widget_basicsetup.resizeColumnsToContents()
         #把layout 增加在分頁上面
-        self.pageFF.setLayout(layoutBasic)
+        self.pageBasicSetup.setLayout(layoutBasic)
 
 
         #Page : Node Information
@@ -80,7 +80,6 @@ class InformationWindow(QtWidgets.QMainWindow):
         table_widget_Node.setHorizontalHeaderLabels(title_name)
         table_widget_Node.resizeColumnsToContents()
         self.pageNode.setLayout(layoutNode)
-        self.pageBasicSetup.setLayout(layoutNode)
 
 
         #Page : FireFighter Information
@@ -94,7 +93,6 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.resize(450, 800)
 
     def onTabChanged(self, index):
-        print("分頁index：", index)
         self.pageChanged.emit(index)
 
 
@@ -142,16 +140,18 @@ class InformationWindow(QtWidgets.QMainWindow):
 
             if (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] <= 0):
                 outputmatrix[i.getNum() - 1][0] = "Save Success"
-            elif (self.inputmatrix[i.getNum() - 1][4] == 1):
-                outputmatrix[i.getNum() - 1][0] = "Idle"
             elif (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] < i.initialGrassAmount):
                 outputmatrix[i.getNum() - 1][0] = "Protecting..."
             elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] <= 0):
                 outputmatrix[i.getNum() - 1][0] = "Damage"
-            elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] < i.initialGrassAmount):
+            elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] <= i.initialGrassAmount):
                 outputmatrix[i.getNum() - 1][0] = "Burning..."
             elif (self.inputmatrix[i.getNum() - 1][1] == 0 and self.inputmatrix[i.getNum() - 1][0] == 0):
                 outputmatrix[i.getNum() - 1][0] = "Normal"
+
+            outputmatrix[14][0] = "Depot"
+            if(self.inputmatrix[i.getNum() - 1][4] == 1 ):
+                outputmatrix[i.getNum() - 1][0] = "Idle"
 
         return outputmatrix
 
@@ -187,6 +187,12 @@ class InformationWindow(QtWidgets.QMainWindow):
                     font.setBold(True)
                     item.setFont(font)
                     item.setBackground(QColor("yellow"))
+                elif (value == "Depot"):
+                    font = QFont()
+                    font.setBold(True)
+                    item.setFont(font)
+                    item.setBackground(QColor("black"))
+                    item.setForeground(QColor("white"))
 
                 table_widget.setItem(i, j, item)
 

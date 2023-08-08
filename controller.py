@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
-from PyQt5.QtCore import QTimer, QPointF, pyqtSignal
+from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
+from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import QTimer
 import random
 import math
 from UIv2_ui import Ui_MainWindow
@@ -11,41 +11,33 @@ from FF import FireFighter
 from node import Node 
 from fire import Fire
 from InformationWindow import InformationWindow
-from PyQt5.QtCore import QPropertyAnimation, QPoint, Qt
 from PyQt5.QtGui import QPixmap, QPainter, QPen
-
+from PyQt5 import uic
+import pandas as pd
 '''
-Bug or improvement:
-消防員個數自定義
-status 顯示可以更完整: 去...node ,在... node processing
-
-
-Latest task : 
-增加消防員可選點可視化 完成 (需要修飾code)
-arc進度條 消防員還沒有好
-
-未來更新 : 
-跟li合併
-火燒過來消防員怎麼辦
-idle的標示
-動態更新information window 
-自定義生成網路
-結算畫面
-
-有時間做:
-Readme 版本紀錄資訊、簡介
-UI Designed
+information table跑不出來 
+可以試試自訂網路(?)
+取消選取功能
+提示視窗有誤
 '''
 
+travel_time = [[]]
 
-#parameter settings
+def readExcel():
+    df = pd.read_excel("coordinates data.xlsx")
+    df_num = len(df.index)
+    for i in range(df_num):
+        travel_time.append([])
+    df = pd.read_excel("adjacent data.xlsx")
+    for j in df.iloc:
+        travel_time[ord(j["i"])-64].append([ord(j["j"])-64, 1])
+        travel_time[ord(j["j"])-64].append([ord(j["i"])-64, 1])
+    print(travel_time)  
 
-
-
-#Data structure settings
+readExcel()
 
 FFNum = 2
-travel_time = [[],
+'''travel_time = [[],
     [[2,20],[4,7],[5,8]],#1
     [[1,20],[3,5],[5,17],[6,21],[10,30]],#2
     [[2,5],[6,25],[7,9],[11,10]],#3
@@ -61,30 +53,41 @@ travel_time = [[],
     [[9,29],[10,12],[11,6],[12,10],[14,22],[15,10]],#13
     [[7,3],[11,10],[13,22],[15,10]],#14
     [[6,10],[9,6],[10,10],[11,10],[12,10],[13,10],[14,10]],#15
-]
+]'''
 
 class MainWindow_controller(QtWidgets.QMainWindow):
     fire : Fire = None
-    focusIndex = 14
     nodeList : list[Node] = []
-    #nodeList = []
-    firefighterNum = 3
-    selectedStyle : str = "border: 2px solid blue;"
-    FFindex = 0
     firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
-    #firefighterList = []
+    firefighterNum = 2
+    selectedStyle : str = "border: 2px solid blue;"
+    FFindex = 0    
+    focusIndex = 14
+    labels : QtWidgets.QLabel = []
     timer = QTimer()
     currentTime = 0
+    pageList = -1
     xPositionList = [[]]
     yPositionList = [[]]
 
-
     def __init__(self):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
+        
         self.ui = Ui_MainWindow()
+        
         self.ui.setupUi(self)
         
-        self.ui.image_1 = QtWidgets.QLabel(self.ui.centralwidget)
+        df = pd.read_excel("coordinates data.xlsx")
+        df_num = len(df.index)
+        #print(df_num)
+        for i in range(df_num):
+            image = QtWidgets.QLabel(self.ui.centralwidget)
+            image.setGeometry(QtCore.QRect(df.iloc[i]["x"], df.iloc[i]["y"], 101, 101))
+            nodePos = QtCore.QRect(df.iloc[i]["x"], df.iloc[i]["y"], 61, 51)
+            nodeButton = Node(self.ui.centralwidget, image, i+1, nodePos)
+            self.nodeList.append(nodeButton)
+
+        '''self.ui.image_1 = QtWidgets.QLabel(self.ui.centralwidget)
         self.ui.image_1.setGeometry(QtCore.QRect(230, 0, 101, 101))
         node1Pos = QtCore.QRect(310, 20, 61, 51)
         self.ui.nodeButton_1 = Node(self.ui.centralwidget, self.ui.image_1, 1, node1Pos)
@@ -139,7 +142,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         node11Pos = QtCore.QRect(820, 300, 61, 61)
         self.ui.nodeButton_11 = Node(self.ui.centralwidget, self.ui.image_11, 11, node11Pos)
 
-
         self.ui.image_12 = QtWidgets.QLabel(self.ui.centralwidget)
         self.ui.image_12.setGeometry(QtCore.QRect(140, 450, 101, 101))
         node12Pos = QtCore.QRect(120, 480, 61, 51)
@@ -164,16 +166,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.ui.nodeButton_4, self.ui.nodeButton_5, self.ui.nodeButton_6, 
         self.ui.nodeButton_7, self.ui.nodeButton_8, self.ui.nodeButton_9, 
         self.ui.nodeButton_10, self.ui.nodeButton_11, self.ui.nodeButton_12, 
-        self.ui.nodeButton_13, self.ui.nodeButton_14, self.ui.nodeButton_15 ]
-        global FFNum
-        #self.firefighterNum = FFNum
-        self.setup_control()
-        self.nw = InformationWindow()
+        self.ui.nodeButton_13, self.ui.nodeButton_14, self.ui.nodeButton_15 ]'''
 
+        global FFNum
+        self.firefighterNum = FFNum
+        self.nw = InformationWindow()
+        self.subwindows = []
+        self.setup_control()
 
     def setup_control(self):
         # init UI
         self.focusIndex = len(self.nodeList) - 1
+        print(self.focusIndex)
         self.initUI()
         # init network
         self.initNode()
@@ -189,77 +193,64 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.descriptionAnimate("choose vertices to save")
         self.ui.node_info_label.setVisible(False)
         self.nodeList[self.focusIndex].setFocus()
-        self.ui.FFlabel.setPixmap(QPixmap("firefighter.png"))
-        self.ui.FFlabel_2.setPixmap(QPixmap("fireman.png"))
-
-
+        self.labels = [self.ui.FFlabel, self.ui.FFlabel_2]
+        self.statusLabels = [self.ui.statuslabel,self.ui.statuslabel_2]
+        self.ui.FFlabel.setPixmap(QPixmap("./image/firefighter.png"))
+        self.ui.FFlabel_2.setPixmap(QPixmap("./image/fireman.png"))
 
     def updateStatus(self):
-        if(self.firefighterList[0].isTraveling()):
-            self.ui.statuslabel.setText("Traveling")
-        elif(self.firefighterList[0].isProcess()):
-            self.ui.statuslabel.setText("Processing")
-        elif(self.firefighterList[0].isSelected()):
-            self.ui.statuslabel.setText("Selected")
-        else:
-            self.ui.statuslabel.setText("Idle")
-
-        if(self.firefighterList[1].isTraveling()):
-            self.ui.statuslabel_2.setText("Traveling")
-        elif(self.firefighterList[1].isProcess()):
-            self.ui.statuslabel_2.setText("Processing")
-        elif(self.firefighterList[1].isSelected()):
-            self.ui.statuslabel_2.setText("Selected")
-        else:
-            self.ui.statuslabel_2.setText("Idle")
+        for i in range(self.firefighterNum):
+            if(self.firefighterList[i].isTraveling()):
+                self.statusLabels[i].setText("Traveling")
+            elif(self.firefighterList[i].isProcess()):
+                self.statusLabels[i].setText("Processing")
+            elif(self.firefighterList[i].isSelected()):
+                self.statusLabels[i].setText("Selected")
+            else:
+                self.statusLabels[i].setText("Idle")
 
     def initNode(self):
         for i in self.nodeList:
             temp = random.randrange(5,11)
             i.clicked.connect(self.choose)       
             #i.updateAmount(temp)
-            #紀錄按鈕的位置，因為位置預設在左上，後面值為調整座標至中間
             self.xPositionList.append(i.getXposition() + i.width() / 2)
             self.yPositionList.append(i.getYposition() + i.width() / 2)
+        
 
     def randomFireAndDepot(self):
         #random fire depot
-        a = random.randint(0,13)
+        a = random.randint(0,len(self.nodeList)-1)
         self.fire = Fire(self.nodeList[a])
         #init depot
-        depot = self.ui.nodeButton_15
+        depot = self.nodeList[-1]
         for i in range(self.firefighterNum):
             ff = FireFighter(i+1, depot)
             depot.depotSetting()
             self.firefighterList.append(ff)
-        self.firefighterList[1].pixmap = QPixmap("fireman.png")
+        self.firefighterList[1].pixmap = QPixmap("./image/fireman.png")
         self.nodeList[self.focusIndex].setStyleSheet("background-color: black;border: 2px solid blue;")
 
     def NodeConnection(self):
         for i in self.nodeList:
-            for j in travel_time[i.getNum()]:           
+            for j in travel_time[i.getNum()]:         
                 i.connectNode(self.nodeList[j[0]-1], j[1])
+                
 
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
+        self.InfoDisable()
         if(a0.key()==Qt.Key_Enter-1):
             self.nextTime()
-            self.updateStatus()
-            return
         elif(a0.key() == Qt.Key_A):
-            self.InfoDisable()
             self.buttonFocusStyle(-1)
         elif(a0.key() == Qt.Key_D):
-            self.InfoDisable()
             self.buttonFocusStyle(1)
         elif(a0.key() == Qt.Key_C):
-            self.InfoDisable()
             self.uiChangeFF()
-            self.updateStatus()
         elif(a0.key() == Qt.Key_X):
-            if(self.ui.node_info_label.isVisible()):
-                self.InfoDisable()
-            else:
+            if(not self.ui.node_info_label.isVisible()):
                 self.InfoShow()
+        self.updateStatus()
 
     def buttonFocusStyle(self, plus):
         style = self.nodeList[self.focusIndex].styleSheet()
@@ -269,7 +260,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 result_string += i+";"
         self.nodeList[self.focusIndex].clearFocus()
         self.nodeList[self.focusIndex].setStyleSheet(result_string)
-        self.focusIndex = (self.focusIndex + plus) % 15
+        self.focusIndex = (self.focusIndex + plus) % len(self.nodeList)
         style = self.nodeList[self.focusIndex].styleSheet()
         self.nodeList[self.focusIndex].setStyleSheet(style + self.selectedStyle)
         self.nodeList[self.focusIndex].setFocus()
@@ -310,7 +301,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             text += "None"
         else:
             text += str(self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex])["length"])
-        #print(text)
         self.ui.node_info_label.setText(text)
 
 
@@ -323,35 +313,30 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.descriptionAnimate("change to {}".format(self.firefighterList[self.FFindex].getName()))
 
     def selectFireFighter(self): #選擇消防員
-        prev = self.FFindex
+        prev = self.FFindex  
+
         self.FFindex = (self.FFindex + 1) % self.firefighterNum
-
         self.__opacitySet()
-        if(self.firefighterList[self.FFindex].isSelected()):
-            for i in range(len(self.firefighterList)):
-                if(not self.firefighterList[i].isSelected()):
-                    self.FFindex = prev
-                    return
-            self.FFindex = prev
-            self.__opacitySet()
-            self.descriptionAnimate("all firefighter has assigned")
         self.firefighterList[self.FFindex].curPos().setImage(self.firefighterList[self.FFindex].pixmap)
-
-        for i in (self.firefighterList[self.FFindex].curPos().getNeighbors()): #計算鄰近點minTimeFireArrival
-            self.fire.minTimeFireArrival(i)
+        
         self.firefighterList[prev].closeaccessibleVisualize()
         self.firefighterList[self.FFindex].accessibleVisualize(self.nodeList)
-    
-    def __opacitySet(self):
-        for i in self.firefighterList:
-            i.curPos().setOpacity(0.3)
-        self.firefighterList[self.FFindex].curPos().setOpacity(1)
 
+    def __opacitySet(self):
+        def setOpacity(num, label):
+            opacity_effect = QGraphicsOpacityEffect()
+            opacity_effect.setOpacity(num)
+            label.setGraphicsEffect(opacity_effect)
+
+        for i in range(self.firefighterNum):
+            opacity = 1 if i == self.FFindex else 0.3
+            setOpacity(opacity, self.firefighterList[i].curPos().getLabel())
+            setOpacity(opacity, self.labels[i])
+        setOpacity(1, self.firefighterList[self.FFindex].curPos().getLabel())
 
     def printStatus(func):
         def aa(self):
-            if (self.firefighterList[self.FFindex].isSelected() and self.sender() != self.firefighterList[
-                self.FFindex].destNode):
+            if(self.firefighterList[self.FFindex].isSelected() and self.sender() != self.firefighterList[self.FFindex].destNode):
                 text = "already selected"
             else:
                 self.sender().setText(str(self.firefighterList[self.FFindex].num))
@@ -378,30 +363,26 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     return "{} reset".format(self.firefighterList[self.FFindex].getName())
                 self.firefighterList[self.FFindex].processAccept(self.sender(), text)
                 text = "{} move to vertex {}".format(self.firefighterList[self.FFindex].getName(), self.sender().getNum())
-                self.selectFireFighter()
                 return text
             return text
 
 
     def checkStatus(self, node):
-        if(not self.firefighterList[self.FFindex].isProcess()):
-            self.fire.minTimeFireArrival(node)
-            if(not self.firefighterList[self.FFindex].isTraveling()):
-                #check if selected FireFighter can move to assigned Node
-                text = self.firefighterList[self.FFindex].next_Pos_Accessment(node)
-                return text
-            else:
-                return "this firefighter is moving"
-        else:
+        if(self.firefighterList[self.FFindex].isProcess()):
             return "this firefighter is processing"
+        self.fire.minTimeFireArrival(node)
+        if(self.firefighterList[self.FFindex].isTraveling()):
+            return "this firefighter is moving"
+            #check if selected FireFighter can move to assigned Node
+        text = self.firefighterList[self.FFindex].next_Pos_Accessment(node)
+        return text
 
     def tryDefend(self): #指派消防員在原地澆水
         if(not self.firefighterList[self.FFindex].isSelected()):
             text = self.firefighterList[self.FFindex].process_Accessment()
-            self.selectFireFighter()
             self.descriptionAnimate(text)
 
-
+        
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
             text = "moving"
@@ -428,34 +409,31 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.timer.setInterval(500)
         self.timer.timeout.connect(timeSkip)
         self.timer.start()
-        
+
 
     def showInformationWindow(self):
-        #self.nw = InformationWindow()
         self.upadateInformation()
         self.nw.show()
-
+        self.subwindows.append(self.nw)
 
     def onSubWindowPageChanged(self, index):
-        print("現在選中的index：", index)
-        self.nw.tab_widget.setCurrentIndex(index)
-
-
+        self.pageList = index
+   
     def upadateInformation(self):
-        #self.nw.pageChanged.connect(self.onSubWindowPageChanged)
-
-
+        self.nw.pageChanged.connect(self.onSubWindowPageChanged)
         temp = self.nw.updateOutputMatrix(self.nodeList,self.firefighterList)
         temp2 = self.nw.setSetupMatrix(self.nodeList, self.firefighterNum,
-                                       self.firefighterList[self.FFindex].rate_extinguish,
-                                       self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,
-                                       self.fire.move_fire)
+                                    self.firefighterList[self.FFindex].rate_extinguish,
+                                    self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,
+                                    self.fire.move_fire)
         self.nw.inputmatrix = temp
         self.nw.setupmatrix = temp2
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
         self.nw.ui()
+        self.nw.tab_widget.setCurrentIndex(self.pageList)
+
 
 
     def paintEvent(self, event):
@@ -493,5 +471,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         self.update()
         qpainter.end()
+
+    def closeEvent(self, event): #當主視窗關閉時關閉全部視窗
+        for subwindow in self.subwindows:
+            subwindow.close()  # Close all open subwindows
+        event.accept()
+
 
 

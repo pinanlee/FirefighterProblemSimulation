@@ -9,9 +9,9 @@ class FireFighter(QObject):
     doneSignal = pyqtSignal(str)
     def __init__(self, num, depot):
         super().__init__()
+        self.num = num
         self.__name = "firefighter " + str(num) #消防員編號
         self.__path = [depot] #紀錄FF經過的node
-        self.num = num
       
         #變數
         self.__arrivalTime = 0 #下一個arc所需移動時間
@@ -24,7 +24,7 @@ class FireFighter(QObject):
         self.destNode = depot #下一個目的
 
         #UI設定
-        self.pixmap = QPixmap("firefighter.png")
+        self.pixmap = QPixmap("./image/firefighter.png")
         self.curPos().defend()
         self.curPos().setImage(self.pixmap)  
 
@@ -41,6 +41,8 @@ class FireFighter(QObject):
         if(self.isIdle()):
             self.__arrivalTime = 1
         self.__cumArrivalTime += self.__arrivalTime
+
+
     def move(self, timer): #開始移動至目的地
         #self.__cumArrivalTime += self.__arrivalTime
         if(self.destNode == self.curPos()):
@@ -105,7 +107,6 @@ class FireFighter(QObject):
     def getName(self):
         return self.__name
 
-
     def next_Pos_Accessment(self, node): #判斷消防員是否可以指派去給定的目的地 
         
         if(self.__statusDetection(node) and self.__distanceDetection(node) and self.__safeDetection(node)):
@@ -159,11 +160,12 @@ class FireFighter(QObject):
         if(arc["FF-travel"] < arc["length"]):
             arc["FF-travel"] += self.move_man
 
+
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
             opacity = 1 - self.curPos().getNodePercentage_FF()
             self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 0, {opacity}); color: white;')
-
+    
     def accessibleVisualize(self,nodelist): #消防員可以前往的點可視化
         for i in nodelist[:14]:
             if(not i.isBurned() and not i.isProtected()):
@@ -179,4 +181,3 @@ class FireFighter(QObject):
             if (i.isBurned() == False and i.isProtected() == False):
                 if (i.fireMinArrivalTime >= self.curPos().getArc(i)["length"] / self.move_man):
                     i.setStyleSheet("")
-    
