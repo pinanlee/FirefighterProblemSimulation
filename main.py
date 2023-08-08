@@ -54,7 +54,7 @@ class MyWidget(QWidget):
         
         self.mytimer = QTimer(self)
         self.mytimer.timeout.connect(self.next_time)
-        self.mytimer.start(200)
+        self.mytimer.start(100)
 
 
     def next_time(self):
@@ -195,13 +195,13 @@ class MyWidget(QWidget):
 
         for i in self.A_p:
             if i[0] < i[1]:
-                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+25,self.NODE_POS[str(i[0])][1]+25, self.NODE_POS[str(i[1])][0]+25, self.NODE_POS[str(i[1])][1]+25)
+                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+15,self.NODE_POS[str(i[0])][1]+15, self.NODE_POS[str(i[1])][0]+25, self.NODE_POS[str(i[1])][1]+25)
         
         qpen.setStyle(Qt.DotLine)
         qpainter.setPen(qpen)
         for i in self.A_f:
             if i[0] < i[1]:
-                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+20,self.NODE_POS[str(i[0])][1]+20, self.NODE_POS[str(i[1])][0]+20, self.NODE_POS[str(i[1])][1]+20)
+                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+20, self.NODE_POS[str(i[1])][1]+20)
 
         qpainter.end()
 
