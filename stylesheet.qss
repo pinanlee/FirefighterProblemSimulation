@@ -21,7 +21,18 @@
     min-height:50px;
 }
 
-Deactivated_Node { 
+Burned_Node { 
     background-color: gray;
-    
+}
+
+Burning_Node { 
+    background-color: red;
+}
+
+Processing_Node { 
+    background-color: blue;
+}
+
+Processed_Node { 
+    background-color: green;
 }
