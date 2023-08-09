@@ -51,6 +51,12 @@ class MyWidget(QWidget):
 
         self.fire_route = [0 for i in range(len(self.N)+1)]
 
+        self.firefighter_route = []
+        for i in self.x:
+            if self.x[i] == 1 and i[0] != i[1]:
+                self.firefighter_route.append(i)
+    
+
         self.time = 0
         t_plus = QPushButton(self)
         t_plus.setText('next time step')
@@ -149,6 +155,7 @@ class MyWidget(QWidget):
         self.p = {1:3}
         self.h = dict([(int(i), data['h'][i]) for i in data['h']])
         self.lamb = dict([(tuple(map(int, i[1:-1].split(','))), data['lamb'][i]) for i in data['lamb']])
+        self.tau = dict([(tuple(map(int, i[1:-1].split(','))), data['tau'][i]) for i in data['tau']])
         self.NODE_POS = data['NODE_POS']
         # self.node_btn = []
         # for i in self.N:
@@ -181,7 +188,14 @@ class MyWidget(QWidget):
             temp.setText(self.node_btn[i].text())
             self.node_btn[i].deleteLater()
             self.node_btn[i] = temp
-
+        
+        self.firefighter_POS = {}
+        for i in self.K:
+            self.firefighter_POS[i] = -1
+        for i in self.x:
+            if self.x[i]== 1 and self.firefighter_POS[i[2]]==-1:
+                self.firefighter_POS[i[2]] = i[0]
+        
     def random_generate(self):
         node_btn = []
         for i in range(NODE_NUMBER):
@@ -237,6 +251,23 @@ class MyWidget(QWidget):
                 qpainter.drawLine(xst, yst, int(xst+alpha*(xnd-xst)), int(yst+alpha*(ynd-yst)))
                 # qpainter.drawLine(self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+10, self.NODE_POS[str(i[1])][1]+10)
                 # print(i[0], i[1], self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+10, self.NODE_POS[str(i[1])][1]+10)
+
+        qpen = QPen(Qt.blue, 5, Qt.SolidLine)
+        qpainter.setPen(qpen)
+        for i in self.firefighter_route:
+            if (i[3] <= self.time):
+                alpha = min(1, (self.time-i[3])/self.tau[(i[0], i[1], i[2])])
+                if alpha == 1:
+                    qpen = QPen(Qt.blue, 5, Qt.SolidLine)
+                else:
+                    qpen = QPen(Qt.green, 5, Qt.SolidLine)
+                qpainter.setPen(qpen)
+
+                xst, yst = self.NODE_POS[str(i[0])][0]+15, self.NODE_POS[str(i[0])][1]+15
+                xnd, ynd = self.NODE_POS[str(i[1])][0]+15, self.NODE_POS[str(i[1])][1]+15
+                qpainter.drawLine(xst, yst, int(xst+alpha*(xnd-xst)), int(yst+alpha*(ynd-yst)))
+                self.firefighter_POS[i[2]] = int(xst+alpha*(xnd-xst)), int(yst+alpha*(ynd-yst))
+                # qpainter.drawLine(xst, yst, xnd, ynd)
         qpainter.end()
         # qpainter.update()
 
