@@ -49,13 +49,14 @@ class MyWidget(QWidget):
         elif (mode == 'load_json'):
             self.load_from_json()
 
-        self.fire_route = [[0 for i in self.N]for j in self.N]
+        self.fire_route = [0 for i in range(len(self.N)+1)]
 
         self.time = 0
         t_plus = QPushButton(self)
         t_plus.setText('next time step')
         t_plus.move(10,1050)
         t_plus.clicked.connect(self.next_time)
+        # t_plus.clicked.connect(self.pause_start)
 
         self.t_text = QLabel(self)
         self.t_text.setText("time = " + str(self.time))
@@ -66,6 +67,11 @@ class MyWidget(QWidget):
         self.mytimer.timeout.connect(self.next_time)
         self.mytimer.start(100)
 
+    # def pause_start(self):
+    #     if self.mytimer.isActive():
+    #         self.mytimer.stop()
+    #     else:
+    #         self.mytimer.start()
 
     def next_time(self):
         self.time += 1
@@ -93,6 +99,8 @@ class MyWidget(QWidget):
                     temp.show()
                     self.node_btn[i].deleteLater()
                     self.node_btn[i] = temp
+            elif type(self.node_btn[i]) is Burned_Node:
+                self.fire_route[i] += 1
 
 
         for i in range(len(self.node_btn)):
@@ -111,6 +119,8 @@ class MyWidget(QWidget):
                     temp.show()
                     self.node_btn[i+1].deleteLater()
                     self.node_btn[i+1] = temp
+        # self.paintEvent()
+        self.update()
 
         
 
@@ -138,7 +148,7 @@ class MyWidget(QWidget):
         # self.p = data['p']
         self.p = {1:3}
         self.h = dict([(int(i), data['h'][i]) for i in data['h']])
-        
+        self.lamb = dict([(tuple(map(int, i[1:-1].split(','))), data['lamb'][i]) for i in data['lamb']])
         self.NODE_POS = data['NODE_POS']
         # self.node_btn = []
         # for i in self.N:
@@ -206,15 +216,29 @@ class MyWidget(QWidget):
 
         for i in self.A_p:
             if i[0] < i[1]:
-                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+15,self.NODE_POS[str(i[0])][1]+15, self.NODE_POS[str(i[1])][0]+25, self.NODE_POS[str(i[1])][1]+25)
+                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+15,self.NODE_POS[str(i[0])][1]+15, self.NODE_POS[str(i[1])][0]+15, self.NODE_POS[str(i[1])][1]+15)
         
         qpen.setStyle(Qt.DotLine)
         qpainter.setPen(qpen)
         for i in self.A_f:
             if i[0] < i[1]:
-                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+20, self.NODE_POS[str(i[1])][1]+20)
+                 qpainter.drawLine(self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+10, self.NODE_POS[str(i[1])][1]+10)
 
+        qpen = QPen(Qt.red, 5, Qt.DotLine)
+        qpainter.setPen(qpen)
+        for i in self.A_f:
+            # qpainter.drawLine(self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+10, self.NODE_POS[str(i[1])][1]+10)
+            # print(i)
+            if self.fire_route[i[0]]!=0:
+                alpha = min(1, self.fire_route[i[0]]/self.lamb[(i[0], i[1])])
+                # print(i[0], i[1])   
+                xst, yst = self.NODE_POS[str(i[0])][0]+10, self.NODE_POS[str(i[0])][1]+10
+                xnd, ynd = self.NODE_POS[str(i[1])][0]+10, self.NODE_POS[str(i[1])][1]+10
+                qpainter.drawLine(xst, yst, int(xst+alpha*(xnd-xst)), int(yst+alpha*(ynd-yst)))
+                # qpainter.drawLine(self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+10, self.NODE_POS[str(i[1])][1]+10)
+                # print(i[0], i[1], self.NODE_POS[str(i[0])][0]+10,self.NODE_POS[str(i[0])][1]+10, self.NODE_POS[str(i[1])][0]+10, self.NODE_POS[str(i[1])][1]+10)
         qpainter.end()
+        # qpainter.update()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
