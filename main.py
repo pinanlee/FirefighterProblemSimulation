@@ -20,6 +20,14 @@ class Burned_Node(Node):
     def __init__(self, node, *args):
         super().__init__(node.q, node.b, node.h, *args)
 
+class Fire_Source_Node(Node):
+    def __init__(self, node, *args):
+        super().__init__(node.q, node.b, node.h, *args)
+
+class Firefighter_Source_Node(Node):
+    def __init__(self, node, *args):
+        super().__init__(node.q, node.b, node.h, *args)
+
 class Burning_Node(Node):
     def __init__(self, node, *args):
         super().__init__(node.q, node.b, node.h, *args)
@@ -41,10 +49,12 @@ class MyWidget(QWidget):
         elif (mode == 'load_json'):
             self.load_from_json()
 
+        self.fire_route = [[0 for i in self.N]for j in self.N]
+
         self.time = 0
         t_plus = QPushButton(self)
         t_plus.setText('next time step')
-        t_plus.move(10,850)
+        t_plus.move(10,1050)
         t_plus.clicked.connect(self.next_time)
 
         self.t_text = QLabel(self)
@@ -72,7 +82,7 @@ class MyWidget(QWidget):
                     temp.move(self.node_btn[i].x(), self.node_btn[i].y())
                     temp.setText(self.node_btn[i].text())
                     temp.show()
-                    self.node_btn[i].deleteLater
+                    self.node_btn[i].deleteLater()
                     self.node_btn[i] = temp
             elif type(self.node_btn[i]) is Processing_Node:
                 self.node_btn[i].r -= self.p[1]
@@ -81,7 +91,7 @@ class MyWidget(QWidget):
                     temp.move(self.node_btn[i].x(), self.node_btn[i].y())
                     temp.setText(self.node_btn[i].text())
                     temp.show()
-                    self.node_btn[i].deleteLater
+                    self.node_btn[i].deleteLater()
                     self.node_btn[i] = temp
 
 
@@ -144,13 +154,14 @@ class MyWidget(QWidget):
 
         self.node_btn = {}
         for i in self.N-self.N_D:
-            print(i)
             self.node_btn[i] =Node(self.q[i], self.b[i], self.h[i],self)
             self.node_btn[i].move(self.NODE_POS[str(i)][0], self.NODE_POS[str(i)][1])
             self.node_btn[i].setText(str(i))
 
         for i in self.N_D:
-            self.node_btn[i] = Node(0, 0, 0, self)
+            temp = Node(0, 0, 0, self)
+            self.node_btn[i] = Firefighter_Source_Node(temp, self)
+            temp.deleteLater()
             self.node_btn[i].move(self.NODE_POS[str(i)][0], self.NODE_POS[str(i)][1])
             self.node_btn[i].setText(str(i))
 
@@ -158,7 +169,7 @@ class MyWidget(QWidget):
             temp = Burning_Node(self.node_btn[i], self)
             temp.move(self.node_btn[i].x(), self.node_btn[i].y())
             temp.setText(self.node_btn[i].text())
-            self.node_btn[i].deleteLater
+            self.node_btn[i].deleteLater()
             self.node_btn[i] = temp
 
     def random_generate(self):
@@ -209,7 +220,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     # w = MyWidget("rand_gen")
     w = MyWidget("load_json")
-    w.resize(1440,900)
+    w.resize(1440,1200)
     
     # label = QLabel(w)
     # label.setText("Behold the Guru, Guru99")
