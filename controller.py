@@ -170,7 +170,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         global FFNum
         self.firefighterNum = FFNum
-        self.nw = InformationWindow()
+        self.nw = InformationWindow(self.nodeList,self.firefighterList)
         self.subwindows = []
         self.setup_control()
 
@@ -426,12 +426,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                                     self.firefighterList[self.FFindex].rate_extinguish,
                                     self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,
                                     self.fire.move_fire)
-        self.nw.inputmatrix = temp
+        self.nw.outputmatrix = temp
         self.nw.setupmatrix = temp2
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
-        self.nw.ui()
+        self.nw.ui(self.nodeList,self.firefighterList)
         self.nw.tab_widget.setCurrentIndex(self.pageList)
 
 

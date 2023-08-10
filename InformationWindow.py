@@ -7,37 +7,40 @@ from PyQt5 import QtWidgets
 class InformationWindow(QtWidgets.QMainWindow):
     pageChanged = pyqtSignal(int)
 
-    def __init__(self):
+    def __init__(self, nodeList,firefighterList):
         super().__init__()
         self.setWindowTitle('Information Window')
-        inputmatrix = [
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
+        # inputmatrix = [
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 0, 0, 0, 0],
+        #
+        # ]
 
-        ] #InputMatrix紀錄node information ; row數量代表節點數目, column數量代表想要呈現的數據名稱數量 0無意義 (目前為手動增加)
+        #InputMatrix紀錄node information ; row數量代表節點數目, column數量代表想要呈現的數據名稱數量 0無意義 (目前為手動增加)
         outputmatrix =[] #OutputMatrix為使用者看到的table
         setupmatrix = [[0,1,2],[0,1,2]]
-        self.inputmatrix = inputmatrix
+        self.inputmatrix = []
         self.outputmatrix = outputmatrix
         self.setupmatrix = setupmatrix
         self.currentIndex = 0
-        self.ui()
+        self.calculateInputMatrix(nodeList,firefighterList)
+        self.ui(nodeList,firefighterList)
 
-    def ui(self):
+    def ui(self, nodeList,firefighterList):
 
         # new a QTabWidget
         self.tab_widget = QTabWidget(self)
@@ -95,10 +98,19 @@ class InformationWindow(QtWidgets.QMainWindow):
     def onTabChanged(self, index):
         self.pageChanged.emit(index)
 
+    def nodeTableWidget(self,table_widget_Node,inputmatrix):
+        table_widget_Node.setRowCount(len(self.inputmatrix))
+        table_widget_Node.setColumnCount(len(self.inputmatrix[0]))
+
 
     #將node information紀錄至InputMatrix
     # [[isProtected,isBurned,getGrassAmount,getWaterAmount] #node 1 with index 0,[,,,]#node 2 with index 1... [,,,]#node 14 with index 13]
     def calculateInputMatrix(self, nodeList,firefighterList):
+        self.inputmatrix=[]
+        for i in range(0, len(nodeList)):
+            self.inputmatrix.append(["", "", "", "", ""])
+        print("len(nodeList)",len(nodeList))
+
         for i in nodeList:
             self.inputmatrix[i.getNum() - 1][0] = i.isProtected()
             self.inputmatrix[i.getNum() - 1][1] = i.isBurned()
@@ -114,7 +126,7 @@ class InformationWindow(QtWidgets.QMainWindow):
     #更新OutputMatrix
     def updateOutputMatrix(self, nodeList,firefighterList):
         outputmatrix =[]
-        for i in range(0, 15):
+        for i in range(0, len(nodeList)):
             outputmatrix.append(["", "", "", "", ""])
 
         self.calculateInputMatrix(nodeList,firefighterList)
@@ -149,7 +161,7 @@ class InformationWindow(QtWidgets.QMainWindow):
             elif (self.inputmatrix[i.getNum() - 1][1] == 0 and self.inputmatrix[i.getNum() - 1][0] == 0):
                 outputmatrix[i.getNum() - 1][0] = "Normal"
 
-            outputmatrix[14][0] = "Depot"
+            #outputmatrix[14][0] = "Depot"
             if(self.inputmatrix[i.getNum() - 1][4] == 1 ):
                 outputmatrix[i.getNum() - 1][0] = "Idle"
 
@@ -157,7 +169,7 @@ class InformationWindow(QtWidgets.QMainWindow):
 
     #Information Table的單元格著色、字體設定都在這邊修改
     def tableVisualizeSetting(self,table_widget):
-        for i, row in enumerate(self.inputmatrix):
+        for i, row in enumerate(self.outputmatrix):
             for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
                 if (value == "Burning..."):
