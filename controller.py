@@ -307,7 +307,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
             text = "moving"
-            print("func")
             self.upadateInformation()
             self.currentTime+=1
             self.fire.fire_spread(self.currentTime)
@@ -357,7 +356,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
-        self.nw.ui()
+        self.nw.ui(self.currentTime)
         self.nw.tab_widget.setCurrentIndex(self.pageList)
 
 

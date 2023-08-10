@@ -61,6 +61,8 @@ class Fire:
     def __calculateMinTime(self, start, end, time):
         for arc in start.getArcs():
             if(arc["node"].isProtected() or arc["node"].isBurned()):
+                if (arc["node"].fireMinArrivalTime<=0):
+                    return 0
                 return
             temp = time + start.getGrassAmount() / self.rate_fireburn + (arc["length"] - arc["fire-travel"]) / self.move_fire
             if(arc["node"].fireMinArrivalTime > temp):

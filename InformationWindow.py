@@ -1,8 +1,9 @@
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QColor, QFont
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout, QSizePolicy, QTabWidget
+from PyQt5.QtGui import QColor, QFont, QPixmap
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout, QSizePolicy, QTabWidget, QLabel, \
+    QHBoxLayout
 from PyQt5 import QtWidgets
-from fire import Fire
+from PyQt5.QtCore import Qt
 
 
 class InformationWindow(QtWidgets.QMainWindow):
@@ -19,10 +20,11 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.setupmatrix = setupmatrix
         self.currentIndex = 0
         self.calculateInputMatrix(nodeList,firefighterList,currentTime)
-        self.ui()
+        self.ui(currentTime)
+        self.fflist = firefighterList
 
-    def ui(self):
 
+    def ui(self,currentTime):
         # new a QTabWidget
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
@@ -67,6 +69,11 @@ class InformationWindow(QtWidgets.QMainWindow):
 
 
         #Page : FireFighter Information
+        layoutFF = QVBoxLayout(self.tab_widget)
+        generateblockFF = self.generateblockFF(currentTime)
+        layoutFF.addWidget(generateblockFF)
+        self.pageFF.setLayout(layoutFF)
+
 
 
         #For Windows setting
@@ -214,13 +221,70 @@ class InformationWindow(QtWidgets.QMainWindow):
 
         return self.setupmatrix
 
-    def basicSetuptableVisualizeSetting(self,table_widget_basicsetup,):
+    def basicSetuptableVisualizeSetting(self,table_widget_basicsetup):
         for i, row in enumerate(self.setupmatrix):
             for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
                 table_widget_basicsetup.setItem(i, j, item)
 
+    def blockFF(self,image_path, image_description,currentTime):
+        blockff = QWidget()
 
+        layout = QHBoxLayout(blockff)
+        vertical_layout = QVBoxLayout()
+        pixmap = QPixmap(image_path)
+        self.image_label = QLabel()
+        self.image_label.setPixmap(pixmap)
+        vertical_layout.addWidget(self.image_label)
+        self.description_label = QLabel()
+        self.description_label.setAlignment(Qt.AlignCenter)
+        vertical_layout.addWidget(self.description_label)
+        layout.addLayout(vertical_layout)
+
+        self.table_widget = QTableWidget(self)
+        self.table_widget.setRowCount(2)
+        self.table_widget.setColumnCount(currentTime+1)
+        title_name_FF=["Node","Status"]
+        self.table_widget.setVerticalHeaderLabels(title_name_FF)
+
+        layout.addWidget(self.table_widget)
+
+        self.show_table_content(currentTime)
+        return blockff
+
+    def show_table_content(self,currentTime):
+
+        for row in range(2):
+            for col in range(currentTime):
+                item = QTableWidgetItem("")
+                self.table_widget.setItem(row, col, item)
+
+        self.table_widget.scrollToBottom()
+        self.table_widget.horizontalScrollBar().setValue(self.table_widget.horizontalScrollBar().maximum())
+        self.table_widget.resizeColumnsToContents()
+
+
+
+    def generateblockFF(self,currentTime):
+        blockffContainer = QWidget()
+        layout = QVBoxLayout(blockffContainer)
+
+        image_data = [
+            {"path": "fireman.png", "description": "Description for Image 1"},
+            {"path": "fireman.png", "description": "Description for Image 2"},
+            {"path": "fireman.png", "description": "Description for Image 3"},
+            {"path": "fireman.png", "description": "Description for Image 4"}
+        ]
+
+        # for i in len(self.fflist):
+        #     self.fflist[i].getName()
+
+
+        for data in image_data:
+            custom_block = self.blockFF(data["path"], data["description"],currentTime)
+            layout.addWidget(custom_block)
+
+        return blockffContainer
 
 
 
