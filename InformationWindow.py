@@ -2,45 +2,26 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout, QSizePolicy, QTabWidget
 from PyQt5 import QtWidgets
+from fire import Fire
 
 
 class InformationWindow(QtWidgets.QMainWindow):
     pageChanged = pyqtSignal(int)
 
-    def __init__(self, nodeList,firefighterList):
+    def __init__(self, nodeList,firefighterList,currentTime):
         super().__init__()
         self.setWindowTitle('Information Window')
-        # inputmatrix = [
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #     [0, 0, 0, 0, 0],
-        #
-        # ]
-
         #InputMatrix紀錄node information ; row數量代表節點數目, column數量代表想要呈現的數據名稱數量 0無意義 (目前為手動增加)
         outputmatrix =[] #OutputMatrix為使用者看到的table
-        setupmatrix = [[0,1,2],[0,1,2]]
+        setupmatrix = [[0,"-","-"],[0,1,2],[0,1,2]]
         self.inputmatrix = []
         self.outputmatrix = outputmatrix
         self.setupmatrix = setupmatrix
         self.currentIndex = 0
-        self.calculateInputMatrix(nodeList,firefighterList)
-        self.ui(nodeList,firefighterList)
+        self.calculateInputMatrix(nodeList,firefighterList,currentTime)
+        self.ui()
 
-    def ui(self, nodeList,firefighterList):
+    def ui(self):
 
         # new a QTabWidget
         self.tab_widget = QTabWidget(self)
@@ -57,11 +38,11 @@ class InformationWindow(QtWidgets.QMainWindow):
         #Basic Setup table
         layoutBasic = QVBoxLayout(self.tab_widget)
         table_widget_basicsetup = QTableWidget()
-        table_widget_basicsetup.setRowCount(2)
+        table_widget_basicsetup.setRowCount(3)
         table_widget_basicsetup.setColumnCount(3)
         self.basicSetuptableVisualizeSetting(table_widget_basicsetup)
         title_name_basicsetup=["Number","Process/Burn Rate","Moving Rate"]  # 這裡可以更換成想要的行標題名稱
-        title_name_basic=["Fire","Firefighter"]  # 這裡可以更換成想要的行標題名稱
+        title_name_basic=["Node","Fire","Firefighter"]  # 這裡可以更換成想要的行標題名稱
         table_widget_basicsetup.setHorizontalHeaderLabels(title_name_basicsetup)
         table_widget_basicsetup.setVerticalHeaderLabels(title_name_basic)  # 設定垂直標題（行名稱）
         layoutBasic.addWidget(table_widget_basicsetup,1)
@@ -79,7 +60,7 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.tableVisualizeSetting(table_widget_Node)
         #layoutBasic.addWidget(table_widget_Node,5)
         layoutNode.addWidget(table_widget_Node,5)
-        title_name=["Status","Amount","Burned/Recovery Percentage",""]  # 這裡可以更換成想要的標題名稱
+        title_name=["Status","Amount","Percentage","Time to burned"]  # 這裡可以更換成想要的標題名稱
         table_widget_Node.setHorizontalHeaderLabels(title_name)
         table_widget_Node.resizeColumnsToContents()
         self.pageNode.setLayout(layoutNode)
@@ -105,17 +86,19 @@ class InformationWindow(QtWidgets.QMainWindow):
 
     #將node information紀錄至InputMatrix
     # [[isProtected,isBurned,getGrassAmount,getWaterAmount] #node 1 with index 0,[,,,]#node 2 with index 1... [,,,]#node 14 with index 13]
-    def calculateInputMatrix(self, nodeList,firefighterList):
+    def calculateInputMatrix(self, nodeList,firefighterList,currentTime):
         self.inputmatrix=[]
         for i in range(0, len(nodeList)):
-            self.inputmatrix.append(["", "", "", "", ""])
-        print("len(nodeList)",len(nodeList))
+            self.inputmatrix.append(["", "", "", "", "",""])
 
         for i in nodeList:
             self.inputmatrix[i.getNum() - 1][0] = i.isProtected()
             self.inputmatrix[i.getNum() - 1][1] = i.isBurned()
             self.inputmatrix[i.getNum() - 1][2] = i.getGrassAmount()
             self.inputmatrix[i.getNum() - 1][3] = i.getWaterAmount()
+            self.inputmatrix[i.getNum() - 1][4] =i.getfireMinArrivalTimePoint(currentTime)
+            self.inputmatrix[i.getNum() - 1][5] =i.getfireMinArrivalTime()
+
             for j in firefighterList:
                 if(j.isIdle()):
                     self.inputmatrix[j.curPos().getNum() - 1 ][4] = 1
@@ -123,13 +106,25 @@ class InformationWindow(QtWidgets.QMainWindow):
                     self.inputmatrix[j.curPos().getNum() - 1 ][4] = 0
 
 
+
+
     #更新OutputMatrix
-    def updateOutputMatrix(self, nodeList,firefighterList):
+    def updateOutputMatrix(self, nodeList,firefighterList,currentTime):
         outputmatrix =[]
         for i in range(0, len(nodeList)):
             outputmatrix.append(["", "", "", "", ""])
 
-        self.calculateInputMatrix(nodeList,firefighterList)
+        self.calculateInputMatrix(nodeList,firefighterList,currentTime)
+
+        for i in range(0, len(nodeList)):
+            outputmatrix[i][4] = self.inputmatrix[i][5]
+            if(self.inputmatrix[i][4] < 100):
+                outputmatrix[i][3] = self.inputmatrix[i][4]
+            else:
+                outputmatrix[i][3] = ""
+
+
+
 
         #條件判斷的顯示
         #title index=[   0   ,   1    ,            2               ,3]
@@ -161,9 +156,10 @@ class InformationWindow(QtWidgets.QMainWindow):
             elif (self.inputmatrix[i.getNum() - 1][1] == 0 and self.inputmatrix[i.getNum() - 1][0] == 0):
                 outputmatrix[i.getNum() - 1][0] = "Normal"
 
-            #outputmatrix[14][0] = "Depot"
             if(self.inputmatrix[i.getNum() - 1][4] == 1 ):
                 outputmatrix[i.getNum() - 1][0] = "Idle"
+            outputmatrix[len(nodeList)-1][0] = "Depot"
+
 
         return outputmatrix
 
@@ -209,12 +205,12 @@ class InformationWindow(QtWidgets.QMainWindow):
                 table_widget.setItem(i, j, item)
 
     def setSetupMatrix(self,nodeList,firefighterNum,rate_extinguish,move_man,rate_fireburn,move_fire):
-        self.setupmatrix[0][0] = len(nodeList) - 1
-        self.setupmatrix[0][1] = rate_fireburn
-        self.setupmatrix[0][2] = move_fire
-        self.setupmatrix[1][0] = firefighterNum
-        self.setupmatrix[1][1] = rate_extinguish
-        self.setupmatrix[1][2] = move_man
+        self.setupmatrix[0][0] = len(nodeList)
+        self.setupmatrix[1][1] = rate_fireburn
+        self.setupmatrix[1][2] = move_fire
+        self.setupmatrix[2][0] = firefighterNum
+        self.setupmatrix[2][1] = rate_extinguish
+        self.setupmatrix[2][2] = move_man
 
         return self.setupmatrix
 

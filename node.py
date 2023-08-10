@@ -14,6 +14,7 @@ class Node(QtWidgets.QPushButton):
         #variables
         self.setProperty("no.", i) #node編號
         self.fireMinArrivalTime = 10000
+        self.fireMinArrivalTimePoint = 100
         self.setProperty("water-amount",20) #即時澆水量 (目前是用減法計算)
         self.initialWaterAmount = 20   #消防員需澆多少水才能保護
         self.setProperty("grass-amount", 20) #即時燃燒量
@@ -109,6 +110,9 @@ class Node(QtWidgets.QPushButton):
 
     def getYposition(self):
         return self.pos().y()
+
+    def getfireMinArrivalTime(self):
+        return self.fireMinArrivalTime
     
     def setLabelVisibility(self):
         if self.__label.isVisible():
@@ -162,3 +166,9 @@ class Node(QtWidgets.QPushButton):
     def connectNode(self, node, length):
         self.__neighbors.append(node)
         self.__adjArc.append({"node": node, "length": length, "fire-travel": 0, "FF-travel": 0})
+
+    def getfireMinArrivalTimePoint(self,currentTime):
+        if 0 <= math.ceil(self.fireMinArrivalTime):
+            return math.ceil(self.fireMinArrivalTime) + currentTime + 1
+        else:
+            return "Burned"

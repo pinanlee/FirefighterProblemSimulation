@@ -15,10 +15,10 @@ from PyQt5.QtGui import QPixmap, QPainter, QPen
 from PyQt5 import uic
 import pandas as pd
 '''
-information table跑不出來 
-可以試試自訂網路(?)
-取消選取功能
-提示視窗有誤
+0810 更改:
+更正reset 選擇後button顏色會跑掉的bug
+
+
 '''
 
 travel_time = [[]]
@@ -87,92 +87,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             nodeButton = Node(self.ui.centralwidget, image, i+1, nodePos)
             self.nodeList.append(nodeButton)
 
-        '''self.ui.image_1 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_1.setGeometry(QtCore.QRect(230, 0, 101, 101))
-        node1Pos = QtCore.QRect(310, 20, 61, 51)
-        self.ui.nodeButton_1 = Node(self.ui.centralwidget, self.ui.image_1, 1, node1Pos)
-
-        self.ui.image_2 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_2.setGeometry(QtCore.QRect(560, 0, 101, 101))
-        node2Pos = QtCore.QRect(630, 40, 61, 51)
-        self.ui.nodeButton_2 = Node(self.ui.centralwidget, self.ui.image_2, 2, node2Pos)
-
-        self.ui.image_3 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_3.setGeometry(QtCore.QRect(810, 20, 101, 101))
-        node3Pos = QtCore.QRect(870, 50, 61, 51)
-        self.ui.nodeButton_3 = Node(self.ui.centralwidget, self.ui.image_3, 3, node3Pos)
-
-        self.ui.image_4 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_4.setGeometry(QtCore.QRect(40, 110, 101, 101))
-        node4Pos = QtCore.QRect(100, 130, 61, 61)
-        self.ui.nodeButton_4 = Node(self.ui.centralwidget, self.ui.image_4, 4, node4Pos)
-
-        self.ui.image_5 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_5.setGeometry(QtCore.QRect(450, 100, 101, 101))
-        node5Pos = QtCore.QRect(430, 140, 61, 51)
-        self.ui.nodeButton_5 = Node(self.ui.centralwidget, self.ui.image_5, 5, node5Pos)
-
-        self.ui.image_6 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_6.setGeometry(QtCore.QRect(650, 160, 101, 101))
-        node6Pos = QtCore.QRect(710, 190, 61, 51)
-        self.ui.nodeButton_6 = Node(self.ui.centralwidget, self.ui.image_6, 6, node6Pos)
-
-        self.ui.image_7 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_7.setGeometry(QtCore.QRect(910, 170, 101, 101))
-        node7Pos = QtCore.QRect(980, 190, 61, 51)
-        self.ui.nodeButton_7 = Node(self.ui.centralwidget, self.ui.image_7, 7, node7Pos)
-
-        self.ui.image_8 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_8.setGeometry(QtCore.QRect(40, 300, 101, 101))
-        node8Pos = QtCore.QRect(20, 330, 61, 51)
-        self.ui.nodeButton_8 = Node(self.ui.centralwidget, self.ui.image_8, 8, node8Pos)
-
-        self.ui.image_9 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_9.setGeometry(QtCore.QRect(320, 230, 101, 101))
-        node9Pos = QtCore.QRect(300, 250, 61, 51)
-        self.ui.nodeButton_9 = Node(self.ui.centralwidget, self.ui.image_9, 9, node9Pos)
-
-        self.ui.image_10 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_10.setGeometry(QtCore.QRect(510, 240, 101, 101))
-        node10Pos = QtCore.QRect(500, 270, 61, 51)
-        self.ui.nodeButton_10 = Node(self.ui.centralwidget, self.ui.image_10, 10, node10Pos)
-
-        self.ui.image_11 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_11.setGeometry(QtCore.QRect(750, 300, 101, 101))
-        node11Pos = QtCore.QRect(820, 300, 61, 61)
-        self.ui.nodeButton_11 = Node(self.ui.centralwidget, self.ui.image_11, 11, node11Pos)
-
-        self.ui.image_12 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_12.setGeometry(QtCore.QRect(140, 450, 101, 101))
-        node12Pos = QtCore.QRect(120, 480, 61, 51)
-        self.ui.nodeButton_12 = Node(self.ui.centralwidget, self.ui.image_12, 12, node12Pos)
-
-        self.ui.image_13 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_13.setGeometry(QtCore.QRect(360, 380, 101, 101))
-        node13Pos = QtCore.QRect(350, 410, 61, 51)
-        self.ui.nodeButton_13 = Node(self.ui.centralwidget, self.ui.image_13, 13, node13Pos)
-
-        self.ui.image_14 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_14.setGeometry(QtCore.QRect(890, 420, 101, 101))
-        node14Pos = QtCore.QRect(960, 430, 61, 51)
-        self.ui.nodeButton_14 = Node(self.ui.centralwidget, self.ui.image_14, 14, node14Pos)
-
-        self.ui.image_15 = QtWidgets.QLabel(self.ui.centralwidget)
-        self.ui.image_15.setGeometry(QtCore.QRect(560, 430, 101, 101))
-        node15Pos = QtCore.QRect(620, 470, 61, 51)
-        self.ui.nodeButton_15 = Node(self.ui.centralwidget, self.ui.image_15, 15, node15Pos)
-
-        self.nodeList = [self.ui.nodeButton_1, self.ui.nodeButton_2, self.ui.nodeButton_3, 
-        self.ui.nodeButton_4, self.ui.nodeButton_5, self.ui.nodeButton_6, 
-        self.ui.nodeButton_7, self.ui.nodeButton_8, self.ui.nodeButton_9, 
-        self.ui.nodeButton_10, self.ui.nodeButton_11, self.ui.nodeButton_12, 
-        self.ui.nodeButton_13, self.ui.nodeButton_14, self.ui.nodeButton_15 ]'''
-
         global FFNum
         self.firefighterNum = FFNum
-        self.nw = InformationWindow(self.nodeList,self.firefighterList)
+        self.nw = InformationWindow(self.nodeList,self.firefighterList,self.currentTime)
         self.subwindows = []
         self.setup_control()
+        self.firefighterList[self.FFindex].accessibleVisualize(self.nodeList)
 
     def setup_control(self):
         # init UI
@@ -215,7 +135,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.clicked.connect(self.choose)       
             #i.updateAmount(temp)
             self.xPositionList.append(i.getXposition() + i.width() / 2)
-            self.yPositionList.append(i.getYposition() + i.width() / 2)
+            self.yPositionList.append(i.getYposition() + i.height())
         
 
     def randomFireAndDepot(self):
@@ -346,8 +266,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return aa
     @printStatus
     def choose(self): #指派消防員移動至給定node
-        if (self.sender() == self.firefighterList[self.FFindex].curPos()):
-            if(self.firefighterList[self.FFindex].destNode == self.sender()):
+        if (self.sender() == self.firefighterList[self.FFindex].curPos()): #選點是否為目前佔位
+            if(self.firefighterList[self.FFindex].destNode == self.sender()): #選點是否為目標預計
                 self.firefighterList[self.FFindex].reset()
                 self.sender().setStyleSheet("")
                 return "{} reset".format(self.firefighterList[self.FFindex].getName())
@@ -359,7 +279,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             if(text == "vaild choose"):
                 if(self.firefighterList[self.FFindex].destNode == self.sender()):
                     self.firefighterList[self.FFindex].reset()
-                    self.sender().setStyleSheet("")
+                    #self.sender().setStyleSheet("")
+                    self.sender().setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
                     return "{} reset".format(self.firefighterList[self.FFindex].getName())
                 self.firefighterList[self.FFindex].processAccept(self.sender(), text)
                 text = "{} move to vertex {}".format(self.firefighterList[self.FFindex].getName(), self.sender().getNum())
@@ -405,6 +326,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     i.idle(self.currentTime)
                 i.move(self.currentTime)'''
                 i.finishTimeSet()
+
+        for i in self.nodeList:
+            self.fire.minTimeFireArrival(i)
+            i.getfireMinArrivalTimePoint(self.currentTime)
+
         self.timer = QTimer()
         self.timer.setInterval(500)
         self.timer.timeout.connect(timeSkip)
@@ -421,7 +347,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
    
     def upadateInformation(self):
         self.nw.pageChanged.connect(self.onSubWindowPageChanged)
-        temp = self.nw.updateOutputMatrix(self.nodeList,self.firefighterList)
+        temp = self.nw.updateOutputMatrix(self.nodeList,self.firefighterList,self.currentTime)
         temp2 = self.nw.setSetupMatrix(self.nodeList, self.firefighterNum,
                                     self.firefighterList[self.FFindex].rate_extinguish,
                                     self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,
@@ -431,7 +357,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
-        self.nw.ui(self.nodeList,self.firefighterList)
+        self.nw.ui()
         self.nw.tab_widget.setCurrentIndex(self.pageList)
 
 
@@ -453,12 +379,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 for j in i.getNeighbors():
                     tempXpercent = (self.xPositionList[j.getNum()] - self.xPositionList[i.getNum()]) * i.getArcPercentage_Fire(j)
                     tempYpercent = (self.yPositionList[j.getNum()] - self.yPositionList[i.getNum()]) * i.getArcPercentage_Fire(j)
-
                     qpen.setColor(Qt.red)
                     qpen.setWidth(6)
                     qpainter.setPen(qpen)
                     qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[i.getNum()]+tempXpercent ,self.yPositionList[i.getNum()]+tempYpercent))
-
         for i in self.nodeList:
                 for j in i.getNeighbors():
                     tempXpercent = (self.xPositionList[j.getNum()] - self.xPositionList[i.getNum()]) * i.getArcPercentage_FF(j)

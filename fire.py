@@ -54,7 +54,8 @@ class Fire:
             return
         for i in self.fireList:
             self.__calculateMinTime(i, node, 0)
-        #print(node.fireMinArrivalTime)
+        # print("node: ",node.getNum(),end="")
+        # print(node.fireMinArrivalTime)
         
 
     def __calculateMinTime(self, start, end, time):

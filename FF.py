@@ -167,7 +167,7 @@ class FireFighter(QObject):
             self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 0, {opacity}); color: white;')
     
     def accessibleVisualize(self,nodelist): #消防員可以前往的點可視化
-        for i in nodelist[:14]:
+        for i in nodelist:
             if(not i.isBurned() and not i.isProtected()):
                 i.setStyleSheet("")
 
@@ -176,7 +176,7 @@ class FireFighter(QObject):
                 if (i.fireMinArrivalTime >= self.curPos().getArc(i)["length"] / self.move_man):
                     i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
-    def closeaccessibleVisualize(self): #用於清除前一個消防員可以前往點的顏色
+    def closeaccessibleVisualize(self): #用於清除可以前往點的顏色
         for i in (self.curPos().getNeighbors()):
             if (i.isBurned() == False and i.isProtected() == False):
                 if (i.fireMinArrivalTime >= self.curPos().getArc(i)["length"] / self.move_man):
