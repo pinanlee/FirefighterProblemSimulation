@@ -103,6 +103,12 @@ class Node(QtWidgets.QPushButton):
 
     def getLabel(self):
         return self.__label
+
+    def getXposition(self):
+        return self.pos().x()
+
+    def getYposition(self):
+        return self.pos().y()
     
     def setLabelVisibility(self):
         if self.__label.isVisible():
