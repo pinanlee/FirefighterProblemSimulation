@@ -168,7 +168,7 @@ class Node(QtWidgets.QPushButton):
         self.__adjArc.append({"node": node, "length": length, "fire-travel": 0, "FF-travel": 0})
 
     def getfireMinArrivalTimePoint(self,currentTime):
-        if 0 <= math.ceil(self.fireMinArrivalTime):
+        if math.ceil(self.fireMinArrivalTime) > 0 :
             return math.ceil(self.fireMinArrivalTime) + currentTime + 1
         else:
-            return "Burned"
+            return 0

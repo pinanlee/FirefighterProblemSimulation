@@ -32,7 +32,7 @@ def readExcel():
     for j in df.iloc:
         travel_time[ord(j["i"])-64].append([ord(j["j"])-64, 1])
         travel_time[ord(j["j"])-64].append([ord(j["i"])-64, 1])
-    print(travel_time)  
+    #print(travel_time)
 
 readExcel()
 
@@ -318,7 +318,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.timeIndexLabel.setText("t= "+str(self.currentTime))
             self.ui.descriptionLabel.setText("moving.")
 
-
         for i in self.firefighterList:
             if(not (i.isTraveling() or i.isProcess())):
                 '''if(i.isIdle()):
@@ -332,8 +331,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         self.timer = QTimer()
         self.timer.setInterval(500)
-        self.timer.timeout.connect(timeSkip)
         self.timer.start()
+        self.timer.timeout.connect(timeSkip)
+
+
 
 
     def showInformationWindow(self):
@@ -356,10 +357,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
-        self.nw.ui(self.currentTime)
+        self.nw.ui(self.currentTime,self.firefighterList)
         self.nw.tab_widget.setCurrentIndex(self.pageList)
-
-
 
     def paintEvent(self, event):
         qpainter = QPainter()

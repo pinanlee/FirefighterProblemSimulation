@@ -19,12 +19,20 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.outputmatrix = outputmatrix
         self.setupmatrix = setupmatrix
         self.currentIndex = 0
+        self.firefightermatrix = []
         self.calculateInputMatrix(nodeList,firefighterList,currentTime)
-        self.ui(currentTime)
-        self.fflist = firefighterList
+        self.ui(currentTime,firefighterList)
+        self.generateblockFFlist = []
+        # for i in  range(len(firefighterList)+1):
+        #     self.firefightermatrix.append([])
+        for i in  range(10):
+            self.firefightermatrix.append([[],[]])  #[[[[node],[status]]],[...],...]
+        print("initialfirefightermatrix",self.firefightermatrix)
 
 
-    def ui(self,currentTime):
+
+
+    def ui(self,currentTime,firefighterList):
         # new a QTabWidget
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
@@ -70,7 +78,7 @@ class InformationWindow(QtWidgets.QMainWindow):
 
         #Page : FireFighter Information
         layoutFF = QVBoxLayout(self.tab_widget)
-        generateblockFF = self.generateblockFF(currentTime)
+        generateblockFF = self.generateblockFF(currentTime,firefighterList)
         layoutFF.addWidget(generateblockFF)
         self.pageFF.setLayout(layoutFF)
 
@@ -125,10 +133,10 @@ class InformationWindow(QtWidgets.QMainWindow):
 
         for i in range(0, len(nodeList)):
             outputmatrix[i][4] = self.inputmatrix[i][5]
-            if(self.inputmatrix[i][4] < 100):
-                outputmatrix[i][3] = self.inputmatrix[i][4]
-            else:
-                outputmatrix[i][3] = ""
+            outputmatrix[i][3] = self.inputmatrix[i][4]
+            if(outputmatrix[i][3] == 0):
+                outputmatrix[i][3] = "Burned"
+
 
 
 
@@ -152,15 +160,31 @@ class InformationWindow(QtWidgets.QMainWindow):
                 outputmatrix[i.getNum() - 1][1] = "---"
                 outputmatrix[i.getNum() - 1][2] = "0 %"
 
-            if (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] <= 0):
-                outputmatrix[i.getNum() - 1][0] = "Save Success"
-            elif (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] < i.initialGrassAmount):
-                outputmatrix[i.getNum() - 1][0] = "Protecting..."
-            elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] <= 0):
-                outputmatrix[i.getNum() - 1][0] = "Damage"
-            elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] <= i.initialGrassAmount):
-                outputmatrix[i.getNum() - 1][0] = "Burning..."
-            elif (self.inputmatrix[i.getNum() - 1][1] == 0 and self.inputmatrix[i.getNum() - 1][0] == 0):
+            # if (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] <= 0):
+            #     outputmatrix[i.getNum() - 1][0] = "Save Success"
+            # elif (self.inputmatrix[i.getNum() - 1][0] == 1 and self.inputmatrix[i.getNum() - 1][3] < i.initialGrassAmount):
+            #     outputmatrix[i.getNum() - 1][0] = "Protecting..."
+            # elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] <= 0):
+            #     outputmatrix[i.getNum() - 1][0] = "Damage"
+            # elif (self.inputmatrix[i.getNum() - 1][1] == 1 and self.inputmatrix[i.getNum() - 1][2] <= i.initialGrassAmount):
+            #     outputmatrix[i.getNum() - 1][0] = "Burning..."
+            # elif (self.inputmatrix[i.getNum() - 1][1] == 0 and self.inputmatrix[i.getNum() - 1][0] == 0):
+            #     outputmatrix[i.getNum() - 1][0] = "Normal"
+
+            if(self.inputmatrix[i.getNum() - 1][0] == 1):
+                if(self.inputmatrix[i.getNum() - 1][3] <= 0):
+                    outputmatrix[i.getNum() - 1][0] = "Save Success"
+                else:
+                    outputmatrix[i.getNum() - 1][0] = "Protecting..."
+
+            if(self.inputmatrix[i.getNum() - 1][1] == 1):
+                if(self.inputmatrix[i.getNum() - 1][2] <= 0):
+                    outputmatrix[i.getNum() - 1][0] = "Damage"
+                else:
+                    outputmatrix[i.getNum() - 1][0] = "Burning..."
+
+
+            if (self.inputmatrix[i.getNum() - 1][1] == 0 and self.inputmatrix[i.getNum() - 1][0] == 0):
                 outputmatrix[i.getNum() - 1][0] = "Normal"
 
             if(self.inputmatrix[i.getNum() - 1][4] == 1 ):
@@ -227,7 +251,7 @@ class InformationWindow(QtWidgets.QMainWindow):
                 item = QTableWidgetItem(str(value))
                 table_widget_basicsetup.setItem(i, j, item)
 
-    def blockFF(self,image_path, image_description,currentTime):
+    def blockFF(self,image_path, image_description,currentTime,firefighterList):
         blockff = QWidget()
 
         layout = QHBoxLayout(blockff)
@@ -236,7 +260,10 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.image_label = QLabel()
         self.image_label.setPixmap(pixmap)
         vertical_layout.addWidget(self.image_label)
-        self.description_label = QLabel()
+        self.description_label = QLabel("Firefighter  " + image_description)
+        font = self.description_label.font()
+        font.setBold(True)  # 设置字体为加粗
+        self.description_label.setFont(font)
         self.description_label.setAlignment(Qt.AlignCenter)
         vertical_layout.addWidget(self.description_label)
         layout.addLayout(vertical_layout)
@@ -249,39 +276,62 @@ class InformationWindow(QtWidgets.QMainWindow):
 
         layout.addWidget(self.table_widget)
 
-        self.show_table_content(currentTime)
-        return blockff
-
-    def show_table_content(self,currentTime):
+        self.show_table_content(image_description,currentTime,firefighterList)
 
         for row in range(2):
             for col in range(currentTime):
-                item = QTableWidgetItem("")
-                self.table_widget.setItem(row, col, item)
+                if row == 0:
+                    item = QTableWidgetItem(str(self.outputNode[col]))
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.table_widget.setItem(row, col, item)
+                elif row == 1:
+                    item = QTableWidgetItem(str(self.outputStatus[col]))
+                    self.table_widget.setItem(row, col, item)
+                    self.table_widget.resizeColumnsToContents()
 
-        self.table_widget.scrollToBottom()
+
+        return blockff
+
+    def generateFFmatrix(self,firefighterList):
+        for i in firefighterList:
+            self.firefightermatrix[i.getFFnum()-1][0].append(i.curPos().getNum())
+            if (i.isProcess() == True):
+                print("i.isProcess ",i.isProcess )
+                self.firefightermatrix[i.getFFnum() - 1][1].append("Processing")
+            elif (i.isTraveling() == True):
+                self.firefightermatrix[i.getFFnum() - 1][1].append("Traveling")
+            else:
+                self.firefightermatrix[i.getFFnum() - 1][1].append("Idle")
+
+    def show_table_content(self,image_description,currentTime,firefighterList):
+        #nodePosition = QTableWidgetItem()
+        # status = QTableWidgetItem()
+
+        self.outputNode = []
+        self.outputStatus = ""
+
+        for i in range(0,5):
+            if(image_description == str(i+1)):
+                self.outputNode = self.firefightermatrix[int(image_description) - 1][0]
+                self.outputStatus = self.firefightermatrix[int(image_description) - 1][1]
+
+        #self.table_widget.resizeColumnsToContents()
         self.table_widget.horizontalScrollBar().setValue(self.table_widget.horizontalScrollBar().maximum())
-        self.table_widget.resizeColumnsToContents()
 
 
 
-    def generateblockFF(self,currentTime):
+    def generateblockFF(self,currentTime,firefighterList):
         blockffContainer = QWidget()
         layout = QVBoxLayout(blockffContainer)
-
-        image_data = [
-            {"path": "fireman.png", "description": "Description for Image 1"},
-            {"path": "fireman.png", "description": "Description for Image 2"},
-            {"path": "fireman.png", "description": "Description for Image 3"},
-            {"path": "fireman.png", "description": "Description for Image 4"}
-        ]
-
-        # for i in len(self.fflist):
-        #     self.fflist[i].getName()
+        self.block_data = []
+        self.generateFFmatrix(firefighterList)
 
 
-        for data in image_data:
-            custom_block = self.blockFF(data["path"], data["description"],currentTime)
+        for i in firefighterList:
+            self.block_data.append({"path": "fireman.png", "Firefighter_k": str(i.getFFnum())})
+
+        for data in self.block_data:
+            custom_block = self.blockFF(data["path"], data["Firefighter_k"],currentTime,firefighterList)
             layout.addWidget(custom_block)
 
         return blockffContainer

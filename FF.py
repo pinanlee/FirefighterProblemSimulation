@@ -107,6 +107,10 @@ class FireFighter(QObject):
     def getName(self):
         return self.__name
 
+    def getFFnum(self):
+        return self.num
+
+
     def next_Pos_Accessment(self, node): #判斷消防員是否可以指派去給定的目的地 
         
         if(self.__statusDetection(node) and self.__distanceDetection(node) and self.__safeDetection(node)):
