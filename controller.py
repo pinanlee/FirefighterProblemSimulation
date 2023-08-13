@@ -9,6 +9,7 @@ from UIv2_ui import Ui_MainWindow
 from FF import FireFighter
 from node import Node 
 from fire import Fire
+from network import Network
 from InformationWindow import InformationWindow
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 from PyQt5 import uic
@@ -20,19 +21,6 @@ information table跑不出來
 提示視窗有誤
 '''
 
-travel_time = [[]]
-
-def readExcel():
-    df = pd.read_excel("coordinates data.xlsx")
-    df_num = len(df.index)
-    for i in range(df_num):
-        travel_time.append([])
-    df = pd.read_excel("adjacent data.xlsx")
-    for j in df.iloc:
-        travel_time[ord(j["i"])-64].append([ord(j["j"])-64, 1])
-        travel_time[ord(j["j"])-64].append([ord(j["i"])-64, 1]) 
-readExcel()
-
 FFNum = 2
 
 class MainWindow_controller(QtWidgets.QMainWindow):
@@ -41,61 +29,101 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
     firefighterNum = 2
     selectedStyle : str = "border: 2px solid blue;"
-    FFindex = 0    
+    FFindex = 0 
     focusIndex = 14
     labels : QtWidgets.QLabel = []
+    statusLabels = []
     timer = QTimer()
     currentTime = 0
     pageList = -1
     xPositionList = [[]]
     yPositionList = [[]]
-
+    FFnetwork : Network = None
+    fireNetwork : Network = None
+    showFFnetwork = True
+    showFireNetwork = True
     def __init__(self):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
-        df = pd.read_excel("coordinates data.xlsx")
-        df_num = len(df.index)
-        for i in range(df_num):
-            image = QtWidgets.QLabel(self.ui.centralwidget)
-            image.setGeometry(QtCore.QRect(df.iloc[i]["x"], df.iloc[i]["y"], 101, 101))
-            nodePos = QtCore.QRect(df.iloc[i]["x"], df.iloc[i]["y"], 61, 51)
-            nodeButton = Node(self.ui.centralwidget, image, i+1, nodePos)
-            self.nodeList.append(nodeButton)
-
         global FFNum
         self.firefighterNum = FFNum
-        self.nw = InformationWindow()
+        #self.nw = InformationWindow(self.nodeList, self.firefighterList, self.currentTime)
         self.subwindows = []
         self.setup_control()
 
     def setup_control(self):
-        # init UI
+        def initNetwork():
+            self.ui.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
+            self.FFnetwork = Network("adjacent data -- ff.xlsx", "coordinates data.xlsx")
+            self.fireNetwork = Network("adjacent data -- fire.xlsx", "coordinates data.xlsx")
+            for i in self.FFnetwork.nodeList:
+                image = QtWidgets.QLabel(self.ui.centralwidget)
+                node = Node(self.ui.centralwidget, image, i)
+                
+                node.clicked.connect(self.choose)
+                self.nodeList.append(node)
+                self.xPositionList.append(node.getXposition() + node.width() / 2)
+                self.yPositionList.append(node.getYposition() + node.width() / 2)
+        initNetwork()
         self.focusIndex = len(self.nodeList) - 1
-        self.initUI()
+
+        def initUI():
+            self.ui.actionnodes.triggered.connect(self.showInformationWindow)
+            self.descriptionAnimate("choose vertices to save")
+            self.ui.node_info_label.setVisible(False)
+            self.nodeList[self.focusIndex].setFocus()
+            self.labels = [self.ui.FFlabel, self.ui.FFlabel_2]
+            self.statusLabels = [self.ui.statuslabel,self.ui.statuslabel_2]
+            self.ui.FFlabel.setPixmap(QPixmap("./image/firefighter.png"))
+            self.ui.FFlabel_2.setPixmap(QPixmap("./image/fireman.png"))
+        initUI()
         # init network
-        self.initNode()
-        self.NodeConnection()
-        self.randomFireAndDepot()
+        def NodeConnection():
+            for i in self.nodeList:
+                pos1 = np.array((i.geometry().x(),i.geometry().y()))
+                for j in self.FFnetwork.adjList[i.getNum()]:
+                    pos2 = np.array((self.nodeList[j[0]-1].x(),self.nodeList[j[0]-1].y()))
+                    length = np.linalg.norm(pos1-pos2)
+                    i.connectNode(self.nodeList[j[0]-1], length)
+        NodeConnection()
 
+        def randomFireAndDepot():
+            def ySort(elem: Node):
+                return elem.geometry().y()
+            #random fire depot
+            self.nodeList.sort(key=ySort)
+            a = random.randint(0, len(self.nodeList)-2)
+            self.fire = Fire(self.fireNetwork, a)
+            self.fire.burnedSignal.connect(self.networkUpdateF)
+            self.fire.burn()
+            self.fire.opacitySignal.connect(self.fireVisualize)
+            self.fire.updateSignal.connect(self.syncFireMinArrivalTime)
+            self.updateMinTime()
+            #init depot
+            depot = self.nodeList[-1]
+            for i in range(self.firefighterNum):
+                ff = FireFighter(i+1, depot)
+                depot.depotSetting()
+                self.firefighterList.append(ff)
+                
+            self.firefighterList[1].pixmap = QPixmap("./image/fireman.png")
+            self.nodeList[self.focusIndex].setStyleSheet("background-color: black;border: 2px solid blue;")
+        randomFireAndDepot()
 
-        self.updateStatus()
+        self.updateFFStatus()
         for i in self.firefighterList:
-            i.doneSignal.connect(self.updateStatus)
-            i.protectSignal.connect(self.updateMinTime)
+            i.FFdoneSignal.connect(self.updateFFStatus)
+            i.FFprotectSignal.connect(self.updateMinTime)
+            i.FFprotectSignal.connect(self.networkUpdate)
 
-    def initUI(self):
-        self.ui.actionnodes.triggered.connect(self.showInformationWindow)
-        self.descriptionAnimate("choose vertices to save")
-        self.ui.node_info_label.setVisible(False)
-        self.nodeList[self.focusIndex].setFocus()
-        self.labels = [self.ui.FFlabel, self.ui.FFlabel_2]
-        self.statusLabels = [self.ui.statuslabel,self.ui.statuslabel_2]
-        self.ui.FFlabel.setPixmap(QPixmap("./image/firefighter.png"))
-        self.ui.FFlabel_2.setPixmap(QPixmap("./image/fireman.png"))
+    #firefighter signal
+    def networkUpdate(self,value):
+        for i in self.nodeList:
+            if(i.getNum() == value):
+                i.defend()
 
-    def updateStatus(self):
+    def updateFFStatus(self):
         for i in range(self.firefighterNum):
             if(self.firefighterList[i].isTraveling()):
                 self.statusLabels[i].setText("Traveling")
@@ -106,44 +134,27 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             else:
                 self.statusLabels[i].setText("Idle")
 
-    def initNode(self):
-        for i in self.nodeList:
-            temp = random.randrange(5,11)
-            i.clicked.connect(self.choose)       
-            #i.updateAmount(temp)
-            self.xPositionList.append(i.getXposition() + i.width() / 2)
-            self.yPositionList.append(i.getYposition() + i.width() / 2)
-
-    def randomFireAndDepot(self):
-        def ySort(elem: Node):
-            return elem.geometry().y()
-        #random fire depot
-        self.nodeList.sort(key=ySort)
-        a = random.randint(0, len(self.nodeList)-1)
-        self.fire = Fire(self.nodeList[a])
-        self.updateMinTime()
-        #init depot
-        depot = self.nodeList[-1]
-        for i in range(self.firefighterNum):
-            ff = FireFighter(i+1, depot)
-            depot.depotSetting()
-            self.firefighterList.append(ff)
-            
-        self.firefighterList[1].pixmap = QPixmap("./image/fireman.png")
-        self.nodeList[self.focusIndex].setStyleSheet("background-color: black;border: 2px solid blue;")
-
     def updateMinTime(self):
         for i in self.nodeList:
-            self.fire.minTimeFireArrival(i)
+            for j in self.fireNetwork.nodeList:
+                if(i.getNum()==j.no):
+                    self.fire.minTimeFireArrival(j)
 
-    def NodeConnection(self):
+    #fire signal
+    def networkUpdateF(self,value):
+        print("get")
         for i in self.nodeList:
-            pos1 = np.array((i.geometry().x(),i.geometry().y()))
-            for j in travel_time[i.getNum()]:
-                pos2 = np.array((self.nodeList[j[0]-1].x(),self.nodeList[j[0]-1].y()))
-                length = np.linalg.norm(pos1-pos2)
-                print(length)
-                i.connectNode(self.nodeList[j[0]-1], length)
+            if(i.getNum() == value):
+                i.onFire()
+
+    def syncFireMinArrivalTime(self):
+        for i in self.fireNetwork.nodeList:
+            self.FFnetwork.nodeList[i.getNum()-1].fireMinArrivalTime = i.fireMinArrivalTime
+
+    def fireVisualize(self, opacity, no):
+        for i in self.nodeList:
+            if(i.getNum()== no):
+                i.setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
 
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
         self.InfoDisable()
@@ -158,7 +169,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         elif(a0.key() == Qt.Key_X):
             if(not self.ui.node_info_label.isVisible()):
                 self.InfoShow()
-        self.updateStatus()
+        elif(a0.key() == Qt.Key_S):
+                self.networkChange()
+        self.updateFFStatus()
 
     def buttonFocusStyle(self, plus):
         style = self.nodeList[self.focusIndex].styleSheet()
@@ -177,21 +190,33 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if(plus == 1):
             self.nodeList[self.focusIndex].geometry().x()
 
+    def networkChange(self):
+        if(self.showFFnetwork and self.showFireNetwork):
+            self.showFireNetwork = False
+            self.ui.networkLabel.setText("FF network")
+        elif(self.showFFnetwork and not self.showFireNetwork):
+            self.showFFnetwork = False
+            self.showFireNetwork = True
+            self.ui.networkLabel.setText("Fire network")
+        elif(not self.showFFnetwork and self.showFireNetwork):
+            self.showFFnetwork = True
+            self.ui.networkLabel.setText("Hybrid network")
+
     def nextAnim(self):
         self.anim.stop()
         self.anim = QPropertyAnimation(self.ui.descriptionLabel, b"pos")
         self.anim.setStartValue(QPoint(10, 240))
         self.anim.setEndValue(QPoint(1200, 240))
-        self.anim.setDuration(500)
+        self.anim.setDuration(250)
         def start():
             self.anim.start()
-        QTimer.singleShot(1000, start)  
+        QTimer.singleShot(800, start)  
 
     def descriptionAnimate(self, text):
         self.ui.descriptionLabel.setText(text)
         self.anim = QPropertyAnimation(self.ui.descriptionLabel, b"pos")
         self.anim.setEndValue(QPoint(10, 240))
-        self.anim.setDuration(500)
+        self.anim.setDuration(250)
         self.anim.start()
 
         self.anim.finished.connect(self.nextAnim)      
@@ -251,7 +276,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 text = func(self)
                 if(text == "vaild choose"):
                     self.sender().setText(str(self.firefighterList[self.FFindex].num))
-            self.updateStatus()
+            self.updateFFStatus()
             self.descriptionAnimate(text)
         return aa
     @printStatus
@@ -282,7 +307,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             text = "moving"
             for i in range(self.currentTime % 3):
                 text += "."
-            self.descriptionAnimate(text)  
+            #self.descriptionAnimate(text)  
             self.upadateInformation()
             self.currentTime+=1
             self.fire.fire_spread(self.currentTime)
@@ -310,8 +335,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.pageList = index
    
     def upadateInformation(self):
-        self.nw.pageChanged.connect(self.onSubWindowPageChanged)
-        temp = self.nw.updateOutputMatrix(self.nodeList,self.firefighterList)
+        '''self.nw.pageChanged.connect(self.onSubWindowPageChanged)
+        temp = self.nw.updateOutputMatrix(self.nodeList,self.firefighterList,self.currentTime)
         temp2 = self.nw.setSetupMatrix(self.nodeList, self.firefighterNum,
                                     self.firefighterList[self.FFindex].rate_extinguish,
                                     self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,
@@ -321,40 +346,48 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         x = self.nw.pos().x()
         y = self.nw.pos().y()
         self.nw.move(x, y)
-        self.nw.ui()
-        self.nw.tab_widget.setCurrentIndex(self.pageList)
+        self.nw.ui(self.currentTime,self.firefighterList)
+        self.nw.tab_widget.setCurrentIndex(self.pageList)'''
 
     def paintEvent(self, event):
         qpainter = QPainter()
         qpainter.begin(self)
-        qpen = QPen(Qt.darkGray, 2, Qt.SolidLine)
-        qpainter.setPen(qpen)
+        qpainter.setRenderHint(QPainter.Antialiasing)
+        if(self.showFFnetwork):
+            qpen = QPen(Qt.black, 2, Qt.SolidLine)
+            qpainter.setPen(qpen)
 
-        for i in self.nodeList:
-            for j in i.getNeighbors():
-                qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[j.getNum()], self.yPositionList[j.getNum()]))
-                i.getXposition() + i.width()/2
-
-        for i in self.nodeList:
+            for i in self.nodeList:
+                for j in i.getNeighbors():
+                    qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y()+ 3/2*i.height()), QPointF(j.x()+ j.width()/2, j.y()+ 3/2*j.height()))
+                    i.getXposition() + i.width()/2
+        if(self.showFireNetwork):
+            qpen = QPen(Qt.darkRed, 4, Qt.DashLine)
+            qpen.setDashPattern([15, 50])
+            qpainter.setPen(qpen)
+            for i in self.fireNetwork.nodeList:
+                for j in i.getNeighbors():
+                    qpainter.drawLine(QPointF(i.pos.x() + i.pos.width()/2, i.pos.y()+ 3/2*i.pos.height()), QPointF(j.pos.x()+ j.pos.width()/2, j.pos.y()+ 3/2*j.pos.height()))          
+            
+        for i in self.fireNetwork.nodeList:
             if(i.isBurned()):
                 for j in i.getNeighbors():
-                    tempXpercent = (self.xPositionList[j.getNum()] - self.xPositionList[i.getNum()]) * i.getArcPercentage_Fire(j)
-                    tempYpercent = (self.yPositionList[j.getNum()] - self.yPositionList[i.getNum()]) * i.getArcPercentage_Fire(j)
+                    tempXpercent = (j.pos.x() + j.pos.width()/2 - i.pos.x() - i.pos.width()/2) * i.getArcPercentage_Fire(j)
+                    tempYpercent = (j.pos.y() + 3/2*j.pos.height() - i.pos.y() - 3/2*i.pos.height()) * i.getArcPercentage_Fire(j)
 
                     qpen.setColor(Qt.red)
                     qpen.setWidth(6)
                     qpainter.setPen(qpen)
-                    qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[i.getNum()]+tempXpercent ,self.yPositionList[i.getNum()]+tempYpercent))
+                    qpainter.drawLine(QPointF(i.pos.x() + i.pos.width()/2, i.pos.y() + 3/2*i.pos.height()), QPointF(i.pos.x() + i.pos.width()/2 + tempXpercent, i.pos.y() + 3/2*i.pos.height() + tempYpercent))
 
         for i in self.nodeList:
                 for j in i.getNeighbors():
-                    tempXpercent = (self.xPositionList[j.getNum()] - self.xPositionList[i.getNum()]) * i.getArcPercentage_FF(j)
-                    tempYpercent = (self.yPositionList[j.getNum()] - self.yPositionList[i.getNum()]) * i.getArcPercentage_FF(j)
-
+                    tempXpercent = (j.x() + j.width()/2 - i.x() - i.width()/2) * i.getArcPercentage_FF(j)
+                    tempYpercent = (j.y() + 3/2*j.height() - i.y() - 3/2*i.height()) * i.getArcPercentage_FF(j)
                     qpen.setColor(Qt.darkGreen)
                     qpen.setWidth(6)
                     qpainter.setPen(qpen)
-                    qpainter.drawLine(QPointF(self.xPositionList[i.getNum()], self.yPositionList[i.getNum()]), QPointF(self.xPositionList[i.getNum()]+tempXpercent ,self.yPositionList[i.getNum()]+tempYpercent))
+                    qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x() + i.width()/2 + tempXpercent ,i.y() + 3/2*i.height()+tempYpercent))
 
         self.update()
         qpainter.end()

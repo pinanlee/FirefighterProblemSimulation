@@ -1,13 +1,10 @@
 from PyQt5.QtGui import QPixmap
 from node import Node
 from PyQt5.QtCore import QTimer, pyqtSignal,QObject
-'''
-calculateCurrentCapacity和wateringVisualize沒用到 (processing未實作完成)
-'''
 
 class FireFighter(QObject):
-    doneSignal = pyqtSignal(str)
-    protectSignal = pyqtSignal(str)
+    FFdoneSignal = pyqtSignal(str)
+    FFprotectSignal = pyqtSignal(int)
     def __init__(self, num, depot):
         super().__init__()
         self.num = num
@@ -48,7 +45,7 @@ class FireFighter(QObject):
         if(self.destNode == self.curPos()):
             self.curPos().defend()
             self.process()
-            self.protectSignal.emit("update request")
+            self.FFprotectSignal.emit(self.curPos().getNum())
         else:
             self.traveling()
         self.checkArrival(timer)
@@ -75,9 +72,9 @@ class FireFighter(QObject):
         return not (self.__select or self.__process or self.__travel or self.destNode != None)
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
+        self.destNode = self.curPos() if self.destNode == None else self.destNode
         if(self.__cumArrivalTime <= timer):
             self.__cumArrivalTime = timer
-            self.destNode = self.curPos() if self.destNode == None else self.destNode
             self.curPos().setImage(QPixmap())
             prev = self.curPos()
             self.__path.append(self.destNode)
@@ -87,13 +84,13 @@ class FireFighter(QObject):
                 self.curPos().setStyleSheet("background-color: black;")
             self.curPos().setImage(self.pixmap)
             self.reset()
-            self.doneSignal.emit("done")
+            self.FFdoneSignal.emit("done")
             return True
         else:
             self.__calculateCurrentCapacity()
             self.__wateringVisualize()
-            for i in self.curPos().getArcs(): #對於現在位置的相鄰點
-                if(i["node"] == self.destNode):
+            for i in self.curPos().nodeController.getArcs(): #對於現在位置的相鄰點
+                if(i["node"] == self.destNode.nodeController):
                     self.__calculateCurrentFFArrive(i)
         return False
 
@@ -103,7 +100,7 @@ class FireFighter(QObject):
     def getName(self):
         return self.__name
 
-    def next_Pos_Accessment(self, node): #判斷消防員是否可以指派去給定的目的地 
+    def next_Pos_Accessment(self, node: Node): #判斷消防員是否可以指派去給定的目的地 
         if(self.__statusDetection(node) and self.__distanceDetection(node) and self.__safeDetection(node)):
             return "vaild choose"
         elif (not self.__statusDetection(node)):
@@ -116,7 +113,7 @@ class FireFighter(QObject):
             return ""
 
     def __safeDetection(self, node: Node):
-        if(node.fireMinArrivalTime >= self.curPos().getArc(node)["length"] / self.move_man):
+        if(node.getFireMinArrivalTime() >= self.curPos().getArc(node)["length"] / self.move_man):
             return True
         return False
 
@@ -160,11 +157,11 @@ class FireFighter(QObject):
 
         for i in (self.curPos().getNeighbors()):
             if (i.isBurned() == False and i.isProtected() == False):
-                if (i.fireMinArrivalTime >= self.curPos().getArc(i)["length"] / self.move_man):
+                if (i.getFireMinArrivalTime() >= self.curPos().getArc(i)["length"] / self.move_man):
                     i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
     def closeaccessibleVisualize(self): #用於清除前一個消防員可以前往點的顏色
         for i in (self.curPos().getNeighbors()):
             if (i.isBurned() == False and i.isProtected() == False):
-                if (i.fireMinArrivalTime >= self.curPos().getArc(i)["length"] / self.move_man):
+                if (i.getFireMinArrivalTime() >= self.curPos().getArc(i)["length"] / self.move_man):
                     i.setStyleSheet("")
