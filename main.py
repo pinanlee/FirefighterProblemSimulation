@@ -59,10 +59,11 @@ class MyWidget(QWidget):
 
         self.time = 0
         t_plus = QPushButton(self)
-        t_plus.setText('next time step')
-        t_plus.move(10,1050)
-        t_plus.clicked.connect(self.next_time)
-        # t_plus.clicked.connect(self.pause_start)
+        # t_plus.setText('next time step')
+        t_plus.setText('pause/start')
+        t_plus.move(10,1150)
+        # t_plus.clicked.connect(self.next_time)
+        t_plus.clicked.connect(self.pause_start)
 
         self.t_text = QLabel(self)
         self.t_text.setText("time = " + str(self.time))
@@ -71,13 +72,14 @@ class MyWidget(QWidget):
         
         self.mytimer = QTimer(self)
         self.mytimer.timeout.connect(self.next_time)
+        # self.mytimer.timeout.connect(self.pause_start)
         self.mytimer.start(100)
 
-    # def pause_start(self):
-    #     if self.mytimer.isActive():
-    #         self.mytimer.stop()
-    #     else:
-    #         self.mytimer.start()
+    def pause_start(self):
+        if self.mytimer.isActive():
+            self.mytimer.stop()
+        else:
+            self.mytimer.start()
 
     def next_time(self):
         self.time += 1
