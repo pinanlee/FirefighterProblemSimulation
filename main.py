@@ -7,6 +7,7 @@ import json
 
 NODE_NUMBER = 10
 NODE_POS = {}
+WINDOWS_WIDTH, WINDOWS_HEIGHT = 2000, 1200
     
 class Node(QPushButton):
     def __init__(self, q, b, h, *args):
@@ -159,6 +160,16 @@ class MyWidget(QWidget):
         self.lamb = dict([(tuple(map(int, i[1:-1].split(','))), data['lamb'][i]) for i in data['lamb']])
         self.tau = dict([(tuple(map(int, i[1:-1].split(','))), data['tau'][i]) for i in data['tau']])
         self.NODE_POS = data['NODE_POS']
+        # print(list(self.NODE_POS.values()))
+        max_x = max([item[0] for item in list(self.NODE_POS.values())])
+        max_y = max([item[1] for item in list(self.NODE_POS.values())])
+        for i in self.NODE_POS:
+            # print(self.NODE_POS[i])
+            self.NODE_POS[i][0] /= max_x
+            self.NODE_POS[i][0] = int(self.NODE_POS[i][0] * WINDOWS_WIDTH * 0.9)
+            self.NODE_POS[i][1] /= max_y
+            self.NODE_POS[i][1] = int(self.NODE_POS[i][1] * WINDOWS_HEIGHT * 0.9)
+
         # self.node_btn = []
         # for i in self.N:
         #     self.node_btn.append(Node(self.q[i], self.b[i], self.h[i],self))
@@ -277,7 +288,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     # w = MyWidget("rand_gen")
     w = MyWidget("load_json")
-    w.resize(1440,1200)
+    w.resize(WINDOWS_WIDTH, WINDOWS_HEIGHT)
     
     # label = QLabel(w)
     # label.setText("Behold the Guru, Guru99")
