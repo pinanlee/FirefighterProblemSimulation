@@ -20,6 +20,7 @@ class FireFighter(QObject):
         self.rate_extinguish = 2 #澆水速率
         self.move_man = 10 #移動速率
         self.destNode = depot #下一個目的
+        self.curMovingArc : dict = None
 
         #UI設定
         self.pixmap = QPixmap("./image/firefighter.png")
@@ -122,6 +123,7 @@ class FireFighter(QObject):
         node.preDefend()
         self.destNode = node
         if(node != self.curPos()):
+            self.curMovingArc = self.curPos().getArc("node")
             self.__arrivalTime = self.curPos().getArc(node)["length"] / self.move_man 
             return "{} move to vertex {}".format(self.getName(), node.getNum())
         else:

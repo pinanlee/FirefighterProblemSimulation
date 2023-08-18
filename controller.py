@@ -8,7 +8,7 @@ import math
 from UIv2_ui import Ui_MainWindow
 from FF import FireFighter
 from node import Node 
-from fire import Fire
+from fireObject import Fire
 from network import Network
 from InformationWindow import InformationWindow
 from PyQt5.QtGui import QPixmap, QPainter, QPen
@@ -24,7 +24,7 @@ information table跑不出來
 FFNum = 2
 
 class MainWindow_controller(QtWidgets.QMainWindow):
-    fire : Fire = None
+    fire : list[Fire] = []
     nodeList : list[Node] = []
     firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
     firefighterNum = 2
@@ -36,8 +36,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     timer = QTimer()
     currentTime = 0
     pageList = -1
-    xPositionList = [[]]
-    yPositionList = [[]]
+    #xPositionList = [[]]
+    #yPositionList = [[]]
     FFnetwork : Network = None
     fireNetwork : Network = None
     showFFnetwork = True
@@ -52,23 +52,25 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.subwindows = []
         self.setup_control()
 
+
+    '''------------------------------------初始化--------------------------------------------------------'''
     def setup_control(self):
-        def initNetwork():
+        def initNetwork(): #建立network class和node
             self.ui.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
             self.FFnetwork = Network("adjacent data -- ff.xlsx", "coordinates data.xlsx")
             self.fireNetwork = Network("adjacent data -- fire.xlsx", "coordinates data.xlsx")
             for i in self.FFnetwork.nodeList:
                 image = QtWidgets.QLabel(self.ui.centralwidget)
                 node = Node(self.ui.centralwidget, image, i)
-                
                 node.clicked.connect(self.choose)
                 self.nodeList.append(node)
-                self.xPositionList.append(node.getXposition() + node.width() / 2)
-                self.yPositionList.append(node.getYposition() + node.width() / 2)
         initNetwork()
         self.focusIndex = len(self.nodeList) - 1
 
         def initUI():
+            opacity_effect = QGraphicsOpacityEffect()
+            opacity_effect.setOpacity(0.7)
+            self.ui.descriptionLabel.setGraphicsEffect(opacity_effect)
             self.ui.actionnodes.triggered.connect(self.showInformationWindow)
             self.descriptionAnimate("choose vertices to save")
             self.ui.node_info_label.setVisible(False)
@@ -94,11 +96,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             #random fire depot
             self.nodeList.sort(key=ySort)
             a = random.randint(0, len(self.nodeList)-2)
-            self.fire = Fire(self.fireNetwork, a)
-            self.fire.burnedSignal.connect(self.networkUpdateF)
-            self.fire.burn()
-            self.fire.opacitySignal.connect(self.fireVisualize)
-            self.fire.updateSignal.connect(self.syncFireMinArrivalTime)
+            self.fire.append(Fire(self.fireNetwork, a))
+            self.fire[-1].burnedSignal.connect(self.networkUpdateF)
+            self.fire[-1].burn()
+            self.fire[-1].opacitySignal.connect(self.fireVisualize)
+            #self.fire[-1].updateSignal.connect(self.syncFireMinArrivalTime)
             self.updateMinTime()
             #init depot
             depot = self.nodeList[-1]
@@ -110,13 +112,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.firefighterList[1].pixmap = QPixmap("./image/fireman.png")
             self.nodeList[self.focusIndex].setStyleSheet("background-color: black;border: 2px solid blue;")
         randomFireAndDepot()
-
+        self.selectFireFighter()
         self.updateFFStatus()
         for i in self.firefighterList:
             i.FFdoneSignal.connect(self.updateFFStatus)
             i.FFprotectSignal.connect(self.updateMinTime)
             i.FFprotectSignal.connect(self.networkUpdate)
-
     #firefighter signal
     def networkUpdate(self,value):
         for i in self.nodeList:
@@ -126,19 +127,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def updateFFStatus(self):
         for i in range(self.firefighterNum):
             if(self.firefighterList[i].isTraveling()):
-                self.statusLabels[i].setText("Traveling")
+                self.statusLabels[i].setText("Traveling to\nNode {}".format(self.firefighterList[i].destNode.getNum()))
             elif(self.firefighterList[i].isProcess()):
-                self.statusLabels[i].setText("Processing")
+                self.statusLabels[i].setText("Processing\nNode {}".format(self.firefighterList[i].destNode.getNum()))
             elif(self.firefighterList[i].isSelected()):
-                self.statusLabels[i].setText("Selected")
+                self.statusLabels[i].setText("Selected\nNode {}".format(self.firefighterList[i].destNode.getNum()))
             else:
                 self.statusLabels[i].setText("Idle")
 
     def updateMinTime(self):
-        for i in self.nodeList:
-            for j in self.fireNetwork.nodeList:
-                if(i.getNum()==j.no):
-                    self.fire.minTimeFireArrival(j)
+        for i in self.fireNetwork.nodeList:
+            i.fireMinArrivalTime = 10000
+
+        for i in self.fire:
+            i.minTimeFireArrival(self.currentTime)
+        for i in self.FFnetwork.nodeList:
+            i.fireMinArrivalTime = self.fireNetwork.nodeList[i.getNum()-1].fireMinArrivalTime
 
     #fire signal
     def networkUpdateF(self,value):
@@ -146,6 +150,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in self.nodeList:
             if(i.getNum() == value):
                 i.onFire()
+                self.fire.append(Fire(self.fireNetwork, value))
+                self.fire[-1].burnedSignal.connect(self.networkUpdateF)
+                self.fire[-1].opacitySignal.connect(self.fireVisualize)
+                #self.fire[-1].updateSignal.connect(self.syncFireMinArrivalTime)
 
     def syncFireMinArrivalTime(self):
         for i in self.fireNetwork.nodeList:
@@ -307,10 +315,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             text = "moving"
             for i in range(self.currentTime % 3):
                 text += "."
-            #self.descriptionAnimate(text)  
+            self.descriptionAnimate(text)  
             self.upadateInformation()
             self.currentTime+=1
-            self.fire.fire_spread(self.currentTime)
+            for i in self.fire:
+                i.fire_spread(self.currentTime)
             for i in self.firefighterList:
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
@@ -353,6 +362,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         qpainter = QPainter()
         qpainter.begin(self)
         qpainter.setRenderHint(QPainter.Antialiasing)
+        
         if(self.showFFnetwork):
             qpen = QPen(Qt.black, 2, Qt.SolidLine)
             qpainter.setPen(qpen)
@@ -363,20 +373,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     i.getXposition() + i.width()/2
         if(self.showFireNetwork):
             qpen = QPen(Qt.darkRed, 4, Qt.DashLine)
-            qpen.setDashPattern([15, 50])
+            qpen.setDashPattern([10, 50, 10, 50])
             qpainter.setPen(qpen)
             for i in self.fireNetwork.nodeList:
                 for j in i.getNeighbors():
                     qpainter.drawLine(QPointF(i.pos.x() + i.pos.width()/2, i.pos.y()+ 3/2*i.pos.height()), QPointF(j.pos.x()+ j.pos.width()/2, j.pos.y()+ 3/2*j.pos.height()))          
+
             
         for i in self.fireNetwork.nodeList:
             if(i.isBurned()):
                 for j in i.getNeighbors():
-                    tempXpercent = (j.pos.x() + j.pos.width()/2 - i.pos.x() - i.pos.width()/2) * i.getArcPercentage_Fire(j)
-                    tempYpercent = (j.pos.y() + 3/2*j.pos.height() - i.pos.y() - 3/2*i.pos.height()) * i.getArcPercentage_Fire(j)
-
-                    qpen.setColor(Qt.red)
-                    qpen.setWidth(6)
+                    tempXpercent = (j.pos.x() + j.pos.width()/2 - i.pos.x() - i.pos.width()/2) * i.getArcPercentage_Fire(j, self.currentTime)
+                    tempYpercent = (j.pos.y() + 3/2*j.pos.height() - i.pos.y() - 3/2*i.pos.height()) * i.getArcPercentage_Fire(j, self.currentTime)
+                    qpen = QPen(Qt.red, 6, Qt.SolidLine)
                     qpainter.setPen(qpen)
                     qpainter.drawLine(QPointF(i.pos.x() + i.pos.width()/2, i.pos.y() + 3/2*i.pos.height()), QPointF(i.pos.x() + i.pos.width()/2 + tempXpercent, i.pos.y() + 3/2*i.pos.height() + tempYpercent))
 
@@ -384,8 +393,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 for j in i.getNeighbors():
                     tempXpercent = (j.x() + j.width()/2 - i.x() - i.width()/2) * i.getArcPercentage_FF(j)
                     tempYpercent = (j.y() + 3/2*j.height() - i.y() - 3/2*i.height()) * i.getArcPercentage_FF(j)
-                    qpen.setColor(Qt.darkGreen)
-                    qpen.setWidth(6)
+                    qpen = QPen(Qt.darkGreen, 6, Qt.SolidLine)
                     qpainter.setPen(qpen)
                     qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x() + i.width()/2 + tempXpercent ,i.y() + 3/2*i.height()+tempYpercent))
 

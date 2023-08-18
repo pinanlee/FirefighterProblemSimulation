@@ -29,11 +29,12 @@ class Fire(QObject):
                     if(self.__statusDetection(j)): #若該點未被保護或未燒起來, 起火
                         j["node"].onFire()
                         self.burnedSignal.emit(j["node"].getNum())
+                        
                         tempList.append(j["node"])
                     ctr+=1
                 else: #還沒抵達，繼續移動
                     self.__calculateCurrentFireArrive(i, j)
-                    print(i.getArcPercentage_Fire(j["node"]))
+                    #print("{}, {}: {}".format(i.getNum(),j["node"].getNum(),i.getArcPercentage_Fire(j["node"])))
             print()
             self.__calculateCurrentCapacity(i, timer)
             if(ctr == len(i.getNeighbors())): #如果該火點的相鄰arc均已移動過，移除該火點

@@ -16,13 +16,17 @@ class Node(QtWidgets.QPushButton):
         self.flashingtimer = QTimer(self)
         self.flashing_interval = 500
 
-    #UI設定function
+    #UI設定
     def UIsettings(self, label : QtWidgets.QLabel, pos):
-        self.__label = label
+        #設定位置
         self.setGeometry(pos)
+        self.setText(str(self.nodeController.no))
+        
+        self.__label = label
         self.__label.setGeometry(pos)
         self.image = label
         self.image.raise_()
+
 
     def setImage(self, image):
         self.__label.setPixmap(image)
@@ -115,12 +119,14 @@ class Node(QtWidgets.QPushButton):
         self.__label.setVisible(True) 
     #get function (計算獲得)
 
-    def getArcPercentage_Fire(self, node): #獲得火在arc上的移動進度
+    def getArcPercentage_Fire(self, node, time): #獲得火在arc上的移動進度
         if(not node in self.__neighbors):
             return -1
         for i in self.nodeController.getArcs():
             if(i["node"] == node.nodeController): 
-                ratio = i["FF-travel"]/i["length"]
+                #ratio = i["FF-travel"]/i["length"]
+                ratio = (time - node.getFireMinArrivalTime()) / (self.getFireMinArrivalTime() - node.getFireMinArrivalTime())
+                ratio = 0 if ratio < 0 else ratio                
                 return ratio if ratio <= 1 else 1 
     
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
@@ -151,7 +157,3 @@ class Node(QtWidgets.QPushButton):
     def connectNode(self, node, length):
         self.__neighbors.append(node)
         self.__adjArc.append({"node": node, "length": length, "fire-travel": 0, "FF-travel": 0})
-    
-    '''def connectNode(self):
-        for i in self.nodeController.getArcs():
-            i["node"] = '''

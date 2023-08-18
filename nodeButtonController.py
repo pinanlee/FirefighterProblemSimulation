@@ -91,17 +91,24 @@ class NodeController():
             self.__label.setVisible(True)
     #get function (計算獲得)
 
-    def getArcPercentage_Fire(self, node): #獲得火在arc上的移動進度
+    def getArcPercentage_Fire(self, node, time): #獲得火在arc上的移動進度
         if(not node in self.__neighbors):
-            return -1
+            #return 1
+            return 0
         for i in self.__adjArc:
             if(i["node"] == node): 
-                ratio = i["fire-travel"]/i["length"]
+                #ratio = i["fire-travel"]/i["length"]
+                if(time > self.fireMinArrivalTime):
+                    ratio = (time - self.fireMinArrivalTime) / (node.fireMinArrivalTime - self.fireMinArrivalTime)
+                    ratio = 0 if ratio < 0 else ratio
+                else:
+                    ratio = 0
+                #return 1
                 return ratio if ratio <= 1 else 1 
     
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
         if(not node in self.__neighbors):
-            return -1
+            return 0
         for i in self.__adjArc:
             if(i["node"] == node): 
                 ratio = i["FF-travel"]/i["length"]
