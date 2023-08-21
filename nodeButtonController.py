@@ -21,6 +21,7 @@ class NodeController():
         self.burned = False
         self.protected = False
         self.depot = False
+        self.idle = False
         self.__neighbors = []
         self.__adjArc = []
 
@@ -31,6 +32,7 @@ class NodeController():
 
     def defend(self):
         self.protected = True
+        self.idle = False
 
     def depotSetting(self):
         self.protected = True
@@ -38,6 +40,10 @@ class NodeController():
         
     def isDepot(self):
         return self.depot
+
+    def ffidle(self):
+        self.idle = True
+        self.protected = False
 
     #update變數
     def updateGrassAmount(self, remain):
@@ -54,6 +60,9 @@ class NodeController():
 
     def isProtected(self):
         return self.protected
+
+    def isIdle(self):
+        return self.idle
 
     def getNeighbors(self):
         return self.__neighbors

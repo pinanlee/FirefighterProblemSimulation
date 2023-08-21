@@ -49,6 +49,7 @@ class Node(QtWidgets.QPushButton):
 
     def defend(self):
         self.nodeController.protected = True
+        self.nodeController.idle = False
         self.setStyleSheet(f'background-color: rgba(0, 255, 0, {0.1});' + "border: 2px solid blue;")
 
     def depotSetting(self):
@@ -58,12 +59,21 @@ class Node(QtWidgets.QPushButton):
     def isDepot(self):
         return self.nodeController.depot
 
+    def ffidle(self):
+        self.nodeController.idle = True
+        self.nodeController.protected = False
+
+
+
     #get functions
     def isBurned(self):
         return self.nodeController.burned
 
     def isProtected(self):
         return self.nodeController.protected
+
+    def isIdle(self):
+        return self.nodeController.idle
 
     def getNeighbors(self):
         return self.__neighbors

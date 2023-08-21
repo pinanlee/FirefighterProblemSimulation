@@ -7,11 +7,17 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1195, 786)
+        #MainWindow.resize(1195, 786)
+        MainWindow.setGeometry(QtCore.QRect(150, 150, 1195, 786))
+        MainWindow.setFixedSize(1195, 786)
+        MainWindow.setWindowFlags(Qt.WindowCloseButtonHint)
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.descriptionLabel = QtWidgets.QLabel(self.centralwidget)

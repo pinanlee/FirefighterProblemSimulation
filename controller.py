@@ -10,11 +10,13 @@ from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from InformationWindow import InformationWindow
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 from PyQt5 import uic
 import pandas as pd
 import numpy as np
+from dataBase import DataBase
+from informationWindow import  InformationWindow
+
 '''
 information table跑不出來 
 
@@ -28,6 +30,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     nodeList : list[Node] = []
     firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
     firefighterNum = 2
+    nodeNum = len(nodeList)
     selectedStyle : str = "border: 2px solid blue;"
     FFindex = 0 
     focusIndex = 14
@@ -44,11 +47,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.db = DataBase()
+        self.nw = InformationWindow(self.db)
         global FFNum
         self.firefighterNum = FFNum
-        #self.nw = InformationWindow(self.nodeList, self.firefighterList, self.currentTime)
         self.subwindows = []
         self.setup_control()
+
 
 
     '''------------------------------------初始化--------------------------------------------------------'''
@@ -63,6 +68,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 node.clicked.connect(self.choose)
                 self.nodeList.append(node)
         initNetwork()
+        self.nodeNum = len(self.nodeList)
+        self.db.numNode = self.nodeNum
+        print(f'self.nodeNum{self.nodeNum}')
 
 
         def initUI(): # UI設定(可略)
@@ -79,6 +87,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.ui.FFlabel.setPixmap(QPixmap("./image/firefighter.png"))
             self.ui.FFlabel_2.setPixmap(QPixmap("./image/fireman.png"))
         initUI()
+        self.showInformationWindow()
 
         def NodeConnection():
             for i in self.nodeList:
@@ -109,7 +118,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 ff = FireFighter(i+1, depot)
                 ff.FFdoneSignal.connect(self.updateFFStatus)
                 ff.FFprotectSignal.connect(self.updateMinTime)
-                ff.FFprotectSignal.connect(self.networkUpdate)                
+                ff.FFprotectSignal.connect(self.networkUpdate)
+                ff.FFidleSignal.connect(self.updateNodeIdle)
                 depot.depotSetting()
                 self.firefighterList.append(ff)
             self.networkUpdate(depot.getNum())
@@ -119,6 +129,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         self.selectFireFighter()
         self.updateFFStatus()
+
+        def databaseInit():
+            self.nw.numFF = self.firefighterNum
+            self.db.numFF = self.firefighterNum
+            self.db.numNode = len(self.nodeList)
+
+        databaseInit()
+        self.dataRecord()
 
     '''---------------------------------------firefighter signal-----------------------------------------'''
     def networkUpdate(self,value): #FF network有節點被保護時呼叫，更新fire network
@@ -146,6 +164,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.statusLabels[i].setText("Selected\nNode {}".format(self.firefighterList[i].destNode.getNum()))
             else:
                 self.statusLabels[i].setText("Idle")
+    def updateNodeIdle(self,value):
+        for i in self.fireNetwork.nodeList:
+            if(i.getNum() == value):
+                i.ffidle()
+
 
     '''------------------------------------------fire signal---------------------------------------------'''
     def networkUpdateF(self,value): #當fire network有新的節點燒起來時，更新ff network並增加新的"火"物件
@@ -305,6 +328,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
+            self.dataRecord()
             text = "moving"
             for i in range(self.currentTime % 3):
                 text += "."
@@ -324,7 +348,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.finishTimeSet()
             i.move(self.currentTime)
         self.timer = QTimer()
-        self.timer.setInterval(500)
+        self.timer.setInterval(300)
         self.timer.timeout.connect(timeSkip)
         self.timer.start()
 
@@ -337,19 +361,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.pageList = index
    
     def upadateInformation(self):
-        '''self.nw.pageChanged.connect(self.onSubWindowPageChanged)
-        temp = self.nw.updateOutputMatrix(self.nodeList,self.firefighterList,self.currentTime)
-        temp2 = self.nw.setSetupMatrix(self.nodeList, self.firefighterNum,
-                                    self.firefighterList[self.FFindex].rate_extinguish,
-                                    self.firefighterList[self.FFindex].move_man, self.fire.rate_fireburn,
-                                    self.fire.move_fire)
-        self.nw.inputmatrix = temp
-        self.nw.setupmatrix = temp2
-        x = self.nw.pos().x()
-        y = self.nw.pos().y()
-        self.nw.move(x, y)
-        self.nw.ui(self.currentTime,self.firefighterList)
-        self.nw.tab_widget.setCurrentIndex(self.pageList)'''
+        self.nw.pageChanged.connect(self.onSubWindowPageChanged)
+        self.nw.tab_widget.setCurrentIndex(self.pageList)
+        # x = self.nw.pos().x()
+        # y = self.nw.pos().y()
+        # self.nw.move(x, y)
 
     def paintEvent(self, event):
         qpainter = QPainter()
@@ -394,5 +410,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             subwindow.close()  # Close all open subwindows
         event.accept()
 
+    def dataRecord(self): #將資料傳入database
+        self.db.currentTime = self.currentTime
+        self.db.ffnetworkNodeList[self.currentTime] = self.FFnetwork.nodeList
+        self.db.fireNetworkNodeList[self.currentTime]  = self.fireNetwork.nodeList
+        self.db.controllerNodeList[self.currentTime]  = self.nodeList
+        self.db.firefighterList[self.currentTime] = self.firefighterList
+        self.db.infoNextTime()
 
+    def loadRecord(self): #讀檔(未完成)
+        print("active ")
+        self.currentTime = self.db.currentTime-1
+        print(f'self.currentTime{self.currentTime}')
+        self.FFnetwork.nodeList = self.db.ffnetworkNodeList[self.currentTime]
+        self.fireNetwork.nodeList = self.db.fireNetworkNodeList[self.currentTime]
+        self.nodeList = self.db.controllerNodeList[self.currentTime]
+        self.updateFFStatus()
+        self.updateMinTime()
+        self.syncFireMinArrivalTime()
 

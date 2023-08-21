@@ -5,6 +5,7 @@ from PyQt5.QtCore import QTimer, pyqtSignal,QObject
 class FireFighter(QObject):
     FFdoneSignal = pyqtSignal(str)
     FFprotectSignal = pyqtSignal(int)
+    FFidleSignal = pyqtSignal(int)
     def __init__(self, num, depot):
         super().__init__()
         self.num = num
@@ -24,6 +25,7 @@ class FireFighter(QObject):
 
         #UI設定
         self.pixmap = QPixmap("./image/firefighter.png")
+        self.pixmaploc = "./image/firefighter.png"
         self.curPos().defend()
         self.curPos().setImage(self.pixmap)  
 
@@ -39,6 +41,7 @@ class FireFighter(QObject):
     def finishTimeSet(self):
         if(self.isIdle()):
             self.__arrivalTime = 1
+            self.FFidleSignal.emit(self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
 
 
