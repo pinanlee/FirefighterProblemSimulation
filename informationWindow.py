@@ -30,17 +30,27 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.currentTime = self.database.currentTime
         self.ffDict = self.database.ffDict_info
         self.ffPosSta = self.database.ffPosSta
-        self.updateUI()
+        self.onTabChanged(self.currentIndex)
+
+    def updateNodeUI(self):
+        self.clear_layout(self.pageNode.layout)
+        self.table_widget_Node = QTableWidget()
+        self.table_widget_Node.setRowCount(self.database.numNode)
+        self.table_widget_Node.setColumnCount(4)
+        self.pageNode.layout.addWidget(self.table_widget_Node)
+        title_name = ["Status", "Grass Amount", "Water Amount", "Time to burned"]  # 這裡可以更換成想要的標題名稱
+        self.table_widget_Node.setHorizontalHeaderLabels(title_name)
+        self.table_widget_Node.resizeColumnsToContents()
+        self.pageNode.setLayout(self.pageNode.layout)
 
 
-
-
-    def updateUI(self):
+    def updateFFUI(self):
         #self.table_widget_Node.setRowCount(self.database.numNode)
         self.clear_layout(self.pageFF.layout)
         blockFF = self.generateblockFF()
         self.pageFF.layout.addWidget(blockFF)
         self.pageFF.setLayout(self.pageFF.layout)
+
 
     '''------------------------------Information Window  UI settings-----------------------------------'''
     def ui(self): #用於Information Window ui的手動設計
@@ -75,16 +85,7 @@ class InformationWindow(QtWidgets.QMainWindow):
 
         #Page : Node Information
         #Node Status table
-        layoutNode = QVBoxLayout(self.tab_widget)
-        table_widget_Node = QTableWidget()
-        table_widget_Node.setRowCount(self.database.numNode)
-        print(f'self.database.numNode{self.database.numNode}')
-        table_widget_Node.setColumnCount(4)
-        layoutNode.addWidget(table_widget_Node)
-        title_name=["Status","Grass Amount","Water Amount","Time to burned"]  # 這裡可以更換成想要的標題名稱
-        table_widget_Node.setHorizontalHeaderLabels(title_name)
-        table_widget_Node.resizeColumnsToContents()
-        self.pageNode.setLayout(layoutNode)
+        self.pageNode.layout = QVBoxLayout()
 
         #Page : FireFighter Information
         self.pageFF.layout = QVBoxLayout()
@@ -120,7 +121,15 @@ class InformationWindow(QtWidgets.QMainWindow):
     '''------------------------------Methods-----------------------------------'''
     #切換分頁時傳遞分頁index至mainwindow class，防止分頁自動跳到default值用
     def onTabChanged(self, index):
-        self.pageChanged.emit(index)
+        self.currentIndex = index
+        if (self.currentIndex == 1):
+            self.updateNodeUI()
+            self.updatenodeInfo()
+            self.clear_layout(self.pageFF.layout)
+        elif (self.currentIndex == 2):
+            self.updateFFUI()
+            self.clear_layout(self.pageNode.layout)
+
 
     def clear_layout(self,layout):
         if layout is not None:
@@ -129,10 +138,73 @@ class InformationWindow(QtWidgets.QMainWindow):
                 widget = item.widget()
                 if widget is not None:
                     widget.deleteLater()
+    def tableVisualizeSetting(self,value):
+        item = QTableWidgetItem(str(value))
+        if (value == "Burned"):
+            item.setBackground(QColor(255, 192, 203))
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+        elif (value == "Protected"):
+            item.setBackground(QColor("lightgreen"))
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+        elif (value == "Safe"):
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+            item.setBackground(QColor("darkgreen"))
+            item.setForeground(QColor("white"))
+        elif (value == "Damaged"):
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+            item.setBackground(QColor("darkred"))
+            item.setForeground(QColor("white"))
+        elif (value == "FFidle"):
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+            item.setBackground(QColor("yellow"))
+        elif (value == "Depot"):
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+            item.setBackground(QColor("black"))
+            item.setForeground(QColor("white"))
 
+        return item
     '''------------------------------page: BasicSetup-----------------------------------'''
 
     '''------------------------------page: Node Information-----------------------------------'''
+    def updatenodeInfo(self):
+        for row in range(1,21):
+            for col in range(0,4):
+                if col == 0:
+                    value  = self.database.getffNDictInfo(self.currentTime,row,"status")
+                    #item = QTableWidgetItem(value)
+                    item = self.tableVisualizeSetting(value)
+                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                    self.table_widget_Node.setItem(row-1, col, item)
+                    self.table_widget_Node.resizeColumnsToContents()
+                elif col == 1:
+                    value  = self.database.getffNDictInfo(self.currentTime,row,"firePercentage")
+                    item = QTableWidgetItem(str(value))
+                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                    self.table_widget_Node.setItem(row-1, col, item)
+                    self.table_widget_Node.resizeColumnsToContents()
+                elif col == 2:
+                    value  = self.database.getffNDictInfo(self.currentTime,row,"FFPercentage")
+                    item = QTableWidgetItem(str(value))
+                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                    self.table_widget_Node.setItem(row-1, col, item)
+                    self.table_widget_Node.resizeColumnsToContents()
+                # elif col == 3:
+                #     value  = self.database.getffNDictInfo(self.currentTime,row,"status")
+                #     item = QTableWidgetItem(value)
+                #     self.table_widget_Node.setItem(row-1, col, item)
+                #     self.table_widget_Node.resizeColumnsToContents()
 
     '''------------------------------page: Firefighter Information------------------------------------'''
     #step 1
