@@ -153,17 +153,38 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.minTimeFireArrival(self.currentTime)
         for i in self.FFnetwork.nodeList:
             i.fireMinArrivalTime = self.fireNetwork.nodeList[i.getNum()-1].fireMinArrivalTime
+            i.updateStatus()
 
     def updateFFStatus(self): #消防員移動/澆水完成時呼叫，更新消防員的狀態
         for i in range(self.firefighterNum):
             if(self.firefighterList[i].isTraveling()):
-                self.statusLabels[i].setText("Traveling to\nNode {}".format(self.firefighterList[i].destNode.getNum()))
+                #self.statusLabels[i].setText("Traveling to Node {}".format(self.firefighterList[i].destNode.getNum()))
+                if (i == self.FFindex):
+                    self.nw.ffblockCP_sta1 = "Traveling to Node {}".format(self.firefighterList[i].destNode.getNum())
+                elif (i == self.prevFFindex):
+                    self.nw.ffblockCP_sta2 = "Traveling to Node {}".format(self.firefighterList[i].destNode.getNum())
             elif(self.firefighterList[i].isProcess()):
-                self.statusLabels[i].setText("Processing\nNode {}".format(self.firefighterList[i].destNode.getNum()))
+                #self.statusLabels[i].setText("Processing Node {}".format(self.firefighterList[i].destNode.getNum()))
+                if (i == self.FFindex):
+                    self.nw.ffblockCP_sta1 = "Processing Node {}".format(self.firefighterList[i].destNode.getNum())
+                elif (i == self.prevFFindex):
+                    self.nw.ffblockCP_sta2 = "Processing Node {}".format(self.firefighterList[i].destNode.getNum())
             elif(self.firefighterList[i].isSelected()):
-                self.statusLabels[i].setText("Selected\nNode {}".format(self.firefighterList[i].destNode.getNum()))
+                #self.statusLabels[i].setText("Selected Node {}".format(self.firefighterList[i].destNode.getNum()))
+                if(i == self.FFindex):
+                    self.nw.ffblockCP_sta1 = "Selected Node {}".format(self.firefighterList[i].destNode.getNum())
+                elif(i == self.prevFFindex):
+                    self.nw.ffblockCP_sta2 = "Selected Node {}".format(self.firefighterList[i].destNode.getNum())
             else:
-                self.statusLabels[i].setText("Idle")
+                #self.statusLabels[i].setText("Idle")
+                if(i == self.FFindex):
+                    self.nw.ffblockCP_sta1 = "Idle"
+                elif(i == self.prevFFindex):
+                    self.nw.ffblockCP_sta2 = "Idle"
+        self.iw_pageCP_FF()
+
+
+
     def updateNodeIdle(self,value):
         for i in self.fireNetwork.nodeList:
             if(i.getNum() == value):
@@ -180,9 +201,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.fire[-1].opacitySignal.connect(self.fireVisualize)
 
     def fireVisualize(self, opacity, no): #當fire network的節點正在燃燒時，更新ui上的opacity
+        for i in self.fireNetwork.nodeList:
+            if(i.getNum() == no):
+                tempGrass = i.getGrassAmount()
+                i.updateStatus()
         for i in self.nodeList:
             if(i.getNum()== no):
                 i.setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
+                i.updateGrassAmount(tempGrass)
+                i.updateStatus()
 
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
@@ -191,10 +218,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.nextTime()
         elif(a0.key() == Qt.Key_A):
             self.buttonFocusStyle(-1)
+            self.iw_pageCP_node()
         elif(a0.key() == Qt.Key_D):
             self.buttonFocusStyle(1)
+            self.iw_pageCP_node()
         elif(a0.key() == Qt.Key_C):
             self.selectFireFighter()
+            #self.iw_pageCP_FF()
         elif(a0.key() == Qt.Key_X):
             if(not self.ui.node_info_label.isVisible()):
                 self.InfoShow()
@@ -269,13 +299,51 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             text += str(self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex])["length"])
         self.ui.node_info_label.setText(text)
 
-    def selectFireFighter(self): #切換選擇消防員
-        prev = self.FFindex  
-        self.FFindex = (self.FFindex + 1) % self.firefighterNum
-        self.__opacitySet()
-        self.firefighterList[self.FFindex].curPos().setImage(self.firefighterList[self.FFindex].pixmap)
+    def iw_pageCP_node(self):
+        #part node
+        self.nw.title_label_node_des.setText(str(self.nodeList[self.focusIndex].getNum()))
 
-        self.firefighterList[prev].closeaccessibleVisualize()
+        if (self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex]) == -1):
+            self.nw.nodeblock_textlen = "Not neighbor"
+        else:
+            self.nw.nodeblock_textlen = str(self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex])["length"])
+
+        self.nw.title_label_length_des.setText(self.nw.nodeblock_textlen)
+        self.nw.title_label_tta_des.setText(str(self.nodeList[self.focusIndex].getNum()))
+        self.nw.title_label_ttb_des.setText(str(self.nodeList[self.focusIndex].getNum()))
+        self.nw.nodeblock_textsta =  self.nodeList[self.focusIndex].getStatus()
+        self.nw.title_label_sta_des.setText(self.nw.nodeblock_textsta)
+
+        if(self.nw.nodeblock_textsta == "Damaged"):
+            self.nw.nodeCircle.setStyleSheet("background-color: red;")
+        elif (self.nw.nodeblock_textsta == "Safe"):
+            self.nw.nodeCircle.setStyleSheet("background-color: darkgreen;")
+        elif(self.nw.nodeblock_textsta == "Protected"):
+            self.nw.nodeCircle.setStyleSheet("background-color: green;")
+        else:
+            self.nw.nodeCircle.setStyleSheet("background-color: white;")
+
+    def iw_pageCP_FF(self):
+        #part FF
+        self.nw.ffblockCP_img1 = self.firefighterList[self.FFindex].pixmaploc
+        self.nw.ffblockCP_name1 = self.firefighterList[self.FFindex].getName()
+        self.nw.ffblockCP_wr1 = str(self.firefighterList[self.FFindex].rate_extinguish)
+
+        self.nw.ffblockCP_img2 = self.firefighterList[self.prevFFindex].pixmaploc
+        self.nw.ffblockCP_name2 = self.firefighterList[self.prevFFindex].getName()
+        self.nw.ffblockCP_wr2 = str(self.firefighterList[self.prevFFindex].rate_extinguish)
+
+        self.nw.pageCP_generateblockFF()
+
+
+
+
+    def selectFireFighter(self): #切換選擇消防員
+        self.prevFFindex = self.FFindex
+        self.FFindex = (self.FFindex + 1) % self.firefighterNum
+        #self.__opacitySet()
+        self.firefighterList[self.FFindex].curPos().setImage(self.firefighterList[self.FFindex].pixmap)
+        self.firefighterList[self.prevFFindex].closeaccessibleVisualize()
         self.firefighterList[self.FFindex].accessibleVisualize()
         self.descriptionAnimate("change to {}".format(self.firefighterList[self.FFindex].getName()))
 

@@ -36,7 +36,7 @@ class DataBase(QObject):
         '''------------------------------Methods-----------------------------------'''
     def initList(self): #initial list,要求T數量空間(目前設定為50,index starts from 0),後續可以跟據T時間調整
         temp = []
-        for i in range(100):
+        for i in range(150):
             temp.append([])
         return temp
 
@@ -102,42 +102,54 @@ class DataBase(QObject):
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Protected"}
+                                          "status": "Protected",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif(dict_Node["idle"] == True):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "FFidle"}
+                                          "status": "Idle",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["protect"] == True and dict_Node["water"] <= 0 ):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Safe"}
+                                          "status": "Safe",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["burn"] == True and dict_Node["grass"] > 0 ):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Burned"}
+                                          "status": "Burned",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["burn"] == True and dict_Node["grass"] <= 0):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Damaged"}
+                                          "status": "Damaged",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     else:
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Normal"}
+                                          "status": "Normal",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                 dict_main[i] = dict_time
                 dict_main_info[i] = dict_time_info

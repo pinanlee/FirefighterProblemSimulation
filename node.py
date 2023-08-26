@@ -99,6 +99,9 @@ class Node(QtWidgets.QPushButton):
     def getLabel(self):
         return self.__label
 
+    def getStatus(self):
+        return self.nodeController.status
+
     #get function (計算獲得)
 
     def getNodePercentage_Fire(self): #獲得火在該node的燃燒進度
@@ -108,6 +111,20 @@ class Node(QtWidgets.QPushButton):
     def getNodePercentage_FF(self): #獲得消防員在該node的燃燒進度
         ratio = self.nodeController.water_amount/self.nodeController.initialWaterAmount
         return ratio if ratio >= 0 else 0
+
+    def updateStatus(self):
+        if(self.nodeController.idle == True):
+            self.nodeController.status = "FF Idle"
+        elif(self.nodeController.protected == True and self.nodeController.water_amount > 0):
+            self.nodeController.status = "Protected"
+        elif (self.nodeController.protected == True and self.nodeController.water_amount <= 0):
+            self.nodeController.status = "Safe"
+        elif (self.nodeController.burned == True and self.nodeController.grass_amount > 0):
+            self.nodeController.status = "Burned"
+        elif (self.nodeController.burned == True and self.nodeController.grass_amount <= 0):
+            self.nodeController.status = "Damaged"
+        else:
+            self.nodeController.status = "Normal"
 
     #一開始建立網路時使用
     def connectNode(self, node, length):

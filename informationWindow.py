@@ -1,9 +1,9 @@
 import math
 
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QColor, QFont, QPixmap
+from PyQt5.QtCore import pyqtSignal, QRectF
+from PyQt5.QtGui import QColor, QFont, QPixmap, QRegion
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout, QSizePolicy, QTabWidget, QLabel, \
-    QHBoxLayout, QPushButton
+    QHBoxLayout, QPushButton, QGraphicsOpacityEffect
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
@@ -18,6 +18,15 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.currentTime = 0
         self.numFF = 0
         self.numNode = 0
+        self.ffblockCP_img1 = "image/firefighter.png"
+        self.ffblockCP_sta1 = ""
+        self.ffblockCP_name1 = ""
+        self.ffblockCP_wr1 = ""
+        self.ffblockCP_img2 = "image/firefighter.png"
+        self.ffblockCP_sta2 = ""
+        self.ffblockCP_name2 = ""
+        self.ffblockCP_wr2 = ""
+
         self.database = database
         self.database.dataUpdateSignal.connect(self.updateInfo)
         self.ffDict = self.database.ffDict_info
@@ -38,7 +47,7 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.table_widget_Node.setRowCount(self.database.numNode)
         self.table_widget_Node.setColumnCount(4)
         self.pageNode.layout.addWidget(self.table_widget_Node)
-        title_name = ["Status", "Grass Amount", "Water Amount", "Time to burned"]  # 這裡可以更換成想要的標題名稱
+        title_name = ["Status", "Water Percentage", "Burned Percentage", "Time to burned"]  # 這裡可以更換成想要的標題名稱
         self.table_widget_Node.setHorizontalHeaderLabels(title_name)
         self.table_widget_Node.resizeColumnsToContents()
         self.pageNode.setLayout(self.pageNode.layout)
@@ -47,7 +56,7 @@ class InformationWindow(QtWidgets.QMainWindow):
     def updateFFUI(self):
         #self.table_widget_Node.setRowCount(self.database.numNode)
         self.clear_layout(self.pageFF.layout)
-        blockFF = self.generateblockFF()
+        blockFF = self.pageFF_generateblockFF()
         self.pageFF.layout.addWidget(blockFF)
         self.pageFF.setLayout(self.pageFF.layout)
 
@@ -60,27 +69,91 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.tab_widget.setTabPosition(QTabWidget.East)
 
         #增加分頁
-        self.pageBasicSetup = QWidget()
+        self.pageControlPanel = QWidget()
         self.pageNode = QWidget()
         self.pageFF = QWidget()
-        self.tab_widget.addTab(self.pageBasicSetup, "Basic Setup")
+        self.tab_widget.addTab(self.pageControlPanel, "ControlPanel")
         self.tab_widget.addTab(self.pageNode, "Node Info")
         self.tab_widget.addTab(self.pageFF, "FireFighter Info")
 
-        #Page : Basic Setup
-        #Basic Setup table
-        # layoutBasic = QVBoxLayout(self.tab_widget)
-        # table_widget_basicsetup = QTableWidget()
-        # table_widget_basicsetup.setRowCount(3)
-        # table_widget_basicsetup.setColumnCount(3)
-        # title_name_basicsetup=["Number","Process/Burn Rate","Moving Rate"]  # 這裡可以更換成想要的行標題名稱
-        # title_name_basic=["Node","Fire","Firefighter"]  # 這裡可以更換成想要的行標題名稱
-        # table_widget_basicsetup.setHorizontalHeaderLabels(title_name_basicsetup)
-        # table_widget_basicsetup.setVerticalHeaderLabels(title_name_basic)  # 設定垂直標題（行名稱）
-        # layoutBasic.addWidget(table_widget_basicsetup,1)
-        # table_widget_basicsetup.resizeColumnsToContents()
-        # #把layout 增加在分頁上面
-        # self.pageBasicSetup.setLayout(layoutBasic)
+        #Page : Control panel
+        self.pageControlPanel.layout = QVBoxLayout()
+        #Control panel-node區塊
+        self.nodeBlock = QWidget()
+        self.nodeBlock.setStyleSheet("background-color: lightgrey;")
+        self.nodeBlock.setFixedSize(400, 200)
+        font = QFont()
+        font.setPointSize(10)
+        font.setBold(True)  # 設定為加粗
+
+        self.nodeblock_textnode = ""
+        self.nodeblock_textlen = ""
+        self.nodeblock_texttta = ""
+        self.nodeblock_textttb = ""
+        self.nodeblock_textsta = ""
+
+
+        self.nodeCircle = QWidget(self.nodeBlock)
+        self.nodeCircle.setGeometry(15, 45, 100, 100)  # 設定容器的位置和大小
+        self.nodeCircle.setStyleSheet("background-color: white;")
+        circle_region = QRegion(self.nodeCircle.rect(), QRegion.Ellipse)
+        self.nodeCircle.setMask(circle_region)
+        self.title_label_sta_des = QLabel(self.nodeblock_textsta, self.nodeBlock)
+        self.title_label_sta_des.setFont(font)
+        self.title_label_sta_des.setGeometry(40, 155, 200, 20)
+
+
+        self.title_label_node = QLabel("Node\t:", self.nodeBlock)
+        self.title_label_node.setFont(font)
+        self.title_label_node.setGeometry(135, 45, 200, 20)
+        self.title_label_node_des = QLabel(self.nodeblock_textnode, self.nodeBlock)
+        self.title_label_node_des.setFont(font)
+        self.title_label_node_des.setGeometry(220, 45, 200, 20)
+
+        self.title_label_length = QLabel("Length\t:", self.nodeBlock)
+        self.title_label_length.setFont(font)
+        self.title_label_length.setGeometry(135, 75, 200, 20)  # 設定容器的位置和大小
+        self.title_label_length_des = QLabel(self.nodeblock_textlen, self.nodeBlock)
+        self.title_label_length_des.setFont(font)
+        self.title_label_length_des.setGeometry(220, 75, 200, 20)
+
+        self.title_label_tta = QLabel("Time to arrive\t:", self.nodeBlock)
+        self.title_label_tta.setFont(font)
+        self.title_label_tta.setGeometry(135, 105, 200, 20)  # 設定容器的位置和大小
+        self.title_label_tta_des = QLabel(self.nodeblock_texttta, self.nodeBlock)
+        self.title_label_tta_des.setFont(font)
+        self.title_label_tta_des.setGeometry(320, 105, 200, 20)
+
+        self.title_label_ttb = QLabel("Time to burned\t:", self.nodeBlock)
+        self.title_label_ttb.setFont(font)
+        self.title_label_ttb.setGeometry(135, 135, 200, 20)  # 設定容器的位置和大小
+        self.title_label_ttb_des = QLabel(self.nodeblock_textttb, self.nodeBlock)
+        self.title_label_ttb_des.setFont(font)
+        self.title_label_ttb_des.setGeometry(320, 135, 200, 20)
+
+
+        self.pageControlPanel.layout.addWidget(self.nodeBlock)
+
+        #Control panel-FF 區塊
+        #self.ffBlock = QLabel()
+        #self.ffBlock.setStyleSheet("background-color: lightgrey;")
+        # multi_text = """
+        #                 <p>This is the <b>first</b> text.</p>
+        #                 <p style="color: red;">This is the <i>second</i> text with custom style.</p>
+        #                 <p align="right">This is the <u>third</u> text aligned to the right.</p>
+        #                 """
+        #self.ffBlock.setText(multi_text)
+        #self.pageControlPanel.layout.addWidget(self.ffBlock)
+
+        self.blockffContainerCP = QWidget()
+        self.blockffContainerCP_layout = QVBoxLayout(self.blockffContainerCP)
+        self.pageCP_generateblockFF()
+        self.pageControlPanel.layout.addWidget(self.blockffContainerCP)
+
+
+
+
+        self.pageControlPanel.setLayout(self.pageControlPanel.layout)
 
 
         #Page : Node Information
@@ -162,7 +235,7 @@ class InformationWindow(QtWidgets.QMainWindow):
             item.setFont(font)
             item.setBackground(QColor("darkred"))
             item.setForeground(QColor("white"))
-        elif (value == "FFidle"):
+        elif (value == "Idle"):
             font = QFont()
             font.setBold(True)
             item.setFont(font)
@@ -173,9 +246,88 @@ class InformationWindow(QtWidgets.QMainWindow):
             item.setFont(font)
             item.setBackground(QColor("black"))
             item.setForeground(QColor("white"))
+        elif (value == "Traveling"):
+            font = QFont()
+            font.setBold(True)
+            item.setFont(font)
+            item.setBackground(QColor("grey"))
+            item.setForeground(QColor("white"))
 
         return item
-    '''------------------------------page: BasicSetup-----------------------------------'''
+    '''------------------------------page: Control Panel-----------------------------------'''
+    def pageCP_blockFF(self,num):
+        if(num == 1):
+            font = QFont()
+            font.setPointSize(12)
+            font.setBold(True)
+
+            blockff = QWidget(self.blockffContainerCP)
+            pixmap = QPixmap(self.ffblockCP_img1)
+            pixmap = pixmap.scaledToWidth(100)  # Adjust width as needed
+            title_label_img = QLabel(blockff)
+            title_label_img.setPixmap(pixmap)
+            title_label_img.setGeometry(0, 0, 200, 200)
+
+            title_label_sta_des = QLabel(self.ffblockCP_sta1, blockff)
+            font.setPointSize(14)
+            title_label_sta_des.setFont(font)
+            font.setPointSize(12)
+            title_label_sta_des.setGeometry(150, 55, 250, 20)
+
+            title_label_name = QLabel("Name\t:", blockff)
+            title_label_name.setFont(font)
+            title_label_name.setGeometry(150, 85, 100, 20)
+            title_label_name_des = QLabel(self.ffblockCP_name1, blockff)
+            title_label_name_des.setFont(font)
+            title_label_name_des.setGeometry(250, 85, 100, 20)
+
+            title_label_wr = QLabel("Water Rate\t:", blockff)
+            title_label_wr.setFont(font)
+            title_label_wr.setGeometry(150, 115, 100, 20)
+            title_label_wr_des = QLabel(self.ffblockCP_wr1, blockff)
+            title_label_wr_des.setFont(font)
+            title_label_wr_des.setGeometry(300, 115, 100, 20)
+        if (num == 2):
+            font = QFont()
+            font.setPointSize(10)
+            font.setBold(False)
+
+            blockff = QWidget(self.blockffContainerCP)
+            pixmap = QPixmap(self.ffblockCP_img2)
+            pixmap = pixmap.scaledToWidth(100)  # Adjust width as needed
+            title_label_img = QLabel(blockff)
+            title_label_img.setPixmap(pixmap)
+            title_label_img.setGeometry(0, 0, 200, 200)
+            opacity_effect = QGraphicsOpacityEffect()
+            opacity_effect.setOpacity(0.3)
+            title_label_img.setGraphicsEffect(opacity_effect)
+
+            title_label_sta_des = QLabel(self.ffblockCP_sta2, blockff)
+            title_label_sta_des.setGeometry(150, 55, 250, 20)
+
+            title_label_name = QLabel("Name\t:", blockff)
+            title_label_name.setFont(font)
+            title_label_name.setGeometry(150, 85, 100, 20)
+            title_label_name_des = QLabel(self.ffblockCP_name2, blockff)
+            title_label_name_des.setGeometry(300, 85, 100, 20)
+
+            title_label_wr = QLabel("Water Rate\t:", blockff)
+            title_label_wr.setFont(font)
+            title_label_wr.setGeometry(150, 115, 100, 20)
+            title_label_wr_des = QLabel(self.ffblockCP_wr2, blockff)
+            title_label_wr_des.setGeometry(300, 115, 100, 20)
+
+        return blockff
+
+    def pageCP_generateblockFF(self):
+        self.clear_layout(self.blockffContainerCP_layout)
+        block1 = self.pageCP_blockFF(1)
+        block2 = self.pageCP_blockFF(2)
+
+        self.blockffContainerCP_layout.addWidget(block1)
+        self.blockffContainerCP_layout.addWidget(block2)
+
+
 
     '''------------------------------page: Node Information-----------------------------------'''
     def updatenodeInfo(self):
@@ -189,13 +341,13 @@ class InformationWindow(QtWidgets.QMainWindow):
                     self.table_widget_Node.setItem(row-1, col, item)
                     self.table_widget_Node.resizeColumnsToContents()
                 elif col == 1:
-                    value  = self.database.getffNDictInfo(self.currentTime,row,"firePercentage")
+                    value  = self.database.getffNDictInfo(self.currentTime,row,"FFPercentage")
                     item = QTableWidgetItem(str(value))
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                     self.table_widget_Node.setItem(row-1, col, item)
                     self.table_widget_Node.resizeColumnsToContents()
                 elif col == 2:
-                    value  = self.database.getffNDictInfo(self.currentTime,row,"FFPercentage")
+                    value  = self.database.getffNDictInfo(self.currentTime,row,"firePercentage")
                     item = QTableWidgetItem(str(value))
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                     self.table_widget_Node.setItem(row-1, col, item)
@@ -208,7 +360,7 @@ class InformationWindow(QtWidgets.QMainWindow):
 
     '''------------------------------page: Firefighter Information------------------------------------'''
     #step 1
-    def blockFF(self, currentTime, image_path, image_description,status):
+    def pageFF_blockFF(self, currentTime, image_path, image_description, status):
         blockff = QWidget()
         layout = QHBoxLayout(blockff) #全部區塊
         vertical_layout = QVBoxLayout() #左半邊
@@ -266,13 +418,14 @@ class InformationWindow(QtWidgets.QMainWindow):
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                     self.table_widget.setItem(row, col, item)
                 elif row == 1:
-                    item = QTableWidgetItem(str(self.outputStatus[col]))
+                    #item = QTableWidgetItem(str(self.outputStatus[col]))
+                    item = self.tableVisualizeSetting(str(self.outputStatus[col]))
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                     self.table_widget.setItem(row, col, item)
                     self.table_widget.resizeColumnsToContents()
 
     #step 4
-    def generateblockFF(self):
+    def pageFF_generateblockFF(self):
         blockffContainer = QWidget()
         self.blockffContainer_layout = QVBoxLayout(blockffContainer)
         for time,node in self.ffDict.items():
@@ -282,7 +435,7 @@ class InformationWindow(QtWidgets.QMainWindow):
                 image_description = str(info["num"])
                 status = info["status"]
                 if (currentTime == self.currentTime):
-                    block = self.blockFF(currentTime, image_path, image_description, status)
+                    block = self.pageFF_blockFF(currentTime, image_path, image_description, status)
                     self.blockffContainer_layout.addWidget(block)
         return blockffContainer
 
