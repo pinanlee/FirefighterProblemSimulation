@@ -16,6 +16,8 @@ import pandas as pd
 import numpy as np
 from dataBase import DataBase
 from informationWindow import  InformationWindow
+import GenerateGraph
+import sys
 
 '''
 information table跑不出來 
@@ -63,8 +65,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.FFnetwork = Network("adjacent data -- ff.xlsx", "coordinates data.xlsx")
             self.fireNetwork = Network("adjacent data -- fire.xlsx", "coordinates data.xlsx")
             for i in self.FFnetwork.nodeList:
-                image = QtWidgets.QLabel(self.ui.centralwidget)
-                node = Node(self.ui.centralwidget, image, i)
+                node = Node(self.ui.centralwidget, i)
                 node.clicked.connect(self.choose)
                 self.nodeList.append(node)
         initNetwork()
@@ -91,9 +92,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         def NodeConnection():
             for i in self.nodeList:
-                '''for j in self.FFnetwork.nodeList:
-                    if(i.getNum() == j.getNum()):
-                        i.connectNode(j.getArcs())'''
                 pos1 = np.array((i.geometry().x(),i.geometry().y()))
                 for j in self.FFnetwork.adjList[i.getNum()]:
                     pos2 = np.array((self.nodeList[j[0]-1].x(),self.nodeList[j[0]-1].y()))
@@ -107,15 +105,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             #初始化火
             self.nodeList.sort(key=ySort)
             a = random.randint(0, len(self.nodeList)-2)
-            self.fire.append(Fire(self.fireNetwork, a))
+            self.fire.append(Fire(self.fireNetwork, a, self.currentTime))
             self.fire[-1].burnedSignal.connect(self.networkUpdateF)
             self.fire[-1].opacitySignal.connect(self.fireVisualize)
+            self.fire[-1].terminateSignal.connect(self.finish)
             self.fire[-1].burn()
             self.updateMinTime()
             #初始化消防員
             depot = self.nodeList[-1]
             for i in range(self.firefighterNum):
-                ff = FireFighter(i+1, depot)
+                ff = FireFighter(self.ui.centralwidget, i+1, depot)
                 ff.FFdoneSignal.connect(self.updateFFStatus)
                 ff.FFprotectSignal.connect(self.updateMinTime)
                 ff.FFprotectSignal.connect(self.networkUpdate)
@@ -123,7 +122,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 depot.depotSetting()
                 self.firefighterList.append(ff)
             self.networkUpdate(depot.getNum())
-            self.firefighterList[1].pixmap = QPixmap("./image/fireman.png")
+            self.firefighterList[1].setPixmap(QPixmap("./image/fireman.png"))
             self.nodeList[self.focusIndex].setStyleSheet("background-color: black;border: 2px solid blue;")
         randomFireAndDepot()
 
@@ -153,6 +152,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.minTimeFireArrival(self.currentTime)
         for i in self.FFnetwork.nodeList:
             i.fireMinArrivalTime = self.fireNetwork.nodeList[i.getNum()-1].fireMinArrivalTime
+            print("node {}: {}".format(i.getNum(), i.fireMinArrivalTime))
 
     def updateFFStatus(self): #消防員移動/澆水完成時呼叫，更新消防員的狀態
         for i in range(self.firefighterNum):
@@ -175,14 +175,25 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in self.nodeList:
             if(i.getNum() == value):
                 i.onFire()
-                self.fire.append(Fire(self.fireNetwork, value))
+                self.fire.append(Fire(self.fireNetwork, value, self.currentTime))
                 self.fire[-1].burnedSignal.connect(self.networkUpdateF)
                 self.fire[-1].opacitySignal.connect(self.fireVisualize)
+                self.fire[-1].terminateSignal.connect(self.finish)
 
     def fireVisualize(self, opacity, no): #當fire network的節點正在燃燒時，更新ui上的opacity
         for i in self.nodeList:
             if(i.getNum()== no):
                 i.setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
+
+    def finish(self):
+        #exit()
+        self.timer.stop()
+        self.ui.networkLabel.setText("finish")
+        self.ui.descriptionLabel.setText("finish")
+        self.anim = QPropertyAnimation(self.ui.descriptionLabel, b"pos")
+        self.anim.setEndValue(QPoint(10, 240))
+        self.anim.setDuration(250)
+        self.anim.start()
 
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
@@ -200,7 +211,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.InfoShow()
         elif(a0.key() == Qt.Key_S):
                 self.networkChange()
+        elif(a0.key() == Qt.Key_N):
+            self.newNetwork()
         self.updateFFStatus()
+
+    def newNetwork(self):
+        import subprocess
+        import os
+        subprocess.call("GenerateGraph.py", shell=True)
+        p = sys.executable
+        os.execl(p, p, *sys.argv)        
 
     def buttonFocusStyle(self, plus):
         style = self.nodeList[self.focusIndex].styleSheet()
@@ -273,10 +293,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         prev = self.FFindex  
         self.FFindex = (self.FFindex + 1) % self.firefighterNum
         self.__opacitySet()
-        self.firefighterList[self.FFindex].curPos().setImage(self.firefighterList[self.FFindex].pixmap)
+        self.firefighterList[self.FFindex].setPixmap(self.firefighterList[self.FFindex].grab())
 
         self.firefighterList[prev].closeaccessibleVisualize()
-        self.firefighterList[self.FFindex].accessibleVisualize()
+        self.firefighterList[self.FFindex].accessibleVisualize(self.currentTime)
         self.descriptionAnimate("change to {}".format(self.firefighterList[self.FFindex].getName()))
 
     def __opacitySet(self): #調整FF的opacity
@@ -287,9 +307,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         for i in range(self.firefighterNum):
             opacity = 1 if i == self.FFindex else 0.3
-            setOpacity(opacity, self.firefighterList[i].curPos().getLabel())
+            setOpacity(opacity, self.firefighterList[i])
             setOpacity(opacity, self.labels[i])
-        setOpacity(1, self.firefighterList[self.FFindex].curPos().getLabel())
+        setOpacity(1, self.firefighterList[self.FFindex])
 
     def printStatus(func):
         def aa(self):
@@ -323,11 +343,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if(node == self.firefighterList[self.FFindex].curPos()):
             return "vaild choose"
             #check if selected FireFighter can move to assigned Node
-        text = self.firefighterList[self.FFindex].next_Pos_Accessment(node)
+        text = self.firefighterList[self.FFindex].next_Pos_Accessment(node, self.currentTime)
         return text
         
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
+            ctr = 0
+            for i in self.fire:
+                if(i.finishSpread):
+                    ctr+=1
+            print("ctr: {}, all: {}".format(ctr, len(self.fire)))
+            if(ctr == len(self.fire)):
+                self.finish()
             self.dataRecord()
             text = "moving"
             for i in range(self.currentTime % 3):
@@ -336,7 +363,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.upadateInformation()
             self.currentTime+=1
             for i in self.fire:
-                i.fire_spread()
+                i.fire_spread(self.currentTime)
             for i in self.firefighterList:
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
@@ -412,11 +439,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def dataRecord(self): #將資料傳入database
         self.db.currentTime = self.currentTime
-        self.db.ffnetworkNodeList[self.currentTime] = self.FFnetwork.nodeList
-        self.db.fireNetworkNodeList[self.currentTime]  = self.fireNetwork.nodeList
-        self.db.controllerNodeList[self.currentTime]  = self.nodeList
-        self.db.firefighterList[self.currentTime] = self.firefighterList
-        self.db.infoNextTime()
+        #self.db.ffnetworkNodeList[self.currentTime] = self.FFnetwork.nodeList
+        #self.db.fireNetworkNodeList[self.currentTime]  = self.fireNetwork.nodeList
+        #self.db.controllerNodeList[self.currentTime]  = self.nodeList
+        #self.db.firefighterList[self.currentTime] = self.firefighterList
+        #self.db.infoNextTime()
 
     def loadRecord(self): #讀檔(未完成)
         print("active ")

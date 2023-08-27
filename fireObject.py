@@ -1,12 +1,15 @@
 from node import Node
 from PyQt5.QtCore import pyqtSignal, QObject
+import math
 import copy
 class Fire(QObject):
     burnedSignal = pyqtSignal(int)
     opacitySignal = pyqtSignal(float, int)
-    def __init__(self, network, depot):
+    terminateSignal = pyqtSignal()
+    def __init__(self, network, depot, time):
         super().__init__()
         self.firePos = network.nodeList[depot-1]
+        self.startBurningTime = time
         self.rate_fireburn = 10 #火燃燒速率
         self.move_fire = 10 #火擴散速率
         self.finishBurn = False
@@ -14,26 +17,41 @@ class Fire(QObject):
         self.arcs = []
         for i in self.firePos.getArcs():
             self.arcs.append({"node" : i["node"], "length": i["length"], "fire-travel": 0})
-        self.arcCtr = 0
 
     def burn(self):
         self.firePos.onFire()
         self.burnedSignal.emit(self.firePos.getNum())
 
-    def fire_spread(self): #火焰傳遞邏輯
+    def fire_spread(self, timer): #火焰傳遞邏輯
         if(self.finishSpread):
             return
         elif(self.finishBurn):
+            ctr = 0
             for j in self.arcs:
+                if(self.__statusDetection(j)): #若該點未被保護或未燒起來, 起火
                     if(j["length"] > j["fire-travel"]):
                         self.__calculateCurrentFireArrive(j)
                     else:
-                        if(self.__statusDetection(j)): #若該點未被保護或未燒起來, 起火
-                            j["node"].onFire()
-                            self.arcCtr+=1
-                            if(self.arcCtr == len(self.arcs)):
-                                self.finishSpread = True
-                            self.burnedSignal.emit(j["node"].getNum())
+                        j["node"].onFire()
+                        print("node {} is burned at time {}".format(j["node"].getNum(), timer))
+                        self.burnedSignal.emit(j["node"].getNum())
+                else:
+                    ctr+=1
+
+                if(ctr == len(self.arcs)):
+                    self.finishSpread = True
+            '''for j in self.arcs:
+                if(j["length"] > j["fire-travel"]):
+                    self.__calculateCurrentFireArrive(j)
+                else:
+                    if(self.__statusDetection(j)): #若該點未被保護或未燒起來, 起火
+                        j["node"].onFire()
+                        print("node {} is burned at time {}".format(j["node"].getNum(), timer))
+                        self.burnedSignal.emit(j["node"].getNum())
+                    else:
+                        ctr+=1
+                if(ctr == len(self.arcs)):
+                    self.finishSpread = True'''
         else:
             self.__calculateCurrentCapacity()
             self.__burningVisualize()
@@ -54,16 +72,17 @@ class Fire(QObject):
         self.__calculateMinTime(time)
 
     def __calculateMinTime(self, time):
-        self.firePos.fireMinArrivalTime = time
+        self.firePos.fireMinArrivalTime = self.startBurningTime
         tempList = [copy.copy(self.firePos)]
         while(tempList):
             tempTime = tempList[0].fireMinArrivalTime
-            tempTime += tempList[0].getGrassAmount() / self.rate_fireburn
+            tempTime += tempList[0].initialGrassAmount / self.rate_fireburn
             
             for j in tempList[0].getArcs():
-                if(j["node"].fireMinArrivalTime > tempTime + j["length"] / self.move_fire):                     
-                    j["node"].fireMinArrivalTime = tempTime + (j["length"] - j["fire-travel"]) / self.move_fire
-                    tempList.append(copy.copy(j["node"]))             
+                if(self.__statusDetection(j)):
+                    if(j["node"].fireMinArrivalTime > math.ceil(tempTime + j["length"] / self.move_fire)):               
+                        j["node"].fireMinArrivalTime = math.ceil(tempTime + j["length"] / self.move_fire)
+                        tempList.append(copy.copy(j["node"]))             
             tempList.remove(tempList[0])
             for i in range(len(tempList)):
                 for j in range(len(tempList)):

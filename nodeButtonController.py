@@ -11,6 +11,7 @@ class NodeController():
         self.pos = pos
         #variables
         self.no = i
+        self.value = 100
         self.fireMinArrivalTime = 10000
         self.initialWaterAmount = 20   #消防員需澆多少水才能保護
         self.initialGrassAmount = 20   #火需要燒多少量才能移動

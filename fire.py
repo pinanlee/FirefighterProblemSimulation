@@ -21,13 +21,14 @@ class Fire(QObject):
 
     def fire_spread(self, timer): #火焰傳遞邏輯
         tempList = [] #暫存新增的火點
-        print(self.fireList)
+        #print(self.fireList)
         for i in self.fireList: #對於每個火點
             ctr = 0
             for j in i.getArcs(): #對於每個火點的相鄰點
                 if(i.arc_finish_spread(j)): #判斷火點是否完成移動
                     if(self.__statusDetection(j)): #若該點未被保護或未燒起來, 起火
                         j["node"].onFire()
+                        print("node {} is burned at time {}".format(j["node"].getNum(), timer))
                         self.burnedSignal.emit(j["node"].getNum())
                         
                         tempList.append(j["node"])
@@ -35,7 +36,6 @@ class Fire(QObject):
                 else: #還沒抵達，繼續移動
                     self.__calculateCurrentFireArrive(i, j)
                     #print("{}, {}: {}".format(i.getNum(),j["node"].getNum(),i.getArcPercentage_Fire(j["node"])))
-            print()
             self.__calculateCurrentCapacity(i, timer)
             if(ctr == len(i.getNeighbors())): #如果該火點的相鄰arc均已移動過，移除該火點
                 self.burnedList.append(i)

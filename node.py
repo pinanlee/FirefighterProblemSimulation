@@ -6,28 +6,19 @@ import math
 from nodeButtonController import NodeController
 
 class Node(QtWidgets.QPushButton):
-    def __init__(self, widgets, label, nodeController: NodeController):
+    def __init__(self, widgets, nodeController: NodeController):
         super().__init__(widgets)
         self.nodeController = nodeController
-        self.UIsettings(label, self.nodeController.pos)
+        self.UIsettings(self.nodeController.pos)
 
         self.__neighbors = [] #表示與那些node有相鄰關係
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
 
     #UI設定
-    def UIsettings(self, label : QtWidgets.QLabel, pos):
+    def UIsettings(self, pos):
         #設定位置
         self.setGeometry(pos)
         self.setText(str(self.nodeController.no))
-        
-        self.__label = label
-        self.__label.setGeometry(pos)
-        self.image = label
-        self.image.raise_()
-
-
-    def setImage(self, image):
-        self.__label.setPixmap(image)
 
     def getFireMinArrivalTime(self):
         return self.nodeController.fireMinArrivalTime
@@ -63,8 +54,6 @@ class Node(QtWidgets.QPushButton):
         self.nodeController.idle = True
         self.nodeController.protected = False
 
-
-
     #get functions
     def isBurned(self):
         return self.nodeController.burned
@@ -95,9 +84,6 @@ class Node(QtWidgets.QPushButton):
 
     def getArcs(self):
         return self.nodeController.getArcs()
-
-    def getLabel(self):
-        return self.__label
 
     #get function (計算獲得)
 

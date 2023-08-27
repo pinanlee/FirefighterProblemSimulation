@@ -16,17 +16,17 @@ class DataBase(QObject):
         super().__init__()
         print("DataBase initializing...")
         self.currentTime = 0
-        self.fireNetworkNodeList = self.initList() #fireNetwork 後續簡稱fiN
+        #self.fireNetworkNodeList = self.initList() #fireNetwork 後續簡稱fiN
         self.ffnetworkNodeList = self.initList()   #ffnetwork後續簡稱ffN
-        self.controllerNodeList = self.initList()#controllerNodeList後續簡稱cN
+        #self.controllerNodeList = self.initList()#controllerNodeList後續簡稱cN
         self.firefighterList = self.initList()
-        self.fiNDict = {}
+        #self.fiNDict = {}
         self.ffNDict = {}
-        self.cNDict = {}
+        #self.cNDict = {}
         self.ffDict = {}
-        self.fiNDict_info = {}
+        #self.fiNDict_info = {}
         self.ffNDict_info = {}
-        self.cNDict_info = {}
+        #self.cNDict_info = {}
         self.ffDict_info = {} # dict for information window
         self.numFF = 2
         self.ffPosSta = []
