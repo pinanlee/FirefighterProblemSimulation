@@ -16,26 +16,27 @@ class DataBase(QObject):
         super().__init__()
         print("DataBase initializing...")
         self.currentTime = 0
-        #self.fireNetworkNodeList = self.initList() #fireNetwork 後續簡稱fiN
+        self.fireNetworkNodeList = self.initList() #fireNetwork 後續簡稱fiN
         self.ffnetworkNodeList = self.initList()   #ffnetwork後續簡稱ffN
-        #self.controllerNodeList = self.initList()#controllerNodeList後續簡稱cN
+        self.controllerNodeList = self.initList()#controllerNodeList後續簡稱cN
         self.firefighterList = self.initList()
-        #self.fiNDict = {}
+        self.fiNDict = {}
         self.ffNDict = {}
-        #self.cNDict = {}
+        self.cNDict = {}
         self.ffDict = {}
-        #self.fiNDict_info = {}
+        self.fiNDict_info = {}
         self.ffNDict_info = {}
-        #self.cNDict_info = {}
+        self.cNDict_info = {}
         self.ffDict_info = {} # dict for information window
         self.numFF = 2
         self.ffPosSta = []
         self.ffPosSta = self.initffPosStaList()
         self.numNode = 20
+        self.infoNextTime()
         '''------------------------------Methods-----------------------------------'''
     def initList(self): #initial list,要求T數量空間(目前設定為50,index starts from 0),後續可以跟據T時間調整
         temp = []
-        for i in range(100):
+        for i in range(150):
             temp.append([])
         return temp
 
@@ -48,24 +49,30 @@ class DataBase(QObject):
     def getfiNNodeInfo(self,time,num,key):
         if (time > self.currentTime):
             return f'No time {time} data'
-        elif  num > self.numNode:
+        elif  num > self.numNode or num <=0 :
             return f'Node {num} not exist'
         return self.fiNDict[time][num][key]
 
     def getffNNodeInfo(self,time,num,key):
         if (time > self.currentTime):
             return f'No time {time} data'
-        elif  num > self.numNode:
+        elif  num > self.numNode or num <=0 :
             return f'Node {num} not exist'
         return self.ffNDict[time][num][key]
 
     def getcNNodeInfo(self,time,num,key):
         if (time > self.currentTime):
             return f'No time {time} data'
-        elif  num > self.numNode:
+        elif  num > self.numNode or num <=0 :
             return f'Node {num} not exist'
         return self.cNDict[time][num][key]
 
+    def getffNDictInfo(self,time,num,key):
+        if (time > self.currentTime or time < 0 ):
+            return f'No time {time} data'
+        elif  num > self.numNode or num <=0 :
+            return f'Node {num} not exist'
+        return self.ffNDict_info[time][num][key]
 
 
 
@@ -85,7 +92,7 @@ class DataBase(QObject):
                                  "protect":j.isProtected(),
                                  "burn":j.isBurned(),
                                  "water": j.getWaterAmount(),
-                                 "grass": j.getGrassAmount(),
+                                 "grass": j.getGrassAmount()  ,
                                  "firePercentage": j.getNodePercentage_Fire(),
                                  "FFPercentage": j.getNodePercentage_FF(),
                                  "idle": j.isIdle()}
@@ -95,43 +102,62 @@ class DataBase(QObject):
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Protected"}
+                                          "status": "Protected",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif(dict_Node["idle"] == True):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "FFidle"}
+                                          "status": "Idle",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["protect"] == True and dict_Node["water"] <= 0 ):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Safe"}
+                                          "status": "Safe",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["burn"] == True and dict_Node["grass"] > 0 ):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Burned"}
+                                          "status": "Burned",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["burn"] == True and dict_Node["grass"] <= 0):
                         dict_Node_info = {"obj": j,
                                           "num": j.getNum(),
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
-                                          "status": "Damaged"}
+                                          "status": "Damaged",
+                                          "water": j.getWaterAmount()
+                                          }
+                        dict_time_info[j.getNum()] = dict_Node_info
+                    else:
+                        dict_Node_info = {"obj": j,
+                                          "num": j.getNum(),
+                                          "firePercentage": j.getNodePercentage_Fire(),
+                                          "FFPercentage": j.getNodePercentage_FF(),
+                                          "status": "Normal",
+                                          "water": j.getWaterAmount()
+                                          }
                         dict_time_info[j.getNum()] = dict_Node_info
                 dict_main[i] = dict_time
                 dict_main_info[i] = dict_time_info
-
             return dict_main,dict_main_info
-        #self.fiNDict,self.fiNDict_info = updateDict_node(self.fireNetworkNodeList)
+        self.fiNDict,self.fiNDict_info = updateDict_node(self.fireNetworkNodeList)
         self.ffNDict,self.ffNDict_info = updateDict_node(self.ffnetworkNodeList)
-        #elf.cNDict,self.cNDict_info = updateDict_node(self.controllerNodeList)
+        #self.cNDict,self.cNDict_info = updateDict_node(self.controllerNodeList)
+
 
         def updateDict_FF(list):
             dict_main = {} #{"obj","num","pos","image","process","travel","idle"}

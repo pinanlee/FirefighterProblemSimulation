@@ -25,6 +25,7 @@ class NodeController():
         self.idle = False
         self.__neighbors = []
         self.__adjArc = []
+        self.status = "Normal"
 
     #設置node狀態
     def onFire(self):
@@ -85,6 +86,8 @@ class NodeController():
 
     def getArcs(self):
         return self.__adjArc
+    def getStatus(self):
+        return self.status
 
     #get function (計算獲得)
     def getNodePercentage_Fire(self): #獲得火在該node的燃燒進度
@@ -94,6 +97,21 @@ class NodeController():
     def getNodePercentage_FF(self): #獲得消防員在該node的燃燒進度
         ratio = self.water_amount/self.initialWaterAmount
         return ratio if ratio >= 0 else 0
+
+    def updateStatus(self):
+        if (self.idle == True):
+            self.status = "FF Idle"
+        elif(self.protected == True and self.water_amount > 0):
+            self.status = "Protected"
+        elif (self.protected == True and self.water_amount <= 0):
+            self.status = "Safe"
+        elif (self.burned == True and self.grass_amount > 0):
+            self.status = "Burned"
+        elif (self.burned == True and self.grass_amount <= 0):
+            self.status = "Damaged"
+        else:
+            self.status = "Normal"
+
 
     #一開始建立網路時使用
     def connectNode(self, node, length):
