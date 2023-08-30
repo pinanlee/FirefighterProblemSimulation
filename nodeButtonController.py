@@ -11,6 +11,7 @@ class NodeController():
         self.pos = pos
         #variables
         self.no = i
+        self.initValue = 100
         self.value = 100
         self.fireMinArrivalTime = 10000
         self.initialWaterAmount = 20   #消防員需澆多少水才能保護
@@ -51,6 +52,8 @@ class NodeController():
     def updateGrassAmount(self, remain):
         remain = 0 if remain < 0 else remain
         self.grass_amount = remain
+        self.value = self.initValue * self.getNodePercentage_FF()
+
 
     def updateWaterAmount(self, remain):
         remain = 0 if remain < 0 else remain
