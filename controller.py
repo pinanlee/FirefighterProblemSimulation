@@ -22,7 +22,7 @@ import pandas as pd
 import numpy as np
 from dataBase import DataBase
 from informationWindow import  InformationWindow
-import GenerateGraph
+from results import resultsWindow
 import sys
 
 '''
@@ -251,14 +251,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.updateStatus()
 
     def finish(self):
-        #exit()
         self.timer.stop()
-        self.ui.networkLabel.setText("finish")
-        self.ui.descriptionLabel.setText("finish")
-        self.anim = QPropertyAnimation(self.ui.descriptionLabel, b"pos")
-        self.anim.setEndValue(QPoint(10, 240))
-        self.anim.setDuration(250)
-        self.anim.start()
+        self.result = resultsWindow(self.nodeList, self.currentTime)
+        self.result.show()
+
 
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
@@ -281,6 +277,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.networkChange()
         elif(a0.key() == Qt.Key_N):
             self.newNetwork()
+        elif(a0.key() == Qt.Key_Q):
+            self.finish()
         self.updateFFStatus()
 
     def newNetwork(self):

@@ -3,6 +3,12 @@ from random import Random
 import graphops 
 import graphio
 
+width = 1000
+height = 600
+node = 20
+edges = 30
+radius = 50
+
 def default_seed():
 	import os, struct
 	try:
@@ -25,13 +31,13 @@ def make_streams(seed):
 
 def main(opts, seed, st):
 	import random
-	num_nodes = 20
+	num_nodes = node
 	random.seed(default_seed())
-	num_edges = random.randint(20,30)
+	num_edges = random.randint(node, node+10)
 	streams = make_streams(seed)
 
 	# first generate some points in the plane, according to our constraints
-	nodes = graphops.generate_nodes(num_nodes, 1100, 500, 60, streams['gen'])
+	nodes = graphops.generate_nodes(num_nodes, width, height, radius, streams['gen'])
 	num_nodes = len(nodes)
 	# find a delaunay triangulation, so we have a list of edges that will give planar graphs
 	tri_edges = graphops.triangulate(nodes, streams['tri'], 'conform')

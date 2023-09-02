@@ -40,18 +40,6 @@ class Fire(QObject):
 
                 if(ctr == len(self.arcs)):
                     self.finishSpread = True
-            '''for j in self.arcs:
-                if(j["length"] > j["fire-travel"]):
-                    self.__calculateCurrentFireArrive(j)
-                else:
-                    if(self.__statusDetection(j)): #若該點未被保護或未燒起來, 起火
-                        j["node"].onFire()
-                        print("node {} is burned at time {}".format(j["node"].getNum(), timer))
-                        self.burnedSignal.emit(j["node"].getNum())
-                    else:
-                        ctr+=1
-                if(ctr == len(self.arcs)):
-                    self.finishSpread = True'''
         else:
             self.__calculateCurrentCapacity()
             self.__burningVisualize()
