@@ -10,8 +10,8 @@ class Fire(QObject):
         super().__init__()
         self.firePos = network.nodeList[depot-1]
         self.startBurningTime = time
-        self.rate_fireburn = 10 #火燃燒速率
-        self.move_fire = 10 #火擴散速率
+        self.rate_fireburn = 4 #火燃燒速率
+        self.move_fire = 4 #火擴散速率
         self.finishBurn = False
         self.finishSpread = False
         self.arcs = []
