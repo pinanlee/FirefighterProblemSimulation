@@ -18,15 +18,14 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.currentTime = 0
         self.numFF = 0
         self.numNode = 0
-        self.ffblockCP_img1 = "image/firefighter.png"
+        self.ffblockCP_img1 =QPixmap("image/firefighter.png")
         self.ffblockCP_sta1 = ""
         self.ffblockCP_name1 = ""
         self.ffblockCP_wr1 = ""
-        self.ffblockCP_img2 = "image/firefighter.png"
+        self.ffblockCP_img2 = QPixmap("image/firefighter.png")
         self.ffblockCP_sta2 = ""
         self.ffblockCP_name2 = ""
         self.ffblockCP_wr2 = ""
-
         self.database = database
         self.database.dataUpdateSignal.connect(self.updateInfo)
         self.ffDict = self.database.ffDict_info
@@ -122,35 +121,22 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.title_label_tta.setGeometry(135, 105, 200, 20)  # 設定容器的位置和大小
         self.title_label_tta_des = QLabel(self.nodeblock_texttta, self.nodeBlock)
         self.title_label_tta_des.setFont(font)
-        self.title_label_tta_des.setGeometry(320, 105, 200, 20)
+        self.title_label_tta_des.setGeometry(300, 105, 200, 20)
 
         self.title_label_ttb = QLabel("Time to burned\t:", self.nodeBlock)
         self.title_label_ttb.setFont(font)
         self.title_label_ttb.setGeometry(135, 135, 200, 20)  # 設定容器的位置和大小
         self.title_label_ttb_des = QLabel(self.nodeblock_textttb, self.nodeBlock)
         self.title_label_ttb_des.setFont(font)
-        self.title_label_ttb_des.setGeometry(320, 135, 200, 20)
+        self.title_label_ttb_des.setGeometry(300, 135, 200, 20)
 
 
         self.pageControlPanel.layout.addWidget(self.nodeBlock)
-
-        #Control panel-FF 區塊
-        #self.ffBlock = QLabel()
-        #self.ffBlock.setStyleSheet("background-color: lightgrey;")
-        # multi_text = """
-        #                 <p>This is the <b>first</b> text.</p>
-        #                 <p style="color: red;">This is the <i>second</i> text with custom style.</p>
-        #                 <p align="right">This is the <u>third</u> text aligned to the right.</p>
-        #                 """
-        #self.ffBlock.setText(multi_text)
-        #self.pageControlPanel.layout.addWidget(self.ffBlock)
 
         self.blockffContainerCP = QWidget()
         self.blockffContainerCP_layout = QVBoxLayout(self.blockffContainerCP)
         self.pageCP_generateblockFF()
         self.pageControlPanel.layout.addWidget(self.blockffContainerCP)
-
-
 
 
         self.pageControlPanel.setLayout(self.pageControlPanel.layout)
@@ -262,7 +248,8 @@ class InformationWindow(QtWidgets.QMainWindow):
             font.setBold(True)
 
             blockff = QWidget(self.blockffContainerCP)
-            pixmap = QPixmap(self.ffblockCP_img1)
+            #pixmap = QPixmap(self.ffblockCP_img1)
+            pixmap = self.ffblockCP_img1
             pixmap = pixmap.scaledToWidth(100)  # Adjust width as needed
             title_label_img = QLabel(blockff)
             title_label_img.setPixmap(pixmap)
@@ -293,7 +280,9 @@ class InformationWindow(QtWidgets.QMainWindow):
             font.setBold(False)
 
             blockff = QWidget(self.blockffContainerCP)
-            pixmap = QPixmap(self.ffblockCP_img2)
+            #pixmap = QPixmap(self.ffblockCP_img2)
+            pixmap = self.ffblockCP_img2
+
             pixmap = pixmap.scaledToWidth(100)  # Adjust width as needed
             title_label_img = QLabel(blockff)
             title_label_img.setPixmap(pixmap)
@@ -334,6 +323,7 @@ class InformationWindow(QtWidgets.QMainWindow):
         for row in range(1,21):
             for col in range(0,4):
                 if col == 0:
+                    print(f'currenttime{self.currentTime}row{row}')
                     value  = self.database.getffNDictInfo(self.currentTime,row,"status")
                     #item = QTableWidgetItem(value)
                     item = self.tableVisualizeSetting(value)
@@ -342,21 +332,23 @@ class InformationWindow(QtWidgets.QMainWindow):
                     self.table_widget_Node.resizeColumnsToContents()
                 elif col == 1:
                     value  = self.database.getffNDictInfo(self.currentTime,row,"FFPercentage")
-                    item = QTableWidgetItem(str(value))
+                    value = (1-value) *100
+                    item = QTableWidgetItem(str(value)+ "%")
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                     self.table_widget_Node.setItem(row-1, col, item)
                     self.table_widget_Node.resizeColumnsToContents()
                 elif col == 2:
                     value  = self.database.getffNDictInfo(self.currentTime,row,"firePercentage")
-                    item = QTableWidgetItem(str(value))
+                    value = (1-value) *100
+                    item = QTableWidgetItem(str(value)+ "%")
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                     self.table_widget_Node.setItem(row-1, col, item)
                     self.table_widget_Node.resizeColumnsToContents()
-                # elif col == 3:
-                #     value  = self.database.getffNDictInfo(self.currentTime,row,"status")
-                #     item = QTableWidgetItem(value)
-                #     self.table_widget_Node.setItem(row-1, col, item)
-                #     self.table_widget_Node.resizeColumnsToContents()
+                elif col == 3:
+                    value  = self.database.getffNDictInfo(self.currentTime,row,"burntime")
+                    item = QTableWidgetItem(str(value))
+                    self.table_widget_Node.setItem(row-1, col, item)
+                    self.table_widget_Node.resizeColumnsToContents()
 
     '''------------------------------page: Firefighter Information------------------------------------'''
     #step 1
@@ -364,7 +356,8 @@ class InformationWindow(QtWidgets.QMainWindow):
         blockff = QWidget()
         layout = QHBoxLayout(blockff) #全部區塊
         vertical_layout = QVBoxLayout() #左半邊
-        pixmap = QPixmap(image_path)
+        #pixmap = QPixmap(image_path)
+        pixmap = image_path
         self.image_label = QLabel()
         self.image_label.setPixmap(pixmap)
         vertical_layout.addWidget(self.image_label)

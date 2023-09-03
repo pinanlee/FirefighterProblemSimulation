@@ -52,12 +52,31 @@ class Ui_MainWindow(object):
         font.setFamily("Arial Rounded MT Bold")
         self.label.setFont(font)
         self.label.setObjectName("label")
+<<<<<<< HEAD
         '''self.FFlabel = QtWidgets.QLabel(self.centralwidget)
         self.FFlabel.setGeometry(QtCore.QRect(470, 590, 191, 141))
         self.FFlabel.setObjectName("FFlabel")
         self.FFlabel_2 = QtWidgets.QLabel(self.centralwidget)
         self.FFlabel_2.setGeometry(QtCore.QRect(810, 590, 191, 141))
         self.FFlabel_2.setObjectName("FFlabel_2")
+=======
+        from controller import FFNum
+        self.numFF = FFNum
+        self.labelList = []
+        for i in range(self.numFF):
+            self.FFlabel = QtWidgets.QLabel(self.centralwidget)
+            self.FFlabel.setGeometry(QtCore.QRect(470, 590, 50, 50))
+            self.labelList.append(self.FFlabel)
+        # self.FFlabel = QtWidgets.QLabel(self.centralwidget)
+        # self.FFlabel.setGeometry(QtCore.QRect(470, 590, 191, 141))
+        # self.FFlabel.setObjectName("FFlabel")
+        # self.FFlabel_2 = QtWidgets.QLabel(self.centralwidget)
+        # self.FFlabel_2.setGeometry(QtCore.QRect(810, 590, 191, 141))
+        # self.FFlabel_2.setObjectName("FFlabel_2")
+        # self.FFlabel_3 = QtWidgets.QLabel(self.centralwidget)
+        # self.FFlabel_3.setGeometry(QtCore.QRect(810, 590, 191, 141))
+        # self.FFlabel_3.setObjectName("FFlabel_3")
+>>>>>>> 6a91006f35f0dee3d276506145015e43398b44d7
         self.statuslabel = QtWidgets.QLabel(self.centralwidget)
         self.statuslabel.setGeometry(QtCore.QRect(590, 620, 181, 71))'''
         font = QtGui.QFont()
@@ -121,16 +140,19 @@ class Ui_MainWindow(object):
         self.node_info_label.setText(_translate("MainWindow", "TextLabel"))
         self.timeIndexLabel.setText(_translate("MainWindow", "t=0"))
         self.label.setText(_translate("MainWindow", "<html><head/><body><p>Instructions:</p><p>Enter:  move to next time</p><p>C: change selected firefighter</p><p>A, D: change selected node</p><p>Space: Assign firefighter to selected node</p></body></html>"))
+<<<<<<< HEAD
         '''self.FFlabel.setText(_translate("MainWindow", "TextLabel"))
         self.FFlabel_2.setText(_translate("MainWindow", "TextLabel"))
+=======
+>>>>>>> 6a91006f35f0dee3d276506145015e43398b44d7
         self.statuslabel.setText(_translate("MainWindow", "TextLabel"))
         self.statuslabel_2.setText(_translate("MainWindow", "TextLabel"))'''
         self.networkLabel.setText(_translate("MainWindow", "Hybrid network"))
         self.menuinfromations.setTitle(_translate("MainWindow", "Status"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuSettings.setTitle(_translate("MainWindow", "Settings"))
-        self.actionnodes.setText(_translate("MainWindow", "Nodes"))
-        self.actionAnimation.setText(_translate("MainWindow", "Animation"))
+        self.actionnodes.setText(_translate("MainWindow", "InformationWindow"))
+        self.actionAnimation.setText(_translate("MainWindow", "Firefighter"))
         self.actionNew.setText(_translate("MainWindow", "New"))
 
 

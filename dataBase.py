@@ -14,7 +14,8 @@ class DataBase(QObject):
 
     def __init__(self):
         super().__init__()
-        print("DataBase initializing...")
+        from controller import FFNum
+        self.numFF = FFNum
         self.currentTime = 0
         self.fireNetworkNodeList = self.initList() #fireNetwork 後續簡稱fiN
         self.ffnetworkNodeList = self.initList()   #ffnetwork後續簡稱ffN
@@ -28,7 +29,6 @@ class DataBase(QObject):
         self.ffNDict_info = {}
         self.cNDict_info = {}
         self.ffDict_info = {} # dict for information window
-        self.numFF = 2
         self.ffPosSta = []
         self.ffPosSta = self.initffPosStaList()
         self.numNode = 20
@@ -95,7 +95,8 @@ class DataBase(QObject):
                                  "grass": j.getGrassAmount()  ,
                                  "firePercentage": j.getNodePercentage_Fire(),
                                  "FFPercentage": j.getNodePercentage_FF(),
-                                 "idle": j.isIdle()}
+                                 "idle": j.isIdle(),
+                                 "burntime": j.fireMinArrivalTime}
                     dict_time[j.getNum()] = dict_Node
                     if (dict_Node["protect"] == True and dict_Node["water"] > 0 ):
                         dict_Node_info = {"obj": j,
@@ -103,7 +104,8 @@ class DataBase(QObject):
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
                                           "status": "Protected",
-                                          "water": j.getWaterAmount()
+                                          "water": j.getWaterAmount(),
+                                          "burntime": j.fireMinArrivalTime
                                           }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif(dict_Node["idle"] == True):
@@ -112,7 +114,8 @@ class DataBase(QObject):
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
                                           "status": "Idle",
-                                          "water": j.getWaterAmount()
+                                          "water": j.getWaterAmount(),
+                                          "burntime": j.fireMinArrivalTime
                                           }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["protect"] == True and dict_Node["water"] <= 0 ):
@@ -121,7 +124,8 @@ class DataBase(QObject):
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
                                           "status": "Safe",
-                                          "water": j.getWaterAmount()
+                                          "water": j.getWaterAmount(),
+                                          "burntime": j.fireMinArrivalTime
                                           }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["burn"] == True and dict_Node["grass"] > 0 ):
@@ -130,7 +134,8 @@ class DataBase(QObject):
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
                                           "status": "Burned",
-                                          "water": j.getWaterAmount()
+                                          "water": j.getWaterAmount(),
+                                          "burntime": j.fireMinArrivalTime
                                           }
                         dict_time_info[j.getNum()] = dict_Node_info
                     elif (dict_Node["burn"] == True and dict_Node["grass"] <= 0):
@@ -139,7 +144,8 @@ class DataBase(QObject):
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
                                           "status": "Damaged",
-                                          "water": j.getWaterAmount()
+                                          "water": j.getWaterAmount(),
+                                          "burntime": j.fireMinArrivalTime
                                           }
                         dict_time_info[j.getNum()] = dict_Node_info
                     else:
@@ -148,7 +154,8 @@ class DataBase(QObject):
                                           "firePercentage": j.getNodePercentage_Fire(),
                                           "FFPercentage": j.getNodePercentage_FF(),
                                           "status": "Normal",
-                                          "water": j.getWaterAmount()
+                                          "water": j.getWaterAmount(),
+                                          "burntime": j.fireMinArrivalTime
                                           }
                         dict_time_info[j.getNum()] = dict_Node_info
                 dict_main[i] = dict_time
@@ -167,16 +174,16 @@ class DataBase(QObject):
 
             for i in range(self.currentTime + 1):
                 for j in list[i]:
-                    dict_Node = {"obj":j,"num": j.num,"pos":j.curPos().getNum(),"image":j.pixmaploc,"process":j.isProcess(),"travel":j.isTraveling(),"idle":j.isIdle()}
+                    dict_Node = {"obj":j,"num": j.num,"pos":j.curPos().getNum(),"image":j.grab(),"process":j.isProcess(),"travel":j.isTraveling(),"idle":j.isIdle()}
                     dict_time[j.num] = dict_Node
                     if (dict_Node["process"] == True):
-                        dict_Node_info = {"obj": j, "num": j.num, "pos": j.curPos().getNum(), "image": j.pixmaploc,"status": "processing"}
+                        dict_Node_info = {"obj": j, "num": j.num, "pos": j.curPos().getNum(), "image": j.grab(),"status": "processing"}
                         dict_time_info[j.num] = dict_Node_info
                     elif (dict_Node["travel"] == True):
-                        dict_Node_info = {"obj": j, "num": j.num, "pos": j.curPos().getNum(), "image": j.pixmaploc,"status": "travelling"}
+                        dict_Node_info = {"obj": j, "num": j.num, "pos": j.curPos().getNum(), "image": j.grab(),"status": "travelling"}
                         dict_time_info[j.num] = dict_Node_info
                     else:
-                        dict_Node_info = {"obj": j, "num": j.num, "pos": j.curPos().getNum(), "image": j.pixmaploc,"status": "Idel"}
+                        dict_Node_info = {"obj": j, "num": j.num, "pos": j.curPos().getNum(), "image": j.grab(),"status": "Idel"}
                         dict_time_info[j.num] = dict_Node_info
                 dict_main[i] = dict_time
                 dict_main_info[i] = dict_time_info
