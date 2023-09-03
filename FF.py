@@ -25,7 +25,7 @@ class FireFighter(QLabel):
         self.destNode = depot #下一個目的
         self.curMovingArc : dict = None
         self.pathProgress = 0
-
+        self.idleLock = False
         #UI設定
         self.setPixmap(QPixmap("./image/firefighter.png"))
         self.pixmaploc = "./image/firefighter.png"
@@ -42,6 +42,9 @@ class FireFighter(QLabel):
         self.__arrivalTime = 0
         self.curMovingArc = None
         self.pathProgress = 0
+
+    def lock(self):
+        self.idleLock = not self.idleLock
 
     def finishTimeSet(self):
         if(self.isIdle()):
@@ -81,6 +84,8 @@ class FireFighter(QLabel):
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
         self.destNode = self.curPos() if self.destNode == None else self.destNode
+        if(self.idleLock):
+            return False
         if(self.__cumArrivalTime <= timer):
             self.__cumArrivalTime = timer
             prev = self.curPos()

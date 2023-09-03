@@ -3,11 +3,13 @@ from random import Random
 import graphops 
 import graphio
 
-width = 1000
-height = 600
-node = 20
-edges = 30
-radius = 50
+width=1000
+height=500
+node=30
+fire_edges=55
+firefighter_edges=70
+seed=120
+radius=40
 
 def default_seed():
 	import os, struct
@@ -29,11 +31,12 @@ def make_streams(seed):
 		i += 1
 	return streams
 
-def main(opts, seed, st):
-	import random
+def main(st):
 	num_nodes = node
-	random.seed(default_seed())
-	num_edges = random.randint(node, node+10)
+	if st == 'fire':
+		num_edges = fire_edges
+	elif st == 'firefighter':
+		num_edges = firefighter_edges
 	streams = make_streams(seed)
 
 	# first generate some points in the plane, according to our constraints
@@ -51,80 +54,81 @@ def main(opts, seed, st):
 	doubled_edges = graphops.double_up_edges(ext_edges, 0.0, streams['double'])
 
 	# write out to file
-	graphio.write(st, nodes, doubled_edges, seed)
-	print(doubled_edges)
-	# write out debug traces if specified
-	if opts.debug_tris is not None:
-		graphio.write(st, opts.debug_tris, nodes, tri_edges, seed)
-		print(tri_edges)
-	if opts.debug_span is not None:
-		graphio.write(st, opts.debug_span, nodes, span_edges, opts.seed)
-		print(span_edges)
-if __name__=='__main__':
-	import argparse
+	graphio.write(st, nodes, doubled_edges)
+	#print(doubled_edges)
 
+	# write out debug traces if specified -- usually not used
+	# if opts.debug_tris is not None:
+	# 	graphio.write(opts.debug_tris, nodes, tri_edges, opts.seed)
+	# 	print(tri_edges)
+	# if opts.debug_span is not None:
+	# 	graphio.write(opts.debug_span, nodes, span_edges, opts.seed)
+	# 	print(span_edges)
+
+if __name__=='__main__':
+	#import argparse
 	defaults = {
-		"width": 1100,
-		"height": 700,
-		"nodes": 20,
+		"width": 320,
+		"height": 240,
+		"nodes": 10,
 		"edges": None,
-		"radius": 60,
+		"radius": 40,
 		"double": 0.0,
 		"hair": 0.0,
-		"seed": default_seed(),
-		#"seed": 0,
+		#"seed": default_seed(),
+		"seed": 0,
 		"debug_trimode": 'conform',
 		"debug_tris": None,
 		"debug_span": None,
 	}
 
-	# argument types, for input-checking
-	def posint(string):
-		value = int(string)
-		if value <= 0:
-			raise argparse.ArgumentTypeError("positive value expected")
-		return value
+	# # argument types, for input-checking
+	# def posint(string):
+	# 	value = int(string)
+	# 	if value <= 0:
+	# 		raise argparse.ArgumentTypeError("positive value expected")
+	# 	return value
 
-	def nonnegative_int(string):
-		value = int(string)
-		if value < 0:
-			raise argparse.ArgumentTypeError("non-negative value expected")
-		return value
+	# def nonnegative_int(string):
+	# 	value = int(string)
+	# 	if value < 0:
+	# 		raise argparse.ArgumentTypeError("non-negative value expected")
+	# 	return value
 
-	def probability(string):
-		value = float(string)
-		if value < 0.0 or value > 1.0:
-			raise argparse.ArgumentTypeError("value in the range [0.0, 1.0] expected")
-		return value
+	# def probability(string):
+	# 	value = float(string)
+	# 	if value < 0.0 or value > 1.0:
+	# 		raise argparse.ArgumentTypeError("value in the range [0.0, 1.0] expected")
+	# 	return value
 
 	# definition of argument structure
 
-	parser = argparse.ArgumentParser(
-		description="Create random planar graphs, suitable as input to graphviz neato.",
-		epilog="Note that sometimes neato decides to pick a nonplanar embedding.  Try giving neato the -n1 argument to use the node coordinates specified by this script, which are always planar but might not look as pretty."
-	)
-	parser.add_argument("--width", metavar="SIZE", type=posint, required=False, help="Width of the field on which to place points.  neato might choose a different width for the output image.")
-	parser.add_argument("--height", metavar="SIZE", type=posint, required=False, help="Height of the field on which to place points.  As above, neato might choose a different size.")
-	parser.add_argument("--nodes", metavar="NUM", type=posint, required=False, help="Number of nodes to place.")
-	parser.add_argument("--edges", metavar="NUM", type=posint, required=False, help="Number of edges to use for connections.  Double edges aren't counted.")
-	parser.add_argument("--radius", metavar="SIZE", type=nonnegative_int, required=False, help="Nodes will not be placed within this distance of each other.  Default %d." % defaults["radius"])
-	parser.add_argument("--double", metavar="CHANCE", type=probability, required=False, help="Probability of an edge being doubled.  Ranges from 0.00 to 1.00.  Default %.2f." % defaults["double"])
-	parser.add_argument("--hair", metavar="AMOUNT", type=probability, required=False, help="Adjustment factor to favour dead-end nodes.  Ranges from 0.00 (least hairy) to 1.00 (most hairy).  Some dead-ends may exist even with a low hair factor.  Default %.2f." % defaults["hair"])
-	parser.add_argument("--seed", metavar="NUMBER", type=int, required=False, help="Seed for the random number generator.  You can check the output file to see what seed was used.")
-	parser.add_argument("--debug-trimode", type=str, choices=['pyhull', 'triangle', 'conform'], required=False, help="Triangulation mode to generate the initial triangular graph.  Default is conform.")
-	parser.add_argument("--debug-tris", metavar="FILENAME", type=str, required=False, help="If a filename is specified here, the initial triangular graph will be saved as a graph for inspection.")
-	parser.add_argument("--debug-span", metavar="FILENAME", type=str, required=False, help="If a filename is specified here, the spanning tree will be saved as a graph for inspection.")
-	#parser.add_argument("filename", type=str, help="The graphviz output will be written to this file.")
+	# parser = argparse.ArgumentParser(
+	# 	description="Create random planar graphs, suitable as input to graphviz neato.",
+	# 	epilog="Note that sometimes neato decides to pick a nonplanar embedding.  Try giving neato the -n1 argument to use the node coordinates specified by this script, which are always planar but might not look as pretty."
+	# )
+	# parser.add_argument("--width", metavar="SIZE", type=posint, required=False, help="Width of the field on which to place points.  neato might choose a different width for the output image.")
+	# parser.add_argument("--height", metavar="SIZE", type=posint, required=False, help="Height of the field on which to place points.  As above, neato might choose a different size.")
+	# parser.add_argument("--nodes", metavar="NUM", type=posint, required=False, help="Number of nodes to place.")
+	# parser.add_argument("--edges", metavar="NUM", type=posint, required=False, help="Number of edges to use for connections.  Double edges aren't counted.")
+	# parser.add_argument("--radius", metavar="SIZE", type=nonnegative_int, required=False, help="Nodes will not be placed within this distance of each other.  Default %d." % defaults["radius"])
+	# parser.add_argument("--double", metavar="CHANCE", type=probability, required=False, help="Probability of an edge being doubled.  Ranges from 0.00 to 1.00.  Default %.2f." % defaults["double"])
+	# parser.add_argument("--hair", metavar="AMOUNT", type=probability, required=False, help="Adjustment factor to favour dead-end nodes.  Ranges from 0.00 (least hairy) to 1.00 (most hairy).  Some dead-ends may exist even with a low hair factor.  Default %.2f." % defaults["hair"])
+	# parser.add_argument("--seed", metavar="NUMBER", type=int, required=False, help="Seed for the random number generator.  You can check the output file to see what seed was used.")
+	# parser.add_argument("--debug-trimode", type=str, choices=['pyhull', 'triangle', 'conform'], required=False, help="Triangulation mode to generate the initial triangular graph.  Default is conform.")
+	# parser.add_argument("--debug-tris", metavar="FILENAME", type=str, required=False, help="If a filename is specified here, the initial triangular graph will be saved as a graph for inspection.")
+	# parser.add_argument("--debug-span", metavar="FILENAME", type=str, required=False, help="If a filename is specified here, the spanning tree will be saved as a graph for inspection.")
+	# #parser.add_argument("filename", type=str, help="The graphviz output will be written to this file.")
 
 	# set defaults and parse!
-	parser.set_defaults(**defaults)
-	options = parser.parse_args()
+	#parser.set_defaults(**defaults)
+	#options = parser.parse_args()
 
 	# post-twiddling of arguments, and cross-checking
-	if options.edges is None:
-		options.edges = int(options.nodes * 1.25)
-	options.edges = max(options.edges, options.nodes-1) # necessary to avoid a disjoint graph
-	a = default_seed()
+	# if options.edges is None:
+	# 	options.edges = int(options.nodes * 1.25)
+	# options.edges = max(options.edges, options.nodes-1) # necessary to avoid a disjoint graph
+
 	# run!
-	main(options, a, "FF")
-	main(options, a, "fire")
+	main("firefighter")
+	main("fire")

@@ -19,12 +19,6 @@ from informationWindow import  InformationWindow
 from results import resultsWindow
 import sys
 
-'''
-information table跑不出來 
-
-提示視窗有誤
-'''
-
 FFNum = 2
 
 class MainWindow_controller(QtWidgets.QMainWindow):
@@ -62,8 +56,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def setup_control(self):
         def initNetwork(): #建立network class和node
             self.ui.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
-            self.FFnetwork = Network("adjacent data -- ff.xlsx", "coordinates data.xlsx")
-            self.fireNetwork = Network("adjacent data -- fire.xlsx", "coordinates data.xlsx")
+            self.FFnetwork = Network("G30_fire_route.xlsx", "G30_nodeInformation.xlsx")
+            self.fireNetwork = Network("G30_firefighter_route.xlsx", "G30_nodeInformation.xlsx")
             for i in self.FFnetwork.nodeList:
                 node = Node(self.ui.centralwidget, i)
                 node.clicked.connect(self.choose)
@@ -83,10 +77,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.descriptionAnimate("choose vertices to save")
             self.ui.node_info_label.setVisible(False)
             self.nodeList[self.focusIndex].setFocus()
-            self.labels = [self.ui.FFlabel, self.ui.FFlabel_2]
+            '''self.labels = [self.ui.FFlabel, self.ui.FFlabel_2]
             self.statusLabels = [self.ui.statuslabel,self.ui.statuslabel_2]
             self.ui.FFlabel.setPixmap(QPixmap("./image/firefighter.png"))
-            self.ui.FFlabel_2.setPixmap(QPixmap("./image/fireman.png"))
+            self.ui.FFlabel_2.setPixmap(QPixmap("./image/fireman.png"))'''
         initUI()
         self.showInformationWindow()
 
@@ -241,6 +235,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.newNetwork()
         elif(a0.key() == Qt.Key_Q):
             self.finish()
+        elif(a0.key() == Qt.Key_L):
+            self.firefighterList[self.FFindex].lock()
+            if(self.firefighterList[self.FFindex].idleLock):
+                self.descriptionAnimate("FF {} : idle locked".format(self.FFindex+1))
+            else:
+                self.descriptionAnimate("FF {} : idle unlocked".format(self.FFindex+1))
         self.updateFFStatus()
 
     def newNetwork(self):
@@ -354,8 +354,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.nw.pageCP_generateblockFF()
 
 
-
-
     def selectFireFighter(self): #切換選擇消防員
         self.prevFFindex = self.FFindex
         self.FFindex = (self.FFindex + 1) % self.firefighterNum
@@ -375,7 +373,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in range(self.firefighterNum):
             opacity = 1 if i == self.FFindex else 0.3
             setOpacity(opacity, self.firefighterList[i])
-            setOpacity(opacity, self.labels[i])
+            #setOpacity(opacity, self.labels[i])
         setOpacity(1, self.firefighterList[self.FFindex])
 
     def printStatus(func):
@@ -521,5 +519,4 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.nodeList = self.db.controllerNodeList[self.currentTime]
         self.updateFFStatus()
         self.updateMinTime()
-        self.syncFireMinArrivalTime()
 
