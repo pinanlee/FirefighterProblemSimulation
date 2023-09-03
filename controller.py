@@ -50,12 +50,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
         global FFNum
+        uic.loadUi("UIv2.ui",self)
+        self.setStyleSheet("background-color: rgb(100, 100, 100);")
+        
         if os.path.exists("FFInfo.json"):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
             FFNum = int(data["FFnumber"])
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
         self.db = DataBase()
         self.nw = InformationWindow(self.db)
         self.firefighterNum = FFNum
@@ -67,11 +68,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     '''------------------------------------初始化--------------------------------------------------------'''
     def setup_control(self):
         def initNetwork(): #建立network class和node
-            self.ui.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
+            self.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
             self.FFnetwork = Network("G30_fire_route.xlsx", "G30_nodeInformation.xlsx")
             self.fireNetwork = Network("G30_firefighter_route.xlsx", "G30_nodeInformation.xlsx")
             for i in self.FFnetwork.nodeList:
-                node = Node(self.ui.centralwidget, i)
+                node = Node(self.centralwidget, i)
                 node.clicked.connect(self.choose)
                 self.nodeList.append(node)
         initNetwork()
@@ -83,16 +84,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.focusIndex = len(self.nodeList) - 1
             opacity_effect = QGraphicsOpacityEffect()
             opacity_effect.setOpacity(0.7)
-            self.ui.descriptionLabel.setGraphicsEffect(opacity_effect)
-            self.ui.actionnodes.triggered.connect(self.showInformationWindow)
-            self.ui.actionAnimation.triggered.connect(self.showFFWindow)
-            self.descriptionAnimate("choose vertices to save")
-            self.ui.node_info_label.setVisible(False)
+            self.descriptionLabel.setGraphicsEffect(opacity_effect)
+            self.actionProblem.triggered.connect(self.showProblem)
+            self.actionControls.triggered.connect(self.showControls)
+            self.actionAnimation.triggered.connect(self.showFFWindow)
+            self.actionNew.triggered.connect(self.newNetwork)
+            #self.descriptionAnimate("choose vertices to save")
+            self.node_info_label.setVisible(False)
             self.nodeList[self.focusIndex].setFocus()
-            '''self.labels = [self.ui.FFlabel, self.ui.FFlabel_2]
-            self.statusLabels = [self.ui.statuslabel,self.ui.statuslabel_2]
-            self.ui.FFlabel.setPixmap(QPixmap("./image/firefighter.png"))
-            self.ui.FFlabel_2.setPixmap(QPixmap("./image/fireman.png"))'''
 
         initUI()
         self.showInformationWindow()
@@ -126,7 +125,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     data = json.load(file)
                 self.FFInfoDict = data["FFinfo"]
                 for i in range(self.firefighterNum):
-                    ff = FireFighter(self.ui.centralwidget, i+1, depot)
+                    ff = FireFighter(self.centralwidget, i+1, depot)
                     ff.FFdoneSignal.connect(self.updateFFStatus)
                     ff.FFprotectSignal.connect(self.updateMinTime)
                     ff.FFprotectSignal.connect(self.networkUpdate)
@@ -145,7 +144,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     i.move_man = int(self.FFInfoDict[tempNum-1]["ts"])
             else:
                 for i in range(self.firefighterNum):
-                    ff = FireFighter(self.ui.centralwidget, i+1, depot)
+                    ff = FireFighter(self.centralwidget, i+1, depot)
                     ff.FFdoneSignal.connect(self.updateFFStatus)
                     ff.FFprotectSignal.connect(self.updateMinTime)
                     ff.FFprotectSignal.connect(self.networkUpdate)
@@ -160,6 +159,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         self.selectFireFighter()
         self.updateFFStatus()
+        self.instruct.raise_()
+        self.yesButton.raise_()
+        self.noButton.raise_()
+        self.yesButton.clicked.connect(self.intoGame)
+        self.noButton.clicked.connect(self.intoGame)
 
         def databaseInit():
             self.nw.numFF = self.firefighterNum
@@ -168,6 +172,38 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         databaseInit()
         self.dataRecord()
+
+    def intoGame(self):
+        self.setStyleSheet("")
+        self.instruct.setGeometry(-200,-200,400,200)
+        self.yesButton.setGeometry(-200,-200,101,51)
+        self.noButton.setGeometry(-200,-200,101,51)
+        
+    def showProblem(self):
+        self.instruct.setGeometry(300,50,600,600)
+        font = QtGui.QFont()
+        font.setFamily("Arial Rounded MT Bold")
+        font.setPointSize(10)
+        self.instruct.setFont(font)
+        self.instruct.setText("This is a firefighter simulation problem")
+        self.noButton.setGeometry(799,599,101,51)
+        self.noButton.setText("back to game")
+
+    def showControls(self):
+        self.instruct.setGeometry(300,50,600,600)
+        font = QtGui.QFont()
+        font.setFamily("Arial Rounded MT Bold")
+        font.setPointSize(10)
+        self.instruct.setFont(font)
+        self.instruct.setAlignment(QtCore.Qt.AlignLeft)
+        self.instruct.setText("Instructions:\n\n"+
+        "Enter: \n\tMove to next time\n"+
+        "C: \n\tChange selected firefighter\n"+
+        "A, D: \n\tChange selected node\n"+
+        "Space: \n\tAssign firefighter to selected node\n"
+        +"S: \n\tChange the view of network\n")
+        self.noButton.setGeometry(799,599,101,51)
+        self.noButton.setText("back to game")
 
     '''---------------------------------------firefighter signal-----------------------------------------'''
     def networkUpdate(self,value): #FF network有節點被保護時呼叫，更新fire network
@@ -252,7 +288,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
-        self.ui.node_info_label.setVisible(False)
+        self.node_info_label.setVisible(False)
         if(a0.key()==Qt.Key_Enter-1):
             self.nextTime()
         elif(a0.key() == Qt.Key_A):
@@ -265,7 +301,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.selectFireFighter()
             #self.iw_pageCP_FF()
         elif(a0.key() == Qt.Key_X):
-            if(not self.ui.node_info_label.isVisible()):
+            if(not self.node_info_label.isVisible()):
                 self.InfoShow()
         elif(a0.key() == Qt.Key_S):
                 self.networkChange()
@@ -313,18 +349,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def networkChange(self):
         if(self.showFFnetwork and self.showFireNetwork):
             self.showFireNetwork = False
-            self.ui.networkLabel.setText("FF network")
+            self.networkLabel.setText("FF network")
         elif(self.showFFnetwork and not self.showFireNetwork):
             self.showFFnetwork = False
             self.showFireNetwork = True
-            self.ui.networkLabel.setText("Fire network")
+            self.networkLabel.setText("Fire network")
         elif(not self.showFFnetwork and self.showFireNetwork):
             self.showFFnetwork = True
-            self.ui.networkLabel.setText("Hybrid network")
+            self.networkLabel.setText("Hybrid network")
 
     def nextAnim(self):
         self.anim.stop()
-        self.anim = QPropertyAnimation(self.ui.descriptionLabel, b"pos")
+        self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
         self.anim.setStartValue(QPoint(10, 240))
         self.anim.setEndValue(QPoint(1200, 240))
         self.anim.setDuration(250)
@@ -333,22 +369,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         QTimer.singleShot(800, start)  
 
     def descriptionAnimate(self, text):
-        self.ui.descriptionLabel.setText(text)
-        self.anim = QPropertyAnimation(self.ui.descriptionLabel, b"pos")
+        self.descriptionLabel.setText(text)
+        self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
         self.anim.setEndValue(QPoint(10, 240))
         self.anim.setDuration(250)
         self.anim.start()
 
         self.anim.finished.connect(self.nextAnim)      
-        self.ui.descriptionLabel.raise_()
+        self.descriptionLabel.raise_()
 
     def InfoShow(self): #查看node資訊
         #移動label位置
         geo = self.nodeList[self.focusIndex].geometry()
-        self.ui.node_info_label.setVisible(True)
-        pos = QtCore.QRect(geo.x(), geo.y() + geo.width(), self.ui.node_info_label.frameRect().width(), self.ui.node_info_label.frameRect().height())
-        self.ui.node_info_label.setGeometry(pos)
-        self.ui.node_info_label.raise_()
+        self.node_info_label.setVisible(True)
+        pos = QtCore.QRect(geo.x(), geo.y() + geo.width(), self.node_info_label.frameRect().width(), self.node_info_label.frameRect().height())
+        self.node_info_label.setGeometry(pos)
+        self.node_info_label.raise_()
 
         #處理顯示文字
         infotext = self.checkStatus(self.nodeList[self.focusIndex]) #檢查指定消防員是否可以移動到指定點
@@ -358,7 +394,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             text += "None"
         else:
             text += str(self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex])["length"])
-        self.ui.node_info_label.setText(text)
+        self.node_info_label.setText(text)
 
     def iw_pageCP_node(self):
         #part node
@@ -481,7 +517,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
             self.__opacitySet()
-            self.ui.timeIndexLabel.setText("t= "+str(self.currentTime))
+            self.timeIndexLabel.setText("t= "+str(self.currentTime))
 
         for i in self.firefighterList:
             if(not (i.isTraveling() or i.isProcess())):

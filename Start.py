@@ -2,21 +2,17 @@
 # coding: utf-8
 import os
 
-# In[ ]:
-
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QPushButton
-
-from controller import MainWindow_controller
-
+#from controller import MainWindow_controller
+from titleScreen import titleScreen
 
 
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow_controller()
+    #window = MainWindow_controller()
+    window = titleScreen()
     window.show()
     sys.exit(app.exec_())
 
