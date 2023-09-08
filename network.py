@@ -18,7 +18,6 @@ class Network:
         df = pd.read_excel(adjFile)
         for j in df.iloc:
             self.adjList[int(j["i"])].append([int(j["j"]), 1])
-            self.adjList[int(j["j"])].append([int(j["i"]), 1])  
         self.connect()
     
     def connect(self):

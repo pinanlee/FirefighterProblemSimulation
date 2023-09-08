@@ -21,7 +21,7 @@ class FireFighter(QLabel):
         self.__travel = False #是否在移動
         self.__process = False #是否在澆水
         self.rate_extinguish = 2 #澆水速率
-        self.move_man = 2 #移動速率
+        self.move_man = 20 #移動速率
         self.destNode = depot #下一個目的
         self.curMovingArc : dict = None
         self.pathProgress = 0
@@ -83,9 +83,12 @@ class FireFighter(QLabel):
         return not (self.__select or self.__process or self.__travel or self.destNode != None)
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
+        print("path: {}".format(self.pathProgress))
         self.destNode = self.curPos() if self.destNode == None else self.destNode
+        print("idle lock: {}".format(self.idleLock))
         if(self.idleLock):
             return False
+        print(self.__arrivalTime)
         if(self.__cumArrivalTime <= timer):
             self.__cumArrivalTime = timer
             prev = self.curPos()
@@ -102,8 +105,10 @@ class FireFighter(QLabel):
             self.__calculateCurrentCapacity()
             self.__wateringVisualize()
             self.setGeometry(QRect(self.curPos().x() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.x() - self.curPos().x())), self.curPos().y() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.y() - self.curPos().y())),self.curPos().width()+ 20, self.curPos().height()+20))
+            print(self.curPos().nodeController.getArcs())
             for i in self.curPos().nodeController.getArcs(): #對於現在位置的相鄰點
                 if(i["node"] == self.destNode.nodeController):
+                    print("??")
                     self.__calculateCurrentFFArrive(i)
         return False
 

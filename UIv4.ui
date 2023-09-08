@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1924</width>
-    <height>786</height>
+    <width>1923</width>
+    <height>964</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,11 +92,14 @@
    <widget class="QLabel" name="backgroundLabel">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>300</x>
       <y>0</y>
-      <width>1921</width>
-      <height>561</height>
+      <width>1621</width>
+      <height>751</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid blue;</string>
     </property>
     <property name="text">
      <string/>
@@ -109,7 +112,7 @@
     <property name="geometry">
      <rect>
       <x>870</x>
-      <y>500</y>
+      <y>600</y>
       <width>311</width>
       <height>71</height>
      </rect>
@@ -130,13 +133,52 @@
      <number>0</number>
     </property>
    </widget>
-   <widget class="QLabel" name="instruct">
+   <widget class="QLabel" name="hintLabel">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>200</y>
-      <width>400</width>
-      <height>200</height>
+      <x>770</x>
+      <y>170</y>
+      <width>311</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+border: 2px solid blue;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="backButton">
+    <property name="geometry">
+     <rect>
+      <x>1810</x>
+      <y>0</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Back to game</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>760</y>
+      <width>211</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -145,79 +187,78 @@
       <pointsize>14</pointsize>
      </font>
     </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: white;border: 2px solid blue;</string>
-    </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Do you need&lt;/p&gt;&lt;p&gt;step by step turtorial?&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignHCenter|Qt::AlignTop</set>
-    </property>
-    <property name="margin">
-     <number>150</number>
+     <string>Total value: </string>
     </property>
    </widget>
-   <widget class="QPushButton" name="yesButton">
+   <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>330</y>
-      <width>101</width>
-      <height>51</height>
+      <x>320</x>
+      <y>810</y>
+      <width>441</width>
+      <height>23</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: white;border: 2px solid blue;</string>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
     </property>
-    <property name="text">
-     <string>Yes</string>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="value">
+     <number>100</number>
+    </property>
+    <property name="invertedAppearance">
+     <bool>false</bool>
+    </property>
+    <property name="format">
+     <string>%v</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="noButton">
+   <widget class="QLabel" name="consoleLabel">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>330</y>
-      <width>101</width>
-      <height>51</height>
+      <x>800</x>
+      <y>770</y>
+      <width>631</width>
+      <height>81</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>16</pointsize>
+     </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: white;border: 2px solid blue;</string>
+     <string notr="true">border: 2px solid blue;</string>
     </property>
     <property name="text">
-     <string>No</string>
+     <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QTabWidget" name="tabWidget">
+   <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>560</y>
-      <width>1191</width>
-      <height>181</height>
+      <x>20</x>
+      <y>690</y>
+      <width>261</width>
+      <height>61</height>
      </rect>
     </property>
-    <property name="tabShape">
-     <enum>QTabWidget::Rounded</enum>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>16</pointsize>
+     </font>
     </property>
-    <property name="currentIndex">
-     <number>0</number>
+    <property name="text">
+     <string>Now assigning:</string>
     </property>
-    <property name="elideMode">
-     <enum>Qt::ElideNone</enum>
-    </property>
-    <widget class="QWidget" name="tab">
-     <attribute name="title">
-      <string>Control Panel</string>
-     </attribute>
-    </widget>
-    <widget class="QWidget" name="tab_2">
-     <attribute name="title">
-      <string>Node Information</string>
-     </attribute>
-    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -225,7 +266,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1924</width>
+     <width>1923</width>
      <height>18</height>
     </rect>
    </property>
