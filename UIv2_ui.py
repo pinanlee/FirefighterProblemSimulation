@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+<<<<<<< HEAD
 # Form implementation generated from reading ui file 'c:\Users\Yung-li\Desktop\ff\pull\UIv2.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
@@ -17,6 +18,22 @@ class Ui_MainWindow(object):
         MainWindow.resize(1924, 786)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+=======
+# Form implementation generated from reading ui file 'UIv.2.ui'
+#
+# Created by: PyQt5 UI code generator 5.9.2
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_MainWindow(object):
+    
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(1195, 786)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.centralwidget.setObjectName("centralwidget")
         self.descriptionLabel = QtWidgets.QLabel(self.centralwidget)
         self.descriptionLabel.setGeometry(QtCore.QRect(-1200, 240, 1091, 61))
@@ -44,6 +61,7 @@ class Ui_MainWindow(object):
         self.timeIndexLabel.setFont(font)
         self.timeIndexLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.timeIndexLabel.setObjectName("timeIndexLabel")
+<<<<<<< HEAD
         self.backgroundLabel = QtWidgets.QLabel(self.centralwidget)
         self.backgroundLabel.setGeometry(QtCore.QRect(0, 0, 1921, 561))
         self.backgroundLabel.setText("")
@@ -93,6 +111,37 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.menubar.sizePolicy().hasHeightForWidth())
         self.menubar.setSizePolicy(sizePolicy)
+=======
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(20, 570, 391, 161))
+        font = QtGui.QFont()
+        font.setFamily("Arial Rounded MT Bold")
+        self.label.setFont(font)
+        self.label.setObjectName("label")
+        self.FFlabel = QtWidgets.QLabel(self.centralwidget)
+        self.FFlabel.setGeometry(QtCore.QRect(470, 590, 191, 141))
+        self.FFlabel.setObjectName("FFlabel")
+        self.FFlabel_2 = QtWidgets.QLabel(self.centralwidget)
+        self.FFlabel_2.setGeometry(QtCore.QRect(810, 590, 191, 141))
+        self.FFlabel_2.setObjectName("FFlabel_2")
+        self.statuslabel = QtWidgets.QLabel(self.centralwidget)
+        self.statuslabel.setGeometry(QtCore.QRect(590, 620, 181, 71))
+        font = QtGui.QFont()
+        font.setFamily("Arial Rounded MT Bold")
+        font.setPointSize(20)
+        self.statuslabel.setFont(font)
+        self.statuslabel.setObjectName("statuslabel")
+        self.statuslabel_2 = QtWidgets.QLabel(self.centralwidget)
+        self.statuslabel_2.setGeometry(QtCore.QRect(930, 620, 181, 71))
+        font = QtGui.QFont()
+        font.setFamily("Arial Rounded MT Bold")
+        font.setPointSize(20)
+        self.statuslabel_2.setFont(font)
+        self.statuslabel_2.setObjectName("statuslabel_2")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1195, 18))
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.menubar.setObjectName("menubar")
         self.menuinfromations = QtWidgets.QMenu(self.menubar)
         self.menuinfromations.setObjectName("menuinfromations")
@@ -104,16 +153,25 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+<<<<<<< HEAD
         self.actionProblem = QtWidgets.QAction(MainWindow)
         self.actionProblem.setObjectName("actionProblem")
+=======
+        self.actionnodes = QtWidgets.QAction(MainWindow)
+        self.actionnodes.setObjectName("actionnodes")
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.actionAnimation = QtWidgets.QAction(MainWindow)
         self.actionAnimation.setObjectName("actionAnimation")
         self.actionNew = QtWidgets.QAction(MainWindow)
         self.actionNew.setObjectName("actionNew")
+<<<<<<< HEAD
         self.actionControls = QtWidgets.QAction(MainWindow)
         self.actionControls.setObjectName("actionControls")
         self.menuinfromations.addAction(self.actionProblem)
         self.menuinfromations.addAction(self.actionControls)
+=======
+        self.menuinfromations.addAction(self.actionnodes)
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.menuFile.addAction(self.actionNew)
         self.menuSettings.addAction(self.actionAnimation)
         self.menubar.addAction(self.menuFile.menuAction())
@@ -121,7 +179,10 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuSettings.menuAction())
 
         self.retranslateUi(MainWindow)
+<<<<<<< HEAD
         self.tabWidget.setCurrentIndex(0)
+=======
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -130,6 +191,7 @@ class Ui_MainWindow(object):
         self.descriptionLabel.setText(_translate("MainWindow", "TextLabel"))
         self.node_info_label.setText(_translate("MainWindow", "TextLabel"))
         self.timeIndexLabel.setText(_translate("MainWindow", "t=0"))
+<<<<<<< HEAD
         self.networkLabel.setText(_translate("MainWindow", "Hybrid network"))
         self.instruct.setText(_translate("MainWindow", "<html><head/><body><p>Do you need</p><p>step by step turtorial?</p></body></html>"))
         self.yesButton.setText(_translate("MainWindow", "Yes"))
@@ -143,3 +205,27 @@ class Ui_MainWindow(object):
         self.actionAnimation.setText(_translate("MainWindow", "Animation"))
         self.actionNew.setText(_translate("MainWindow", "New"))
         self.actionControls.setText(_translate("MainWindow", "Controls"))
+=======
+        self.label.setText(_translate("MainWindow", "<html><head/><body><p>Instructions:</p><p>Enter:  move to next time</p><p>C: change selected firefighter</p><p>A, D: change selected node</p><p>Space: Assign firefighter to selected node</p></body></html>"))
+        self.FFlabel.setText(_translate("MainWindow", "TextLabel"))
+        self.FFlabel_2.setText(_translate("MainWindow", "TextLabel"))
+        self.statuslabel.setText(_translate("MainWindow", "TextLabel"))
+        self.statuslabel_2.setText(_translate("MainWindow", "TextLabel"))
+        self.menuinfromations.setTitle(_translate("MainWindow", "Status"))
+        self.menuFile.setTitle(_translate("MainWindow", "File"))
+        self.menuSettings.setTitle(_translate("MainWindow", "Settings"))
+        self.actionnodes.setText(_translate("MainWindow", "Nodes"))
+        self.actionAnimation.setText(_translate("MainWindow", "Animation"))
+        self.actionNew.setText(_translate("MainWindow", "New"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e

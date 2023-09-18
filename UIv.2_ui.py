@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+<<<<<<< HEAD
 # Form implementation generated from reading ui file 'c:\Users\Yung-li\Desktop\ff\pull\UIv.2.ui'
+=======
+# Form implementation generated from reading ui file 'UIv.2.ui'
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -59,13 +63,18 @@ class Ui_MainWindow(object):
         self.statuslabel.setGeometry(QtCore.QRect(590, 620, 181, 71))
         font = QtGui.QFont()
         font.setFamily("Arial Rounded MT Bold")
+<<<<<<< HEAD
         font.setPointSize(16)
+=======
+        font.setPointSize(20)
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.statuslabel.setFont(font)
         self.statuslabel.setObjectName("statuslabel")
         self.statuslabel_2 = QtWidgets.QLabel(self.centralwidget)
         self.statuslabel_2.setGeometry(QtCore.QRect(930, 620, 181, 71))
         font = QtGui.QFont()
         font.setFamily("Arial Rounded MT Bold")
+<<<<<<< HEAD
         font.setPointSize(16)
         self.statuslabel_2.setFont(font)
         self.statuslabel_2.setObjectName("statuslabel_2")
@@ -84,6 +93,14 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1195, 18))
+=======
+        font.setPointSize(20)
+        self.statuslabel_2.setFont(font)
+        self.statuslabel_2.setObjectName("statuslabel_2")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1195, 25))
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.menubar.setObjectName("menubar")
         self.menuinfromations = QtWidgets.QMenu(self.menubar)
         self.menuinfromations.setObjectName("menuinfromations")
@@ -95,6 +112,7 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+<<<<<<< HEAD
         self.actionnodes = QtWidgets.QAction(MainWindow)
         self.actionnodes.setObjectName("actionnodes")
         self.actionAnimation = QtWidgets.QAction(MainWindow)
@@ -104,6 +122,28 @@ class Ui_MainWindow(object):
         self.menuinfromations.addAction(self.actionnodes)
         self.menuFile.addAction(self.actionNew)
         self.menuSettings.addAction(self.actionAnimation)
+=======
+
+        self.actionnodes = QtWidgets.QAction(MainWindow)
+        self.actionnodes.setObjectName("actionnodes")
+
+        self.actionAnimation = QtWidgets.QAction(MainWindow)
+        self.actionAnimation.setObjectName("actionAnimation")
+
+        self.actionNew = QtWidgets.QAction(MainWindow)
+        self.actionNew.setObjectName("actionNew")
+
+        self.actionInformation_Windows = QtWidgets.QAction(MainWindow)
+        self.actionInformation_Windows.setObjectName("actionInformation_Windows")
+
+        self.menuinfromations.addAction(self.actionnodes)
+        self.menuinfromations.addAction(self.actionInformation_Windows)
+
+        self.menuFile.addAction(self.actionNew)
+
+        self.menuSettings.addAction(self.actionAnimation)
+
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuinfromations.menuAction())
         self.menubar.addAction(self.menuSettings.menuAction())
@@ -122,10 +162,27 @@ class Ui_MainWindow(object):
         self.FFlabel_2.setText(_translate("MainWindow", "TextLabel"))
         self.statuslabel.setText(_translate("MainWindow", "TextLabel"))
         self.statuslabel_2.setText(_translate("MainWindow", "TextLabel"))
+<<<<<<< HEAD
         self.networkLabel.setText(_translate("MainWindow", "Hybrid network"))
+=======
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
         self.menuinfromations.setTitle(_translate("MainWindow", "Status"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuSettings.setTitle(_translate("MainWindow", "Settings"))
         self.actionnodes.setText(_translate("MainWindow", "Nodes"))
         self.actionAnimation.setText(_translate("MainWindow", "Animation"))
         self.actionNew.setText(_translate("MainWindow", "New"))
+<<<<<<< HEAD
+=======
+        self.actionInformation_Windows.setText(_translate("MainWindow", "Information Windows"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+>>>>>>> 8d9ef3706cfac9a94427e981d940585d65a6741e
