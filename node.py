@@ -44,6 +44,7 @@ class Node(QtWidgets.QPushButton):
         self.setStyleSheet(f'background-color: rgba(0, 255, 0, {0.1});' + "border: 2px solid blue;")
 
     def depotSetting(self):
+        self.nodeController.style = "background-color: black;"
         self.setStyleSheet("background-color: black;")
         self.nodeController.depotSetting()
 

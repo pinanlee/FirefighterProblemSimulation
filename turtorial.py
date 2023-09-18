@@ -68,7 +68,9 @@ class turtorial(QtWidgets.QMainWindow):
         self.mainWindow = window
         global FFNum
         uic.loadUi("UIv4.ui",self)
-        #self.centralWidget().setGeometry(self.geometry())
+        self.instruct.setGeometry(-100,-300, self.instruct.width(), self.instruct.height())
+        self.yesButton.setGeometry(-100,-300, self.instruct.width(), self.instruct.height())
+        self.noButton.setGeometry(-100,-300, self.instruct.width(), self.instruct.height())
         if os.path.exists("FFInfo.json"):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
@@ -129,7 +131,6 @@ class turtorial(QtWidgets.QMainWindow):
             self.actionAnimation.triggered.connect(self.showFFWindow)
             self.actionNew.triggered.connect(self.newNetwork)
             self.backButton.clicked.connect(self.back)
-            #self.descriptionAnimate("choose vertices to save")
             self.node_info_label.setVisible(False)
             self.nodeList[self.focusIndex].setFocus()
 
@@ -211,11 +212,6 @@ class turtorial(QtWidgets.QMainWindow):
 
     def back(self):
         self.mainWindow.show()
-        self.close()
-
-    def turtorial(self):
-        self.turtorialWindow = turtorial()
-        self.turtorialWindow.show()
         self.close()
 
     def intoGame(self):

@@ -52,10 +52,14 @@ class FireFighter(QLabel):
             self.FFidleSignal.emit(self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
 
+    def getcumArrivalTime(self):
+        return self.__cumArrivalTime
+
     def move(self, timer): #開始移動至目的地
         if(self.destNode == self.curPos()):
             self.curPos().defend()
             self.process()
+            self.curPos().nodeController.burned = False
             self.FFprotectSignal.emit(self.curPos().getNum())
         elif(self.destNode != None):
             self.traveling()
@@ -83,12 +87,9 @@ class FireFighter(QLabel):
         return not (self.__select or self.__process or self.__travel or self.destNode != None)
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
-        print("path: {}".format(self.pathProgress))
         self.destNode = self.curPos() if self.destNode == None else self.destNode
-        print("idle lock: {}".format(self.idleLock))
         if(self.idleLock):
             return False
-        print(self.__arrivalTime)
         if(self.__cumArrivalTime <= timer):
             self.__cumArrivalTime = timer
             prev = self.curPos()
@@ -96,7 +97,8 @@ class FireFighter(QLabel):
             if(prev != self.curPos()):
                 self.curPos().setStyleSheet("")
             if(self.curPos().isDepot()):
-                self.curPos().setStyleSheet("background-color: black;")
+                self.curPos().style = "background-color: black;"
+                self.curPos().setStyleSheet(self.curPos().style)
             self.newPos()
             self.reset()
             self.FFdoneSignal.emit("done")
@@ -105,10 +107,8 @@ class FireFighter(QLabel):
             self.__calculateCurrentCapacity()
             self.__wateringVisualize()
             self.setGeometry(QRect(self.curPos().x() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.x() - self.curPos().x())), self.curPos().y() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.y() - self.curPos().y())),self.curPos().width()+ 20, self.curPos().height()+20))
-            print(self.curPos().nodeController.getArcs())
             for i in self.curPos().nodeController.getArcs(): #對於現在位置的相鄰點
                 if(i["node"] == self.destNode.nodeController):
-                    print("??")
                     self.__calculateCurrentFFArrive(i)
         return False
 
@@ -167,23 +167,28 @@ class FireFighter(QLabel):
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
             opacity = 1 - self.curPos().getNodePercentage_FF()
-            self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 0, {opacity}); color: white;')
+            self.curPos().nodeController.style = f'background-color: rgba(0, 255, 0, {opacity}); color: white;'
+            self.curPos().setStyleSheet(self.curPos().nodeController.style)
     
     def accessibleVisualize(self, timer): #消防員可以前往的點可視化
-        for i in self.curPos().getNeighbors():
+        '''for i in self.curPos().getNeighbors():
             if(not i.isBurned() and not i.isProtected()):
-                i.setStyleSheet("")
+                i.setStyleSheet("")'''
+        if(not self.isTraveling() or not self.isProcess()):
+            for i in (self.curPos().getNeighbors()):
+                if (i.isBurned() == False and i.isProtected() == False):
+                    if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["length"] / self.move_man)):
+                        i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
+            if(not self.curPos().isProtected()):
+                self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
-        for i in (self.curPos().getNeighbors()):
-            if (i.isBurned() == False and i.isProtected() == False):
-                if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["length"] / self.move_man)):
-                    i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
-
-    def closeaccessibleVisualize(self): #用於清除前一個消防員可以前往點的顏色
-        for i in (self.curPos().getNeighbors()):
+    def closeaccessibleVisualize(self, lst): #用於清除前一個消防員可以前往點的顏色
+        '''for i in (self.curPos().getNeighbors()):
             if (i.isBurned() == False and i.isProtected() == False):
                 if (i.getFireMinArrivalTime() >= self.curPos().getArc(i)["length"] / self.move_man):
-                    i.setStyleSheet("")
+                    i.setStyleSheet("")'''
+        for i in lst:
+            i.setStyleSheet(i.nodeController.style)
 
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
         for i in self.curPos().getArcs():

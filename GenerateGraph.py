@@ -3,13 +3,7 @@ from random import Random
 import graphops 
 import graphio
 
-width=1000
-height=500
-node=30
-fire_edges=55
-firefighter_edges=70
-seed=120
-radius=40
+
 
 def default_seed():
 	import os, struct
@@ -20,6 +14,14 @@ def default_seed():
 		# backup seed: this can be imperfect so we don't want it always
 		import time
 		return int(time.time()) | os.getpid()
+
+width=1500
+height=550
+node=30
+fire_edges=55
+firefighter_edges=70
+seed = default_seed()
+radius=40
 
 def make_streams(seed):
 	# since triangulator is specialised and might need its own random stream

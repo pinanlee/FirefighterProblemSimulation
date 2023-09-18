@@ -5,8 +5,8 @@ from PyQt5 import QtWidgets,QtCore,QtGui
 import math
 
 class NodeController():
-    customSignal = pyqtSignal(str)
-    leaveSignal = pyqtSignal(str)
+    '''customSignal = pyqtSignal(str)
+    leaveSignal = pyqtSignal(str)'''
     def __init__(self, i, pos: QtCore.QRect):
         self.pos = pos
         #variables
@@ -27,6 +27,7 @@ class NodeController():
         self.__neighbors = []
         self.__adjArc = []
         self.status = "Normal"
+        self.style = ""
 
     #設置node狀態
     def onFire(self):
@@ -52,7 +53,8 @@ class NodeController():
     def updateGrassAmount(self, remain):
         remain = 0 if remain < 0 else remain
         self.grass_amount = remain
-        self.value = self.initValue * self.getNodePercentage_FF()
+        self.value = self.initValue * (1 - self.getNodePercentage_Fire())
+
 
 
     def updateWaterAmount(self, remain):

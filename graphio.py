@@ -126,8 +126,8 @@ def write_graph(st, nodes, edges):
     
     #save to excel
     for i in range(len(Position)):
-        x_list.append(Position[i][0])
-        y_list.append(Position[i][1])
+        x_list.append(Position[i][0]+300)
+        y_list.append(Position[i][1]+50)
         q.append(3)
         b.append(3)
         h.append(3)
