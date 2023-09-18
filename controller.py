@@ -2,9 +2,10 @@
 # coding: utf-8
 import json
 import os
+from functools import partial
 
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF,pyqtSignal
-from PyQt5.QtWidgets import QGraphicsOpacityEffect,QVBoxLayout
+from PyQt5.QtWidgets import QGraphicsOpacityEffect, QVBoxLayout, QLabel, QSizePolicy, QPushButton, QWidget
 from PyQt5 import QtWidgets, QtCore, QtGui
 import random
 import math
@@ -16,7 +17,7 @@ from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor
 from PyQt5 import uic
 import pandas as pd
 import numpy as np
@@ -68,6 +69,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.setup_control()
         self.window_FFnum = FFnumWindow()
         self.window_FFnum.window_FF.updateFFnumSignal.connect(self.newFFnum)
+        self.block_completelist = []
+
+
 
     '''------------------------------------初始化--------------------------------------------------------'''
     def setup_control(self):
@@ -177,6 +181,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 #self.nodeList[self.focusIndex].setStyleSheet("background-color: black;border: 2px solid blue;")
 
         randomFireAndDepot()
+        self.generateblockFF_gameWindow()
 
         self.selectFireFighter()
         self.updateFFStatus()
@@ -701,6 +706,173 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.window_FFnum.show()
 
 
+    def blockFFContent_gameWindow(self, num):
+        for i in self.firefighterList:
+            if(num == i.num):
+                font = QFont()
+                font.setPointSize(11)
+                font.setBold(True)
+
+                blockff = QWidget()
+                blockff.setObjectName(f'{num}')
+                blockff.setFixedSize(230,115)
+                blockff.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                pixmap = i.grab()
+                title_label_img = QLabel(blockff)
+                title_label_img.setGeometry(10, 10, 85,100)
+
+                title_label_img.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                title_label_img.setStyleSheet(
+                    "QLabel {"
+                    "   border: 2px solid #0078d7;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                scaled_pixmap = pixmap.scaled(title_label_img.width(), title_label_img.height())
+                title_label_img.setPixmap(scaled_pixmap)
+
+                title_label_name_des = QLabel(i.getName(), blockff)
+                title_label_name_des.setFont(font)
+                title_label_name_des.setGeometry(100, 75, 120, 30)
+
+                # temp = str(i.status)
+                # self.title_label_ready_des = QLabel(temp, blockff)
+                # self.title_label_ready_des.setFont(font)
+                # self.title_label_ready_des.setGeometry(100, 25, 120, 35)
+
+        return blockff
+    def blockFFComplete_gameWindow(self, num):
+        for i in self.firefighterList:
+            if(num == i.num):
+                font = QFont()
+                font.setPointSize(11)
+                font.setBold(True)
+
+                blockff = QWidget(self.centralwidget)
+                blockff.setObjectName(f'{num}')
+                blockff.setFixedSize(240,380)
+                blockff.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                def delete_self(self):
+                    blockff.close()
+                button_delete = QPushButton("Close",blockff)
+                button_delete.setGeometry(180, 10, 50, 25)
+                button_delete.clicked.connect(delete_self)
+
+
+                pixmap = i.grab()
+                title_label_img = QLabel(blockff)
+                title_label_img.setGeometry(10, 10, 85,100)
+
+                title_label_img.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                title_label_img.setStyleSheet(
+                    "QLabel {"
+                    "   border: 2px solid #0078d7;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                scaled_pixmap = pixmap.scaled(title_label_img.width(), title_label_img.height())
+                title_label_img.setPixmap(scaled_pixmap)
+                title_label_name = QLabel("Name\t:", blockff)
+                title_label_name.setFont(font)
+                title_label_name.setGeometry(0, 115, 80, 30)
+                title_label_name_des = QLabel(i.getName(), blockff)
+                title_label_name_des.setFont(font)
+                title_label_name_des.setGeometry(0, 155, 120, 30)
+
+                title_label_wr = QLabel("Water Rate\t:", blockff)
+                title_label_wr.setFont(font)
+                title_label_wr.setGeometry(0, 205, 120, 30)
+                temp = str(i.rate_extinguish)
+                title_label_wr_des = QLabel(temp, blockff)
+                title_label_wr_des.setFont(font)
+                title_label_wr_des.setGeometry(0, 245, 150, 30)
+
+                title_label_mr = QLabel("Move Rate\t:", blockff)
+                title_label_mr.setFont(font)
+                title_label_mr.setGeometry(0, 295, 120, 30)
+                temp = str(i.move_man)
+                title_label_mr_des = QLabel(temp, blockff)
+                title_label_mr_des.setFont(font)
+                title_label_mr_des.setGeometry(0, 335, 150, 30)
+
+        return blockff
+
+    def generateblockFF_gameWindow(self):
+        self.blocklist = []
+        for i in self.firefighterList:
+            block = self.blockFFContent_gameWindow(i.num)
+            self.blocklist.append(block)
+            block.mousePressEvent = partial(self.blockFF_mousePressEvent,block.objectName())
+            block.enterEvent = partial(self.blockFF_mouseEnterEvent,block.objectName())
+            block.leaveEvent = partial(self.blockFF_mouseLeaveEvent,block.objectName())
+            self.verticalLayout.addWidget(block)
+
+    def clear_layout(self,layout):
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+
+    def checkAllReady(self):
+        templist = []
+        for i in self.firefighterList:
+            templist.append(i.nextRound)
+        if(False in templist):
+            self.ready = False
+        else:
+            self.ready = True
+
+    def blockFF_mousePressEvent(self,nums,event):
+        for i in self.block_completelist:
+            i.close()
+            self.block_completelist = []
+        for i in self.blocklist:
+            if(i.objectName() == nums):
+                nums = int(nums)
+                block_complete = self.blockFFComplete_gameWindow(nums)
+                self.block_completelist.append(block_complete)
+                block_complete.raise_()
+                block_complete.show()
+                block_complete.setGeometry(270,250,240,400)
+
+    def blockFF_mouseEnterEvent(self,nums ,event):
+        for i in self.blocklist:
+            if(i.objectName() == nums):
+                i.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid #FF4778 ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                i.setCursor(QCursor(Qt.PointingHandCursor))
+
+    def blockFF_mouseLeaveEvent(self,nums ,event):
+        for i in self.blocklist:
+            if(i.objectName() == nums):
+                i.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid  ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
 
 
 
