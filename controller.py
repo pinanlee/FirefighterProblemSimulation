@@ -17,7 +17,7 @@ from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor
 from PyQt5 import uic
 import pandas as pd
 import numpy as np
@@ -263,6 +263,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def updateFFStatus(self): #消防員移動/澆水完成時呼叫，更新消防員的狀態
         for i in range(self.firefighterNum):
+            self.firefighterList[i].updateStatus()
             if(self.firefighterList[i].isTraveling()):
                 #self.statusLabels[i].setText("Traveling to Node {}".format(self.firefighterList[i].destNode.getNum()))
                 if (i == self.FFindex):
@@ -357,7 +358,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             else:
                 self.descriptionAnimate("FF {} : idle unlocked".format(self.FFindex+1))
         self.updateFFStatus()
-
+        self.clear_layout(self.verticalLayout)
+        self.generateblockFF_gameWindow()
     def newNetwork(self):
         import subprocess
         import os
@@ -568,6 +570,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.sender().setStyleSheet("")
                 return ("{} reset".format(self.firefighterList[self.FFindex].getName()), -1)
             text = self.firefighterList[self.FFindex].processCheck(self.sender())
+            self.firefighterList[self.FFindex].ready()
+            self.firefighterList[self.FFindex].updateStatus()
+            self.clear_layout(self.verticalLayout)
+            self.generateblockFF_gameWindow()
             return (text, 1)
         return (text, 0)
 
@@ -601,6 +607,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             for i in self.fire:
                 i.fire_spread(self.currentTime)
             for i in self.firefighterList:
+                i.cancelReady()
+                i.updateStatus()
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
                     self.FFindex = i.num - 2
@@ -611,9 +619,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
             self.__opacitySet()
             self.timeIndexLabel.setText("t= "+str(self.currentTime))
+            self.clear_layout(self.verticalLayout)
+            self.generateblockFF_gameWindow()
+
         print(self.assignedFF)
         print(self.availFF)
+
         if(self.assignedFF == self.availFF):
+            self.clear_layout(self.verticalLayout)
+            self.generateblockFF_gameWindow()
             for i in self.firefighterList:
                 if(not (i.isTraveling() or i.isProcess())):
                     i.finishTimeSet()
@@ -742,10 +756,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 title_label_name_des.setFont(font)
                 title_label_name_des.setGeometry(100, 75, 120, 30)
 
-                # temp = str(i.status)
-                # self.title_label_ready_des = QLabel(temp, blockff)
-                # self.title_label_ready_des.setFont(font)
-                # self.title_label_ready_des.setGeometry(100, 25, 120, 35)
+                temp = str(i.status)
+                self.title_label_ready_des = QLabel(temp, blockff)
+                self.title_label_ready_des.setFont(font)
+                self.title_label_ready_des.setGeometry(100, 25, 120, 35)
 
         return blockff
     def blockFFComplete_gameWindow(self, num):
@@ -763,8 +777,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     "   border: 2px solid ;"  
                     "   border-radius: 10px;"  
                     "   padding: 5px;"  
+                    "background-color: white;"
                     "}"
                 )
+
                 def delete_self(self):
                     blockff.close()
                 button_delete = QPushButton("Close",blockff)
