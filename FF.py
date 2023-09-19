@@ -20,12 +20,14 @@ class FireFighter(QLabel):
         self.__select = False #是否被指派
         self.__travel = False #是否在移動
         self.__process = False #是否在澆水
+        self.__ready = False #是否已準備好
         self.rate_extinguish = 2 #澆水速率
         self.move_man = 20 #移動速率
         self.destNode = depot #下一個目的
         self.curMovingArc : dict = None
         self.pathProgress = 0
         self.idleLock = False
+        self.status = "Not Ready"
         #UI設定
         self.setPixmap(QPixmap("./image/firefighter.png"))
         self.pixmaploc = "./image/firefighter.png"
@@ -80,11 +82,20 @@ class FireFighter(QLabel):
     def selected(self): #消防員標記為被指派
         self.__select = True
 
+    def ready(self):
+        self.__ready = True
+
+    def cancelReady(self):
+        self.__ready = False
+
     def isSelected(self): #回傳是否消防員被指派
         return self.__select
     
     def isIdle(self):
         return not (self.__select or self.__process or self.__travel or self.destNode != None)
+
+    def isReady(self):
+        return self.__ready
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
         self.destNode = self.curPos() if self.destNode == None else self.destNode
@@ -196,3 +207,15 @@ class FireFighter(QLabel):
                 ratio = self.pathProgress/i["length"]
                 return ratio if ratio <= 1 else 1 
         return 0
+
+    def updateStatus(self):
+        if(self.isReady()):
+            self.status = "Ready"
+        elif(self.isProcess()):
+            self.status = "Processing"
+        elif(self.isTraveling()):
+            self.status = "Traveling"
+        elif(self.isIdle()):
+            self.status = "Not Ready"
+        else:
+            self.status = "Not Ready"
