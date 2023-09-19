@@ -5,8 +5,6 @@ from PyQt5 import QtWidgets,QtCore,QtGui
 import math
 
 class NodeController():
-    '''customSignal = pyqtSignal(str)
-    leaveSignal = pyqtSignal(str)'''
     def __init__(self, i, pos: QtCore.QRect):
         self.pos = pos
         #variables

@@ -222,8 +222,8 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="consoleLabel">
     <property name="geometry">
      <rect>
-      <x>800</x>
-      <y>770</y>
+      <x>990</x>
+      <y>760</y>
       <width>631</width>
       <height>131</height>
      </rect>
@@ -413,6 +413,9 @@ border: 2px solid blue;</string>
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="wrapping">
+     <bool>true</bool>
+    </property>
     <property name="minimum">
      <number>1</number>
     </property>
@@ -444,7 +447,7 @@ border: 2px solid blue;</string>
      <rect>
       <x>10</x>
       <y>750</y>
-      <width>681</width>
+      <width>921</width>
       <height>151</height>
      </rect>
     </property>
@@ -456,6 +459,28 @@ border: 2px solid blue;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>800</y>
+      <width>221</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Idle til the end</string>
+    </property>
+    <property name="autoRepeat">
+     <bool>false</bool>
     </property>
    </widget>
    <zorder>backgroundLabel_2</zorder>
@@ -480,6 +505,7 @@ border: 2px solid blue;</string>
    <zorder>defendButton</zorder>
    <zorder>spinBox</zorder>
    <zorder>label_3</zorder>
+   <zorder>checkBox</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -487,7 +513,7 @@ border: 2px solid blue;</string>
      <x>0</x>
      <y>0</y>
      <width>1923</width>
-     <height>25</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="sizePolicy">
