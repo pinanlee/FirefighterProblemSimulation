@@ -34,6 +34,7 @@ class Node(QtWidgets.QPushButton):
         #onFire setting
         self.nodeController.burned = True
         self.setStyleSheet(f'background-color: rgba(255, 0, 0, {0.1});')
+        self.nodeController.style = f'background-color: rgba(255, 0, 0, {0.1});'
 
     def preDefend(self):
         self.setStyleSheet("background-color: grey;" + "border: 2px solid blue;")

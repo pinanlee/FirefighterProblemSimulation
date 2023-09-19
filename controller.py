@@ -110,7 +110,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.noButton.raise_()
             self.yesButton.clicked.connect(self.intoGame)
             self.noButton.clicked.connect(self.intoGame)
-            
+            self.idleButton.clicked.connect(self.assignIdle)
+            self.defendButton.clicked.connect(self.choose)
         initUI()
         self.showInformationWindow()
 
@@ -127,7 +128,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             def ySort(elem: Node):
                 return elem.geometry().y()
             #初始化火
-            self.nodeList.sort(key=ySort)
+            #self.nodeList.sort(key=ySort)
             for i in self.FFnetwork.nodeList:
                 if(not i.getArcs()):
                     a = i.getNum()
@@ -137,7 +138,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.fire[-1].terminateSignal.connect(self.finish)
             self.fire[-1].burn()
             self.updateMinTime()
-
             #初始化消防員
             for i in self.fireNetwork.nodeList:
                 if(not i.getArcs()):
@@ -181,14 +181,20 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 #self.nodeList[self.focusIndex].setStyleSheet("background-color: black;border: 2px solid blue;")
 
         randomFireAndDepot()
-        self.generateblockFF_gameWindow()
+        value = 0
+        for i in self.fireNetwork.nodeList:
+            value += int(i.value)
+        self.totalValue = value
+        self.progressBar.setValue(self.totalValue)
+        self.prevFFindex = self.FFindex - 1
+        self.nextFFindex = self.FFindex + 1
+        #self.selectFireFighter()
 
-        self.selectFireFighter()
+        self.generateblockFF_gameWindow()
         self.updateFFStatus()
         
 
         self.howManyAvail()
-        self.descriptionAnimate("Assign firefighter to new position or protect the current node")
         self.hintAnimate("firefighter available: {}".format(self.availFF))
         def databaseInit():
             self.nw.numFF = self.firefighterNum
@@ -197,6 +203,17 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         databaseInit()
         self.dataRecord()
+
+        def setOpacity(num, label):
+            opacity_effect = QGraphicsOpacityEffect()
+            opacity_effect.setOpacity(num)
+            label.setGraphicsEffect(opacity_effect)
+        if(self.firefighterList[self.FFindex].curPos().isProtected()):
+            setOpacity(0.5,self.defendButton)
+            self.defendButton.setEnabled(False)
+        else:
+            setOpacity(1,self.defendButton)
+            self.defendButton.setEnabled(True)
 
     def turtorial(self):
         self.turtorialWindow = turtorial(self)
@@ -216,6 +233,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.instruct.setGeometry(-200,-200,400,200)
         self.yesButton.setGeometry(-200,-200,101,51)
         self.noButton.setGeometry(-200,-200,101,51)
+        self.descriptionAnimate("Assign firefighter to new position or protect the current node")
         
     def showProblem(self):
         self.instruct.setGeometry(300,50,600,600)
@@ -226,6 +244,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.instruct.setText("This is a firefighter simulation problem")
         self.noButton.setGeometry(799,599,101,51)
         self.noButton.setText("back to game")
+
+    def assignIdle(self):
+        #self.firefighterList[self.FFindex].finishTimeSet(self.spinBox.value())
+        self.assignedFF += 1
+        self.hintAnimate("firefighter available: {}".format(self.availFF - self.assignedFF))
+        if(not self.firefighterList[(self.FFindex + 1) % self.firefighterNum].isSelected()):
+            self.selectFireFighter()
+        self.updateFFStatus()
+        self.descriptionAnimate("{} idle for {} time step(s)".format(self.firefighterList[self.FFindex].getName(), self.spinBox.value()))
+        self.nextTime()
 
     def showControls(self):
         self.instruct.setGeometry(300,50,600,600)
@@ -258,7 +286,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.minTimeFireArrival(self.currentTime)
         for i in self.FFnetwork.nodeList:
             i.fireMinArrivalTime = self.fireNetwork.nodeList[i.getNum()-1].fireMinArrivalTime
-            #print("node {}: {}".format(i.getNum(), i.fireMinArrivalTime))
+            print("node {}: {}".format(i.getNum(), i.fireMinArrivalTime))
 
 
     def updateFFStatus(self): #消防員移動/澆水完成時呼叫，更新消防員的狀態
@@ -319,8 +347,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.setStyleSheet(i.nodeController.style)
                 i.updateGrassAmount(tempGrass)
                 i.updateStatus()
-                self.totalValue -= value
-                self.progressBar.setValue(self.totalValue)
+                #self.totalValue -= value
+        value = 0
+        for i in self.fireNetwork.nodeList:
+            value += int(i.value)
+        self.totalValue = value
+        self.progressBar.setValue(self.totalValue)
 
     def finish(self):
         self.timer.stop()
@@ -404,18 +436,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def nextAnim(self):
         self.anim.stop()
         self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
-        self.anim.setStartValue(QPoint(310, 240))
-        self.anim.setEndValue(QPoint(2200, 240))
+        self.anim.setStartValue(QPoint(750, 710))
+        self.anim.setEndValue(QPoint(2200, 710))
         self.anim.setDuration(250)
         def start():
             self.anim.start()
-        QTimer.singleShot(800, start)
+        QTimer.singleShot(1500, start)
 
     def descriptionAnimate(self, text):
         
         self.descriptionLabel.setText(text)
         self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
-        self.anim.setEndValue(QPoint(310, 240))
+        self.anim.setStartValue(QPoint(2200, 710))
+        self.anim.setEndValue(QPoint(750, 710))
         self.anim.setDuration(250)
         self.anim.start()
 
@@ -563,7 +596,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return aa
     @printStatus
     def choose(self): #指派消防員移動至給定node
-        text = self.checkStatus(self.sender()) #檢查選擇的node是否符合限制
+        if(self.sender().objectName == "defendButton"):
+            text = self.checkStatus(self.firefighterList[self.FFindex].curPos())
+        else:
+            text = self.checkStatus(self.sender()) #檢查選擇的node是否符合限制
         if(text == "vaild choose"):
             if(self.firefighterList[self.FFindex].destNode == self.sender()): #是否選擇取消(再次點擊同node)
                 self.firefighterList[self.FFindex].reset()
@@ -616,6 +652,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.descriptionAnimate("firefighter {} has finished task".format(i.num))
                     self.howManyAvail()
                     self.hintAnimate("firefighter available: {}".format(self.availFF))
+                    def setOpacity(num, label):
+                        opacity_effect = QGraphicsOpacityEffect()
+                        opacity_effect.setOpacity(num)
+                        label.setGraphicsEffect(opacity_effect)
+                    if(i.curPos().isProtected()):
+                        setOpacity(0.5,self.defendButton)
+                        self.defendButton.setEnabled(False)
+                    else:
+                        setOpacity(1,self.defendButton)
+                        self.defendButton.setEnabled(True)
 
             self.__opacitySet()
             self.timeIndexLabel.setText("t= "+str(self.currentTime))
@@ -630,7 +676,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.generateblockFF_gameWindow()
             for i in self.firefighterList:
                 if(not (i.isTraveling() or i.isProcess())):
-                    i.finishTimeSet()
+                    i.finishTimeSet(self.spinBox.value())
                     i.closeaccessibleVisualize(self.nodeList)
                 i.move(self.currentTime)
             self.timer = QTimer()

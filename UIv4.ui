@@ -111,8 +111,8 @@
    <widget class="QLabel" name="networkLabel">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>660</y>
+      <x>300</x>
+      <y>0</y>
       <width>311</width>
       <height>71</height>
      </rect>
@@ -175,8 +175,8 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>760</y>
+      <x>300</x>
+      <y>660</y>
       <width>211</width>
       <height>61</height>
      </rect>
@@ -194,8 +194,8 @@ border: 2px solid blue;</string>
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>810</y>
+      <x>300</x>
+      <y>710</y>
       <width>441</width>
       <height>23</height>
      </rect>
@@ -248,7 +248,7 @@ border: 2px solid blue;</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>690</y>
+      <y>740</y>
       <width>261</width>
       <height>61</height>
      </rect>
@@ -327,9 +327,9 @@ border: 2px solid blue;</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>750</y>
-      <width>221</width>
-      <height>151</height>
+      <y>790</y>
+      <width>171</width>
+      <height>101</height>
      </rect>
     </property>
     <property name="text">
@@ -360,6 +360,126 @@ border: 2px solid blue;</string>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout"/>
    </widget>
+   <widget class="QPushButton" name="idleButton">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>800</y>
+      <width>131</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Idle</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="defendButton">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>850</y>
+      <width>131</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Defend</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>800</y>
+      <width>71</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>1</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>800</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Idle time</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="backgroundLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>750</y>
+      <width>681</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid blue;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <zorder>backgroundLabel_2</zorder>
+   <zorder>descriptionLabel</zorder>
+   <zorder>node_info_label</zorder>
+   <zorder>timeIndexLabel</zorder>
+   <zorder>backgroundLabel</zorder>
+   <zorder>networkLabel</zorder>
+   <zorder>hintLabel</zorder>
+   <zorder>backButton</zorder>
+   <zorder>label</zorder>
+   <zorder>progressBar</zorder>
+   <zorder>consoleLabel</zorder>
+   <zorder>label_2</zorder>
+   <zorder>instruct</zorder>
+   <zorder>noButton</zorder>
+   <zorder>yesButton</zorder>
+   <zorder>selectLabel</zorder>
+   <zorder>warningLabel</zorder>
+   <zorder>verticalLayoutWidget</zorder>
+   <zorder>idleButton</zorder>
+   <zorder>defendButton</zorder>
+   <zorder>spinBox</zorder>
+   <zorder>label_3</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
