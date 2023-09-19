@@ -46,9 +46,9 @@ class FireFighter(QLabel):
     def lock(self):
         self.idleLock = not self.idleLock
 
-    def finishTimeSet(self):
+    def finishTimeSet(self, value):
         if(self.isIdle()):
-            self.__arrivalTime = 1
+            self.__arrivalTime = value
             self.FFidleSignal.emit(self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
 

@@ -53,7 +53,7 @@ class NodeController():
     def updateGrassAmount(self, remain):
         remain = 0 if remain < 0 else remain
         self.grass_amount = remain
-        self.value = self.initValue * (1 - self.getNodePercentage_Fire())
+        self.value = self.initValue * self.getNodePercentage_Fire()
 
 
 
