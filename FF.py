@@ -23,7 +23,7 @@ class FireFighter(QLabel):
         self.__ready = False #是否已準備好
         self.rate_extinguish = 2 #澆水速率
         self.move_man = 20 #移動速率
-        self.destNode = depot #下一個目的
+        self.destNode = None #下一個目的
         self.curMovingArc : dict = None
         self.pathProgress = 0
         self.idleLock = False
@@ -53,11 +53,13 @@ class FireFighter(QLabel):
             self.__arrivalTime = value
             self.FFidleSignal.emit(self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
+        print(self.__arrivalTime)
+        print(self.__cumArrivalTime)
 
     def getcumArrivalTime(self):
         return self.__cumArrivalTime
 
-    def move(self, timer): #開始移動至目的地
+    def move(self): #開始移動至目的地
         if(self.destNode == self.curPos()):
             self.curPos().defend()
             self.process()

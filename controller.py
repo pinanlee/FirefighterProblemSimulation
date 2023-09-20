@@ -12,7 +12,6 @@ import math
 
 from FFSettingsWindow import FFSettingsWindow
 from FFSettingsWindow import FFnumWindow
-from UIv2_ui import Ui_MainWindow
 from FF import FireFighter
 from node import Node 
 from fireObject import Fire
@@ -76,8 +75,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def setup_control(self):
         def initNetwork(): #建立network class和node
             self.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
-            self.FFnetwork = Network("G30_fire_route.xlsx", "G30_nodeInformation.xlsx")
-            self.fireNetwork = Network("G30_firefighter_route.xlsx", "G30_nodeInformation.xlsx")
+            self.FFnetwork = Network("./network/G30_fire_route.xlsx", "./network/G30_nodeInformation.xlsx")
+            self.fireNetwork = Network("./network/G30_firefighter_route.xlsx", "./network/G30_nodeInformation.xlsx")
             for i in self.FFnetwork.nodeList:
                 node = Node(self.centralwidget, i)
                 node.clicked.connect(self.choose)
@@ -284,7 +283,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.minTimeFireArrival(self.currentTime)
         for i in self.FFnetwork.nodeList:
             i.fireMinArrivalTime = self.fireNetwork.nodeList[i.getNum()-1].fireMinArrivalTime
-            print("node {}: {}".format(i.getNum(), i.fireMinArrivalTime))
+            #print("node {}: {}".format(i.getNum(), i.fireMinArrivalTime))
 
 
     def updateFFStatus(self): #消防員移動/澆水完成時呼叫，更新消防員的狀態
@@ -312,13 +311,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.nw.ffblockCP_sta2 = "Idle"
         self.iw_pageCP_FF()
 
-
-
     def updateNodeIdle(self,value):
-        for i in self.fireNetwork.nodeList:
+        self.fireNetwork.nodeList[value-1].ffidle()
+        '''for i in self.fireNetwork.nodeList:
             if(i.getNum() == value):
-                i.ffidle()
-
+                i.ffidle()'''
 
     '''------------------------------------------fire signal---------------------------------------------'''
     def networkUpdateF(self,value): #當fire network有新的節點燒起來時，更新ff network並增加新的"火"物件
@@ -370,7 +367,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def newNetwork(self):
         import subprocess
         import os
-        subprocess.call("GenerateGraph.py", shell=True)
+        subprocess.call("./randomPlanerGraph/GenerateGraph.py", shell=True)
         p = sys.executable
         os.execl(p, p, *sys.argv)
 
@@ -511,8 +508,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 text = "already selected"
             else:
                 text = func(self)
-                #if(text == "vaild choose"):
-                #self.sender().setText(str(self.firefighterList[self.FFindex].num))
                 self.assignedFF += text[1]
                 self.hintAnimate("firefighter available: {}".format(self.availFF - self.assignedFF))
                 if(not self.firefighterList[(self.FFindex + 1) % self.firefighterNum].isSelected() and text[1] == 1):
@@ -524,16 +519,20 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return aa
     @printStatus
     def choose(self): #指派消防員移動至給定node
-        if(self.sender().objectName == "defendButton"):
+        send = None
+        if(self.sender().objectName() == "defendButton"):
+            print("im here")
             text = self.checkStatus(self.firefighterList[self.FFindex].curPos())
+            send = self.firefighterList[self.FFindex].curPos()
         else:
             text = self.checkStatus(self.sender()) #檢查選擇的node是否符合限制
+            send = self.sender()
         if(text == "vaild choose"):
-            if(self.firefighterList[self.FFindex].destNode == self.sender()): #是否選擇取消(再次點擊同node)
+            if(self.firefighterList[self.FFindex].destNode == send): #是否選擇取消(再次點擊同node)
                 self.firefighterList[self.FFindex].reset()
-                self.sender().setStyleSheet("")
+                send.setStyleSheet("")
                 return ("{} reset".format(self.firefighterList[self.FFindex].getName()), -1)
-            text = self.firefighterList[self.FFindex].processCheck(self.sender())
+            text = self.firefighterList[self.FFindex].processCheck(send)
             self.firefighterList[self.FFindex].ready()
             self.firefighterList[self.FFindex].updateStatus()
             self.clear_layout(self.verticalLayout)
@@ -598,7 +597,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if(not (i.isTraveling() or i.isProcess())):
                     i.finishTimeSet(self.spinBox.value())
                     i.closeaccessibleVisualize(self.nodeList)
-                i.move(self.currentTime)
+                i.move()
             self.timer = QTimer()
             self.timer.setInterval(700)
             self.timer.timeout.connect(timeSkip)
@@ -617,7 +616,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.nw.tab_widget.setCurrentIndex(self.pageList)
         # x = self.nw.pos().x()
         # y = self.nw.pos().y()
-        # self.nw.move(x, y)
+        # self.nw.(x, y)
 
     def paintEvent(self, event):
         qpainter = QPainter()
@@ -638,14 +637,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.setText(str(i.getNum()))
                 for j in i.getNeighbors():
                     if(not self.showFireNetwork):
-                        if(i.getArc(j)["length"] < 150):
+                        '''if(i.getArc(j)["length"] < 150):
                             qpen = QPen(Qt.green, 4, Qt.SolidLine)
                         elif(i.getArc(j)["length"] < 300):
                             qpen = QPen(Qt.darkYellow, 4, Qt.SolidLine)
                         else:
                             qpen = QPen(Qt.red, 4, Qt.SolidLine)
                             
-                    qpainter.setPen(qpen)
+                    qpainter.setPen(qpen)'''
                     qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y()+ 3/2*i.height()), QPointF(j.x()+ j.width()/2, j.y()+ 3/2*j.height()))
         for i in self.fire:
             for j in i.arcs:
