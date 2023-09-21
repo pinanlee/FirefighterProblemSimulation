@@ -26,6 +26,12 @@ class NodeController():
         self.__adjArc = []
         self.status = "Normal"
         self.style = ""
+        #UI設定
+        self.node_opa_value = 0.3
+        self.node_opa_shift = 1
+        self.timer_nodeOpacity = QTimer()
+        self.timer_nodeOpacity.timeout.connect(self.opacityAffect)
+
 
     #設置node狀態
     def onFire(self):
@@ -120,3 +126,11 @@ class NodeController():
     def connectNode(self, node, length):
         self.__neighbors.append(node)
         self.__adjArc.append({"node": node, "length": length, "fire-travel": 0})
+
+    def opacityAffect(self):
+        self.node_opa_value += 0.1 * self.node_opa_shift
+        if self.node_opa_value >= 0.8:
+            self.node_opa_shift = -1
+        elif self.node_opa_value <= 0.3:
+            self.node_opa_shift = 1
+        self.setStyleSheet(f'background-color: rgba(0, 255, 255, {self.node_opa_value}); color: white;')

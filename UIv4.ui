@@ -360,30 +360,11 @@ border: 2px solid blue;</string>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout"/>
    </widget>
-   <widget class="QPushButton" name="idleButton">
-    <property name="geometry">
-     <rect>
-      <x>590</x>
-      <y>790</y>
-      <width>121</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Idle</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="defendButton">
     <property name="geometry">
      <rect>
-      <x>590</x>
-      <y>850</y>
+      <x>630</x>
+      <y>800</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -396,50 +377,6 @@ border: 2px solid blue;</string>
     </property>
     <property name="text">
      <string>Defend</string>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="spinBox">
-    <property name="geometry">
-     <rect>
-      <x>860</x>
-      <y>780</y>
-      <width>71</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="wrapping">
-     <bool>true</bool>
-    </property>
-    <property name="minimum">
-     <number>1</number>
-    </property>
-    <property name="value">
-     <number>1</number>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>780</y>
-      <width>111</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Idle time</string>
     </property>
    </widget>
    <widget class="QLabel" name="backgroundLabel_2">
@@ -459,28 +396,6 @@ border: 2px solid blue;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox">
-    <property name="geometry">
-     <rect>
-      <x>960</x>
-      <y>780</y>
-      <width>221</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Idle til the end</string>
-    </property>
-    <property name="autoRepeat">
-     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -530,6 +445,102 @@ border: 2px solid blue;</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QLabel" name="label_selectedFF">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>760</y>
+      <width>171</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcd_time">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>40</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>810</y>
+      <width>551</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="idleButton">
+       <property name="font">
+        <font>
+         <family>Arial Rounded MT Bold</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Idle</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <family>Arial Rounded MT Bold</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Idle time</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="spinBox">
+       <property name="font">
+        <font>
+         <family>Arial Rounded MT Bold</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="wrapping">
+        <bool>true</bool>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="font">
+        <font>
+         <family>Arial Rounded MT Bold</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Idle til the end</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
    <zorder>backgroundLabel_2</zorder>
    <zorder>descriptionLabel</zorder>
    <zorder>node_info_label</zorder>
@@ -548,13 +559,12 @@ border: 2px solid blue;</string>
    <zorder>selectLabel</zorder>
    <zorder>warningLabel</zorder>
    <zorder>verticalLayoutWidget</zorder>
-   <zorder>idleButton</zorder>
    <zorder>defendButton</zorder>
-   <zorder>spinBox</zorder>
-   <zorder>label_3</zorder>
-   <zorder>checkBox</zorder>
    <zorder>label_4</zorder>
    <zorder>label_5</zorder>
+   <zorder>label_selectedFF</zorder>
+   <zorder>lcd_time</zorder>
+   <zorder>horizontalLayoutWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
