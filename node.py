@@ -1,5 +1,5 @@
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QTimer, pyqtSignal
+from PyQt5.QtGui import QPixmap, QCursor
+from PyQt5.QtCore import QTimer, pyqtSignal, Qt
 from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5 import QtWidgets,QtCore,QtGui
 import math
@@ -29,6 +29,7 @@ class Node(QtWidgets.QPushButton):
 
     def enterEvent(self, a0: QtCore.QEvent) -> None:
         self.showSignal.emit(self.getNum())
+        self.setCursor(QCursor(Qt.PointingHandCursor))
 
     def getFireMinArrivalTime(self):
         return self.nodeController.fireMinArrivalTime

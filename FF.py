@@ -1,6 +1,6 @@
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QCursor
 from node import Node
-from PyQt5.QtCore import QTimer, pyqtSignal, QRect
+from PyQt5.QtCore import QTimer, pyqtSignal, QRect, Qt
 from PyQt5.QtWidgets import QLabel
 import math
 
@@ -214,9 +214,6 @@ class FireFighter(QLabel):
         self.timer_arrow.timeout.connect(arrowAnimation)
         self.timer_arrow.start(200)
 
-
-
-
         if(not self.isTraveling() or not self.isProcess()):
             for i in (self.curPos().getNeighbors()):
                 if (i.isBurned() == False and i.isProtected() == False):
@@ -224,7 +221,8 @@ class FireFighter(QLabel):
                         #i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
                         i.timer_nodeOpacity.start(100)
             if(not self.curPos().isProtected()):
-                self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
+                self.curPos().timer_nodeOpacity.start(100)
+                #self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
     def closeaccessibleVisualize(self, lst): #用於清除前一個消防員可以前往點的顏色
         '''for i in (self.curPos().getNeighbors()):

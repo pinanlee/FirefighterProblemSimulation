@@ -112,6 +112,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.idleButton.clicked.connect(self.assignIdle)
             self.defendButton.clicked.connect(self.choose)
             self.checkBox.toggled.connect(self.idleLock)
+            self.lcd_time.display(self.currentTime)
         initUI()
         self.showInformationWindow()
 
@@ -158,6 +159,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 for i in self.firefighterList:
                     tempNum = i.num
                     pixmap = QPixmap(self.FFInfoDict[tempNum-1]["img"])
+                    self.labels.append(pixmap)
                     scaled_pixmap = pixmap.scaled(self.labels[tempNum-1].size(), aspectRatioMode=Qt.KeepAspectRatio,
                                                   transformMode=Qt.SmoothTransformation)
                     i.setPixmap(scaled_pixmap)
@@ -176,6 +178,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.firefighterList[1].setPixmap(QPixmap("./image/fireman.png"))
 
         randomFireAndDepot()
+        self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName()) #UI SETTING: put here because the order of initialization
         self.totalValue = self.fireNetwork.getTotalValue()
         self.progressBar.setValue(self.totalValue)
         self.selectFireFighter()
@@ -483,7 +486,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.firefighterList[self.FFindex].accessibleVisualize(self.currentTime)
         self.descriptionAnimate("change to {}".format(self.firefighterList[self.FFindex].getName()))
         image = self.firefighterList[self.FFindex].grab()
-        self.selectLabel.setPixmap(image.scaled(220,150))
+        scaled_pixmap = image.scaled(self.selectLabel.width(), self.selectLabel.height())
+        self.selectLabel.setPixmap(scaled_pixmap)
         if(self.firefighterList[self.FFindex].isSelected()):
             warn = QPixmap("./image/warning.png")
             self.warningLabel.setPixmap(warn.scaled(90,70))
@@ -520,6 +524,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     @printStatus
     def choose(self): #指派消防員移動至給定node
         send = None
+        self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName())
         if(self.sender().objectName() == "defendButton"):
             print("im here")
             text = self.checkStatus(self.firefighterList[self.FFindex].curPos())
@@ -553,6 +558,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
+            self.lcd_time.display(self.currentTime)
             ctr = 0
             for i in self.fire:
                 if(i.finishSpread):
@@ -585,9 +591,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     else:
                         setOpacity(1,self.defendButton)
                         self.defendButton.setEnabled(True)
-
+            self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName())
             self.__opacitySet()
             self.timeIndexLabel.setText("t= "+str(self.currentTime))
+            # self.lcd_time.display(self.currentTime)
             self.clear_layout(self.verticalLayout)
             self.generateblockFF_gameWindow()
         if(self.assignedFF == self.availFF):

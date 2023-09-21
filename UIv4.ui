@@ -483,6 +483,43 @@ border: 2px solid blue;</string>
      <bool>false</bool>
     </property>
    </widget>
+   <widget class="QLCDNumber" name="lcd_time">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>20</y>
+      <width>131</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <italic>false</italic>
+      <bold>true</bold>
+      <underline>false</underline>
+     </font>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_selectedFF">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>740</y>
+      <width>261</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
    <zorder>backgroundLabel_2</zorder>
    <zorder>descriptionLabel</zorder>
    <zorder>node_info_label</zorder>
@@ -506,6 +543,8 @@ border: 2px solid blue;</string>
    <zorder>spinBox</zorder>
    <zorder>label_3</zorder>
    <zorder>checkBox</zorder>
+   <zorder>lcd_time</zorder>
+   <zorder>label_selectedFF</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -513,7 +552,7 @@ border: 2px solid blue;</string>
      <x>0</x>
      <y>0</y>
      <width>1923</width>
-     <height>18</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="sizePolicy">
