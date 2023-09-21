@@ -11,7 +11,6 @@ import math
 
 from FFSettingsWindow import FFSettingsWindow
 from FFSettingsWindow import FFnumWindow
-from UIv2_ui import Ui_MainWindow
 from FF import FireFighter
 from node import Node 
 from fireObject import Fire

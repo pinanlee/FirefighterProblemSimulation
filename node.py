@@ -6,11 +6,12 @@ import math
 from nodeButtonController import NodeController
 
 class Node(QtWidgets.QPushButton):
+    showSignal = pyqtSignal(int)
     def __init__(self, widgets, nodeController: NodeController):
         super().__init__(widgets)
         self.nodeController = nodeController
         self.UIsettings(self.nodeController.pos)
-
+       
         self.__neighbors = [] #表示與那些node有相鄰關係
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
 
@@ -25,6 +26,9 @@ class Node(QtWidgets.QPushButton):
         #設定位置
         self.setGeometry(pos)
         self.setText(str(self.nodeController.no))
+
+    def enterEvent(self, a0: QtCore.QEvent) -> None:
+        self.showSignal.emit(self.getNum())
 
     def getFireMinArrivalTime(self):
         return self.nodeController.fireMinArrivalTime

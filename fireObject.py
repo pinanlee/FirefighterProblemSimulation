@@ -4,7 +4,7 @@ import math
 import copy
 class Fire(QObject):
     burnedSignal = pyqtSignal(int)
-    opacitySignal = pyqtSignal(float, int, int)
+    opacitySignal = pyqtSignal(float, int)
     terminateSignal = pyqtSignal()
     def __init__(self, network, depot, time):
         super().__init__()
@@ -89,8 +89,7 @@ class Fire(QObject):
 
     def __burningVisualize(self): #UI設定
         opacity = 1 - self.firePos.getNodePercentage_Fire()
-        value = int(self.firePos.value / (self.firePos.initialGrassAmount/self.rate_fireburn))
-        self.opacitySignal.emit(opacity, self.firePos.no, value)
+        self.opacitySignal.emit(opacity, self.firePos.no)
 
     def getArcPercentage_Fire(self, arc): #獲得火在arc上的移動進度
         if(arc in self.arcs):

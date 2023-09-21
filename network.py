@@ -27,3 +27,8 @@ class Network:
                 pos2 = np.array((self.nodeList[j[0]-1].pos.x(),self.nodeList[j[0]-1].pos.y()))
                 length = int(np.linalg.norm(pos1-pos2))
                 i.connectNode(self.nodeList[j[0]-1], length)
+    def getTotalValue(self) -> int:
+        value = 0
+        for i in self.nodeList:
+            value += i.value
+        return int(value)
