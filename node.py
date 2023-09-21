@@ -14,6 +14,12 @@ class Node(QtWidgets.QPushButton):
         self.__neighbors = [] #表示與那些node有相鄰關係
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
 
+        # UI設定
+        self.node_opa_value = 0.3
+        self.node_opa_shift = 1
+        self.timer_nodeOpacity = QTimer()
+        self.timer_nodeOpacity.timeout.connect(self.opacityAffect)
+
     #UI設定
     def UIsettings(self, pos):
         #設定位置
@@ -28,6 +34,14 @@ class Node(QtWidgets.QPushButton):
 
     def updateWaterAmount(self, remain):
         self.nodeController.updateWaterAmount(remain)
+
+    def opacityAffect(self):
+        self.node_opa_value += 0.1 * self.node_opa_shift
+        if self.node_opa_value >= 0.8:
+            self.node_opa_shift = -1
+        elif self.node_opa_value <= 0.3:
+            self.node_opa_shift = 1
+        self.setStyleSheet(f'background-color: rgba(0, 255, 255, {self.node_opa_value}); color: white;')
 
     #設置node狀態
     def onFire(self):

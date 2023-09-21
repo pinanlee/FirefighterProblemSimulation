@@ -10,6 +10,7 @@ class FireFighter(QLabel):
     FFidleSignal = pyqtSignal(int)
     def __init__(self, widget, num, depot):
         super().__init__(widget)
+        self.widget = widget
         self.num = num
         self.__name = "firefighter " + str(num) #消防員編號
         self.__path = [depot] #紀錄FF經過的node
@@ -32,6 +33,10 @@ class FireFighter(QLabel):
         self.setPixmap(QPixmap("./image/firefighter.png"))
         self.pixmaploc = "./image/firefighter.png"
         self.curPos().defend()
+        self.arrowLabel = QLabel(self.widget)
+        self.timer_arrow = QTimer(self)
+
+
 
     def newPos(self):
         self.setGeometry(QRect(self.curPos().x()+20, self.curPos().y(),self.curPos().width()+ 20, self.curPos().height()+20))
@@ -185,11 +190,37 @@ class FireFighter(QLabel):
         '''for i in self.curPos().getNeighbors():
             if(not i.isBurned() and not i.isProtected()):
                 i.setStyleSheet("")'''
+        self.arrowdirection = 1
+
+        def arrowAnimation():
+            current_pos = self.arrowLabel.pos()
+            new_y = current_pos.y() + 2 * self.arrowdirection
+            if new_y >= self.y()-100:
+                self.arrowdirection = -1
+            elif new_y <= self.y()-110:
+                self.arrowdirection = 1
+            self.arrowLabel.move(current_pos.x(), new_y)
+
+
+        self.arrowLabel = QLabel(self.widget)
+        arrow = QPixmap("image/arrow.png")
+        self.arrowLabel.setPixmap(arrow)
+        self.arrowLabel.raise_()
+        self.arrowLabel.show()
+        self.arrowLabel.setGeometry(self.x()-5,self.y()-110,100,100)
+        self.timer_arrow = QTimer(self)
+        self.timer_arrow.timeout.connect(arrowAnimation)
+        self.timer_arrow.start(200)
+
+
+
+
         if(not self.isTraveling() or not self.isProcess()):
             for i in (self.curPos().getNeighbors()):
                 if (i.isBurned() == False and i.isProtected() == False):
                     if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["length"] / self.move_man)):
-                        i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
+                        #i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
+                        i.timer_nodeOpacity.start(100)
             if(not self.curPos().isProtected()):
                 self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
@@ -198,9 +229,13 @@ class FireFighter(QLabel):
             if (i.isBurned() == False and i.isProtected() == False):
                 if (i.getFireMinArrivalTime() >= self.curPos().getArc(i)["length"] / self.move_man):
                     i.setStyleSheet("")'''
+        self.arrowLabel.setText("")
+        self.arrowLabel.setPixmap(QPixmap())
+        self.timer_arrow.stop()
+
         for i in lst:
             i.setStyleSheet(i.nodeController.style)
-
+            i.timer_nodeOpacity.stop()
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
         for i in self.curPos().getArcs():
             if(i["node"] == node.nodeController): 
