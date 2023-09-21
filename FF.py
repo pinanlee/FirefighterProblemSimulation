@@ -5,9 +5,10 @@ from PyQt5.QtWidgets import QLabel
 import math
 
 class FireFighter(QLabel):
-    FFdoneSignal = pyqtSignal(str)
+    FFSignal = pyqtSignal(str, int)
+    '''FFdoneSignal = pyqtSignal(str)
     FFprotectSignal = pyqtSignal(int)
-    FFidleSignal = pyqtSignal(int)
+    FFidleSignal = pyqtSignal(int)'''
     def __init__(self, widget, num, depot):
         super().__init__(widget)
         self.num = num
@@ -51,10 +52,9 @@ class FireFighter(QLabel):
     def finishTimeSet(self, value):
         if(self.isIdle()):
             self.__arrivalTime = value
-            self.FFidleSignal.emit(self.curPos().getNum())
+            #self.FFidleSignal.emit(self.curPos().getNum())
+            self.FFSignal.emit("idle", self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
-        print(self.__arrivalTime)
-        print(self.__cumArrivalTime)
 
     def getcumArrivalTime(self):
         return self.__cumArrivalTime
@@ -64,10 +64,10 @@ class FireFighter(QLabel):
             self.curPos().defend()
             self.process()
             self.curPos().nodeController.burned = False
-            self.FFprotectSignal.emit(self.curPos().getNum())
+            #self.FFprotectSignal.emit(self.curPos().getNum())
+            self.FFSignal.emit("protect",self.curPos().getNum())
         elif(self.destNode != None):
             self.traveling()
-        #self.checkArrival(timer)
 
     def process(self): #消防員標記為澆水中
         self.__process = True
@@ -114,7 +114,7 @@ class FireFighter(QLabel):
                 self.curPos().setStyleSheet(self.curPos().style)
             self.newPos()
             self.reset()
-            self.FFdoneSignal.emit("done")
+            self.FFSignal.emit("done", 0)
             return True
         else:
             self.__calculateCurrentCapacity()
@@ -184,9 +184,6 @@ class FireFighter(QLabel):
             self.curPos().setStyleSheet(self.curPos().nodeController.style)
     
     def accessibleVisualize(self, timer): #消防員可以前往的點可視化
-        '''for i in self.curPos().getNeighbors():
-            if(not i.isBurned() and not i.isProtected()):
-                i.setStyleSheet("")'''
         if(not self.isTraveling() or not self.isProcess()):
             for i in (self.curPos().getNeighbors()):
                 if (i.isBurned() == False and i.isProtected() == False):

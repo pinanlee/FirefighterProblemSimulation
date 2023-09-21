@@ -222,7 +222,7 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="consoleLabel">
     <property name="geometry">
      <rect>
-      <x>990</x>
+      <x>1280</x>
       <y>760</y>
       <width>631</width>
       <height>131</height>
@@ -247,8 +247,8 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>740</y>
+      <x>300</x>
+      <y>750</y>
       <width>261</width>
       <height>61</height>
      </rect>
@@ -326,10 +326,10 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="selectLabel">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>790</y>
-      <width>171</width>
-      <height>101</height>
+      <x>300</x>
+      <y>800</y>
+      <width>121</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="text">
@@ -339,10 +339,10 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="warningLabel">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>840</y>
-      <width>91</width>
-      <height>71</height>
+      <x>420</x>
+      <y>830</y>
+      <width>71</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -353,7 +353,7 @@ border: 2px solid blue;</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>80</y>
+      <y>130</y>
       <width>251</width>
       <height>611</height>
      </rect>
@@ -363,10 +363,10 @@ border: 2px solid blue;</string>
    <widget class="QPushButton" name="idleButton">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>800</y>
-      <width>131</width>
-      <height>41</height>
+      <x>590</x>
+      <y>790</y>
+      <width>121</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -382,10 +382,10 @@ border: 2px solid blue;</string>
    <widget class="QPushButton" name="defendButton">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>590</x>
       <y>850</y>
-      <width>131</width>
-      <height>41</height>
+      <width>121</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -401,8 +401,8 @@ border: 2px solid blue;</string>
    <widget class="QSpinBox" name="spinBox">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>800</y>
+      <x>860</x>
+      <y>780</y>
       <width>71</width>
       <height>41</height>
      </rect>
@@ -426,8 +426,8 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>470</x>
-      <y>800</y>
+      <x>730</x>
+      <y>780</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -445,10 +445,10 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="backgroundLabel_2">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>750</y>
+      <x>290</x>
+      <y>760</y>
       <width>921</width>
-      <height>151</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -464,8 +464,8 @@ border: 2px solid blue;</string>
    <widget class="QCheckBox" name="checkBox">
     <property name="geometry">
      <rect>
-      <x>700</x>
-      <y>800</y>
+      <x>960</x>
+      <y>780</y>
       <width>221</width>
       <height>41</height>
      </rect>
@@ -481,6 +481,53 @@ border: 2px solid blue;</string>
     </property>
     <property name="autoRepeat">
      <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>1050</x>
+      <y>690</y>
+      <width>841</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Assign firefighters to new position or protect the current node</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>241</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string>firefighters:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <zorder>backgroundLabel_2</zorder>
@@ -506,6 +553,8 @@ border: 2px solid blue;</string>
    <zorder>spinBox</zorder>
    <zorder>label_3</zorder>
    <zorder>checkBox</zorder>
+   <zorder>label_4</zorder>
+   <zorder>label_5</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
