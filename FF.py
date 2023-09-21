@@ -23,7 +23,7 @@ class FireFighter(QLabel):
         self.__process = False #是否在澆水
         self.__ready = False #是否已準備好
         self.rate_extinguish = 2 #澆水速率
-        self.move_man = 20 #移動速率
+        self.move_man = 10 #移動速率
         self.destNode = None #下一個目的
         self.curMovingArc : dict = None
         self.pathProgress = 0
