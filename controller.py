@@ -75,8 +75,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def setup_control(self):
         def initNetwork(): #建立network class和node
             self.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
-            self.FFnetwork = Network("./network/G30_fire_route.xlsx", "./network/G30_nodeInformation.xlsx")
-            self.fireNetwork = Network("./network/G30_firefighter_route.xlsx", "./network/G30_nodeInformation.xlsx")
+            self.FFnetwork = Network("network/G30_fire_route.xlsx", "network/G30_nodeInformation.xlsx")
+            self.fireNetwork = Network("network/G30_firefighter_route.xlsx", "network/G30_nodeInformation.xlsx")
             for i in self.FFnetwork.nodeList:
                 node = Node(self.centralwidget, i)
                 node.clicked.connect(self.choose)
@@ -131,9 +131,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if(not i.getArcs()):
                     a = i.getNum()
             self.fire.append(Fire(self.fireNetwork, a, self.currentTime))
-            self.fire[-1].burnedSignal.connect(self.networkUpdateF)
-            self.fire[-1].opacitySignal.connect(self.fireVisualize)
-            self.fire[-1].terminateSignal.connect(self.finish)
+            self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
+            '''self.fire[-1].burnedSignal.connect(self.networkUpdateF)
+            self.fire[-1].opacitySignal.connect(self.fireVisualize)'''
             self.fire[-1].burn()
             self.updateMinTime()
             #初始化消防員
@@ -149,10 +149,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.FFInfoDict = data["FFinfo"]
                 for i in range(self.firefighterNum):
                     ff = FireFighter(self.centralwidget, i+1, depot)
-                    ff.FFdoneSignal.connect(self.updateFFStatus)
+                    ff.FFSignal.connect(self.ffSignalDetermination)
+                    '''ff.FFdoneSignal.connect(self.updateFFStatus)
                     ff.FFprotectSignal.connect(self.updateMinTime)
                     ff.FFprotectSignal.connect(self.networkUpdate)
-                    ff.FFidleSignal.connect(self.updateNodeIdle)
+                    ff.FFidleSignal.connect(self.updateNodeIdle)'''
                     depot.depotSetting()
                     self.firefighterList.append(ff)
                 self.networkUpdate(depot.getNum())
@@ -168,14 +169,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             else:
                 for i in range(self.firefighterNum):
                     ff = FireFighter(self.centralwidget, i+1, depot)
-                    ff.FFdoneSignal.connect(self.updateFFStatus)
+                    ff.FFSignal.connect(self.ffSignalDetermination)
+                    '''ff.FFdoneSignal.connect(self.updateFFStatus)
                     ff.FFprotectSignal.connect(self.updateMinTime)
                     ff.FFprotectSignal.connect(self.networkUpdate)
-                    ff.FFidleSignal.connect(self.updateNodeIdle)
+                    ff.FFidleSignal.connect(self.updateNodeIdle)'''
                     depot.depotSetting()
                     self.firefighterList.append(ff)
                 self.networkUpdate(depot.getNum())
-                self.firefighterList[1].setPixmap(QPixmap("./image/fireman.png"))
+                #self.firefighterList[1].setPixmap(QPixmap("./image/fireman.png"))
 
         randomFireAndDepot()
         self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName()) #UI SETTING: put here because the order of initialization
@@ -270,11 +272,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.noButton.setText("back to game")
 
     '''---------------------------------------firefighter signal-----------------------------------------'''
-    def networkUpdate(self,value): #FF network有節點被保護時呼叫，更新fire network
-        '''for i in self.fireNetwork.nodeList:
-            if(i.getNum() == value):
-                i.defend()'''
-        self.fireNetwork.nodeList[value-1].defend()
+    def ffSignalDetermination(self, text, no):
+        if(text == "done"):
+            self.updateFFStatus()
+        elif(text == "protect"):
+            self.networkUpdate(no)
+        elif(text == "idle"):
+            self.updateNodeIdle(no)
+
+    def networkUpdate(self,no): #FF network有節點被保護時呼叫，更新fire network
+        self.fireNetwork.nodeList[no-1].defend()
         self.updateMinTime()
 
     def updateMinTime(self): #更新FF network的fireMinArrivalTime
@@ -283,7 +290,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             i.fireMinArrivalTime = 10000
 
         for i in self.fire:
-            i.minTimeFireArrival(self.currentTime)
+            i.minTimeFireArrival()
         for i in self.FFnetwork.nodeList:
             i.fireMinArrivalTime = self.fireNetwork.nodeList[i.getNum()-1].fireMinArrivalTime
             #print("node {}: {}".format(i.getNum(), i.fireMinArrivalTime))
@@ -314,19 +321,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.nw.ffblockCP_sta2 = "Idle"
         self.iw_pageCP_FF()
 
-    def updateNodeIdle(self,value):
-        self.fireNetwork.nodeList[value-1].ffidle()
-        '''for i in self.fireNetwork.nodeList:
-            if(i.getNum() == value):
-                i.ffidle()'''
+    def updateNodeIdle(self, no):
+        self.fireNetwork.nodeList[no-1].ffidle()
 
     '''------------------------------------------fire signal---------------------------------------------'''
-    def networkUpdateF(self,value): #當fire network有新的節點燒起來時，更新ff network並增加新的"火"物件
-        self.nodeList[value-1].onFire()
-        self.fire.append(Fire(self.fireNetwork, value, self.currentTime))
-        self.fire[-1].burnedSignal.connect(self.networkUpdateF)
-        self.fire[-1].opacitySignal.connect(self.fireVisualize)
-        self.fire[-1].terminateSignal.connect(self.finish)
+    def fireSignalDetermination(self, text, opacity = 0, no = 0):
+        if(text == "burn"):
+            self.networkUpdateF(no)
+        elif(text == "visual"):
+            self.fireVisualize(opacity, no)
+    
+    def networkUpdateF(self,no): #當fire network有新的節點燒起來時，更新ff network並增加新的"火"物件
+        self.nodeList[no - 1].onFire()
+        self.fire.append(Fire(self.fireNetwork, no, self.currentTime))
+        self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
+        '''self.fire[-1].burnedSignal.connect(self.networkUpdateF)
+        self.fire[-1].opacitySignal.connect(self.fireVisualize)'''
 
     def fireVisualize(self, opacity, no): #當fire network的節點正在燃燒時，更新ui上的opacity
         self.fireNetwork.nodeList[no-1].updateStatus()
@@ -367,6 +377,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.updateFFStatus()
         self.clear_layout(self.verticalLayout)
         self.generateblockFF_gameWindow()
+
     def newNetwork(self):
         import subprocess
         import os
@@ -526,7 +537,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         send = None
         self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName())
         if(self.sender().objectName() == "defendButton"):
-            print("im here")
             text = self.checkStatus(self.firefighterList[self.FFindex].curPos())
             send = self.firefighterList[self.FFindex].curPos()
         else:
@@ -710,7 +720,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
                 blockff = QWidget()
                 blockff.setObjectName(f'{num}')
-                blockff.setFixedSize(230,115)
+                blockff.setFixedSize(240,115)
                 blockff.setStyleSheet(
                     "QWidget {"
                     "   border: 2px solid ;"  

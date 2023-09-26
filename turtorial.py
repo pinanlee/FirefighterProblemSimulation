@@ -2,9 +2,10 @@
 # coding: utf-8
 import json
 import os
+from functools import partial
 
-from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
-from PyQt5.QtWidgets import QGraphicsOpacityEffect,QVBoxLayout
+from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF,pyqtSignal
+from PyQt5.QtWidgets import QGraphicsOpacityEffect, QVBoxLayout, QLabel, QSizePolicy, QPushButton, QWidget
 from PyQt5 import QtWidgets, QtCore, QtGui
 import random
 import math
@@ -15,7 +16,7 @@ from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor
 from PyQt5 import uic
 import pandas as pd
 import numpy as np
@@ -37,7 +38,6 @@ class turtorial(QtWidgets.QMainWindow):
     FFindex = 0 
     focusIndex = 14
     labels : QtWidgets.QLabel = []
-    statusLabels = []
     timer = QTimer()
     currentTime = 0
     pageList = -1
@@ -46,6 +46,9 @@ class turtorial(QtWidgets.QMainWindow):
     showFFnetwork : bool = True
     showFireNetwork : bool = True
     FFInfoDict = []
+    totalValue = 0
+    availFF = 0
+    assignedFF = 0
     turtorialWindow = None
     turtorialList = [
         "This is a firefighter problem simulation. In this simulation, you are a firefighter manager, trying to contruct barriers in order to contain the fire spreading in a given network",
@@ -67,13 +70,13 @@ class turtorial(QtWidgets.QMainWindow):
         self.mainWindow = window
         global FFNum
         uic.loadUi("UIv4.ui",self)
-        self.instruct.setGeometry(-100,-300, self.instruct.width(), self.instruct.height())
-        self.yesButton.setGeometry(-100,-300, self.instruct.width(), self.instruct.height())
-        self.noButton.setGeometry(-100,-300, self.instruct.width(), self.instruct.height())
         if os.path.exists("FFInfo.json"):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
             FFNum = int(data["FFnumber"])
+        self.instruct.setGeometry(-100,-300, self.instruct.width(), self.instruct.height())
+        self.yesButton.setGeometry(-100,-300, self.yesButton.width(), self.yesButton.height())
+        self.noButton.setGeometry(-100,-300, self.noButton.width(), self.noButton.height())
         self.db = DataBase()
         self.nw = InformationWindow(self.db)
         self.firefighterNum = FFNum
@@ -84,6 +87,7 @@ class turtorial(QtWidgets.QMainWindow):
         self.hintLabel.setText(self.turtorialList[self.turtorialIndex])
         self.hintLabel.raise_()
         self.consoleLabel.raise_()
+        self.block_completelist = []
 
     '''------------------------------------初始化--------------------------------------------------------'''
     
@@ -107,13 +111,16 @@ class turtorial(QtWidgets.QMainWindow):
     def setup_control(self):
         def initNetwork(): #建立network class和node
             self.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
-            self.FFnetwork = Network("G15_fire_route_example.xlsx", "G15_nodeInformation_example.xlsx")
-            self.fireNetwork = Network("G15_firefighter_route_example.xlsx", "G15_nodeInformation_example.xlsx")
+            self.FFnetwork = Network("./network/example/G15_fire_route_example.xlsx", "./network/example/G15_nodeInformation_example.xlsx")
+            self.fireNetwork = Network("./network/example/G15_firefighter_route_example.xlsx", "./network/example/G15_nodeInformation_example.xlsx")
             for i in self.FFnetwork.nodeList:
                 node = Node(self.centralwidget, i)
                 node.clicked.connect(self.choose)
+                node.showSignal.connect(self.InfoShow)
                 self.nodeList.append(node)
-                #self.gridLayout.addWidget(node)
+                self.totalValue+=node.getValue()
+            self.progressBar.setMaximum(self.totalValue)
+            self.progressBar.setValue(self.totalValue)
         initNetwork()
         self.nodeNum = len(self.nodeList)
         self.db.numNode = self.nodeNum
@@ -132,7 +139,9 @@ class turtorial(QtWidgets.QMainWindow):
             self.backButton.clicked.connect(self.back)
             self.node_info_label.setVisible(False)
             self.nodeList[self.focusIndex].setFocus()
-
+            self.idleButton.clicked.connect(self.assignIdle)
+            self.defendButton.clicked.connect(self.choose)
+            self.checkBox.toggled.connect(self.idleLock)
         initUI()
         self.showInformationWindow()
 
@@ -149,7 +158,7 @@ class turtorial(QtWidgets.QMainWindow):
             def ySort(elem: Node):
                 return elem.geometry().y()
             #初始化火
-            self.nodeList.sort(key=ySort)
+            #self.nodeList.sort(key=ySort)
             a = 13
             self.fire.append(Fire(self.fireNetwork, a, self.currentTime))
             self.fire[-1].burnedSignal.connect(self.networkUpdateF)
@@ -197,9 +206,14 @@ class turtorial(QtWidgets.QMainWindow):
 
         randomFireAndDepot()
 
+        self.totalValue = self.fireNetwork.getTotalValue()
+        self.progressBar.setValue(self.totalValue)
         self.selectFireFighter()
+        self.generateblockFF_gameWindow()
         self.updateFFStatus()
 
+        self.howManyAvail()
+        self.hintAnimate("firefighter available: {}".format(self.availFF))
 
         def databaseInit():
             self.nw.numFF = self.firefighterNum
@@ -208,10 +222,27 @@ class turtorial(QtWidgets.QMainWindow):
 
         databaseInit()
         self.dataRecord()
+        def setOpacity(num, label):
+            opacity_effect = QGraphicsOpacityEffect()
+            opacity_effect.setOpacity(num)
+            label.setGraphicsEffect(opacity_effect)
+        if(self.firefighterList[self.FFindex].curPos().isProtected()):
+            setOpacity(0.5,self.defendButton)
+            self.defendButton.setEnabled(False)
+        else:
+            setOpacity(1,self.defendButton)
+            self.defendButton.setEnabled(True)
 
     def back(self):
         self.mainWindow.show()
         self.close()
+
+    def howManyAvail(self):
+        self.assignedFF = 0
+        self.availFF = 0
+        for i in self.firefighterList:
+            if(i.getcumArrivalTime() == self.currentTime):
+                self.availFF += 1
 
     def intoGame(self):
         self.setStyleSheet("")
@@ -243,11 +274,25 @@ class turtorial(QtWidgets.QMainWindow):
         self.noButton.setGeometry(799,599,101,51)
         self.noButton.setText("back to game")
 
+    def assignIdle(self):
+        self.assignedFF += 1
+        self.hintAnimate("firefighter available: {}".format(self.availFF - self.assignedFF))
+        if(not self.firefighterList[(self.FFindex + 1) % self.firefighterNum].isSelected()):
+            self.selectFireFighter()
+        self.updateFFStatus()
+        self.descriptionAnimate("{} idle for {} time step(s)".format(self.firefighterList[self.FFindex].getName(), self.spinBox.value()))
+        self.nextTime()
+
+    def idleLock(self):
+        if(self.checkBox.isChecked()):
+            self.spinBox.setValue(99)
+            self.spinBox.setEnabled(False)
+        else:
+            self.spinBox.setEnabled(True)
+
     '''---------------------------------------firefighter signal-----------------------------------------'''
     def networkUpdate(self,value): #FF network有節點被保護時呼叫，更新fire network
-        for i in self.fireNetwork.nodeList:
-            if(i.getNum() == value):
-                i.defend()
+        self.fireNetwork.nodeList[value-1].defend()
         self.updateMinTime()
 
     def updateMinTime(self): #更新FF network的fireMinArrivalTime
@@ -292,31 +337,26 @@ class turtorial(QtWidgets.QMainWindow):
 
 
     def updateNodeIdle(self,value):
-        for i in self.fireNetwork.nodeList:
-            if(i.getNum() == value):
-                i.ffidle()
+        self.fireNetwork.nodeList[value-1].ffidle()
 
 
     '''------------------------------------------fire signal---------------------------------------------'''
     def networkUpdateF(self,value): #當fire network有新的節點燒起來時，更新ff network並增加新的"火"物件
-        for i in self.nodeList:
-            if(i.getNum() == value):
-                i.onFire()
-                self.fire.append(Fire(self.fireNetwork, value, self.currentTime))
-                self.fire[-1].burnedSignal.connect(self.networkUpdateF)
-                self.fire[-1].opacitySignal.connect(self.fireVisualize)
-                self.fire[-1].terminateSignal.connect(self.finish)
+        self.nodeList[value-1].onFire()
+        self.fire.append(Fire(self.fireNetwork, value, self.currentTime))
+        self.fire[-1].burnedSignal.connect(self.networkUpdateF)
+        self.fire[-1].opacitySignal.connect(self.fireVisualize)
+        self.fire[-1].terminateSignal.connect(self.finish)
 
     def fireVisualize(self, opacity, no): #當fire network的節點正在燃燒時，更新ui上的opacity
-        for i in self.fireNetwork.nodeList:
-            if(i.getNum() == no):
-                tempGrass = i.getGrassAmount()
-                i.updateStatus()
-        for i in self.nodeList:
-            if(i.getNum()== no):
-                i.setStyleSheet(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
-                i.updateGrassAmount(tempGrass)
-                i.updateStatus()
+        self.fireNetwork.nodeList[no-1].updateStatus()
+        self.nodeList[no-1].nodeController.style = f'background-color: rgba(255, 0, 0, {opacity}); color: white;'
+        self.nodeList[no-1].setStyleSheet(self.nodeList[no-1].nodeController.style)
+        self.nodeList[no-1].updateGrassAmount(self.fireNetwork.nodeList[no-1].getGrassAmount())
+        self.nodeList[no-1].updateStatus()
+
+        self.totalValue = self.fireNetwork.getTotalValue()
+        self.progressBar.setValue(self.totalValue)
 
     def finish(self):
         self.timer.stop()
@@ -330,12 +370,6 @@ class turtorial(QtWidgets.QMainWindow):
             self.node_info_label.setVisible(False)
             if(a0.key()==Qt.Key_Enter-1):
                     self.nextTime()
-            elif(a0.key() == Qt.Key_A):
-                self.buttonFocusStyle(-1)
-                self.iw_pageCP_node()
-            elif(a0.key() == Qt.Key_D):
-                self.buttonFocusStyle(1)
-                self.iw_pageCP_node()
             elif(a0.key() == Qt.Key_C):
                 if(self.practice):
                     self.selectFireFighter()
@@ -343,10 +377,6 @@ class turtorial(QtWidgets.QMainWindow):
                         self.turtorialing = True
                         self.practice = False
                         self.nextPage()
-                #self.iw_pageCP_FF()
-            elif(a0.key() == Qt.Key_X):
-                if(not self.node_info_label.isVisible()):
-                    self.InfoShow()
             elif(a0.key() == Qt.Key_S):
                     self.networkChange()
             elif(a0.key() == Qt.Key_N):
@@ -360,11 +390,12 @@ class turtorial(QtWidgets.QMainWindow):
                 else:
                     self.descriptionAnimate("FF {} : idle unlocked".format(self.FFindex+1))
         self.updateFFStatus()
-
+        self.clear_layout(self.verticalLayout)
+        self.generateblockFF_gameWindow()
     def newNetwork(self):
         import subprocess
         import os
-        subprocess.call("GenerateGraph.py", shell=True)
+        subprocess.call("./randomPlanerGraph/GenerateGraph.py", shell=True)
         p = sys.executable
         os.execl(p, p, *sys.argv)
 
@@ -372,23 +403,6 @@ class turtorial(QtWidgets.QMainWindow):
         import os
         p = sys.executable
         os.execl(p, p, *sys.argv)
-
-    def buttonFocusStyle(self, plus):
-        style = self.nodeList[self.focusIndex].styleSheet()
-        result_string = ""
-        for i in style.split(";"):
-            if(i+";" != self.selectedStyle):
-                result_string += i+";"
-        self.nodeList[self.focusIndex].clearFocus()
-        self.nodeList[self.focusIndex].setStyleSheet(result_string)
-        self.focusIndex = (self.focusIndex + plus) % len(self.nodeList)
-        style = self.nodeList[self.focusIndex].styleSheet()
-        self.nodeList[self.focusIndex].setStyleSheet(style + self.selectedStyle)
-        self.nodeList[self.focusIndex].setFocus()
-
-    def nextFocus(self, plus):
-        if(plus == 1):
-            self.nodeList[self.focusIndex].geometry().x()
 
     def networkChange(self):
         if(self.showFFnetwork and self.showFireNetwork):
@@ -405,40 +419,44 @@ class turtorial(QtWidgets.QMainWindow):
     def nextAnim(self):
         self.anim.stop()
         self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
-        self.anim.setStartValue(QPoint(310, 240))
-        self.anim.setEndValue(QPoint(2200, 240))
+        self.anim.setStartValue(QPoint(750, 710))
+        self.anim.setEndValue(QPoint(2200, 710))
         self.anim.setDuration(250)
         def start():
             self.anim.start()
-        QTimer.singleShot(800, start)  
+        QTimer.singleShot(1500, start)  
 
     def descriptionAnimate(self, text):
         self.descriptionLabel.setText(text)
         self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
-        self.anim.setEndValue(QPoint(310, 240))
+        self.anim.setStartValue(QPoint(2200, 710))
+        self.anim.setEndValue(QPoint(750, 710))
         self.anim.setDuration(250)
         self.anim.start()
 
         self.anim.finished.connect(self.nextAnim)      
         self.descriptionLabel.raise_()
 
-    def InfoShow(self): #查看node資訊
-        #移動label位置
-        geo = self.nodeList[self.focusIndex].geometry()
-        self.node_info_label.setVisible(True)
-        pos = QtCore.QRect(geo.x(), geo.y() + geo.width(), self.node_info_label.frameRect().width(), self.node_info_label.frameRect().height())
-        self.node_info_label.setGeometry(pos)
-        self.node_info_label.raise_()
-
-        #處理顯示文字
-        infotext = self.checkStatus(self.nodeList[self.focusIndex]) #檢查指定消防員是否可以移動到指定點
-        text = infotext + "\nnode: {}, A = {}, L= ".format(self.nodeList[self.focusIndex].getNum(), self.nodeList[self.focusIndex].getWaterAmount())
-        #取得arc長度
-        if(self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex]) == -1):
-            text += "None"
+    def nextHintAnim(self):
+        if self.index < len(self.text):
+            self.consoleLabel.setText(self.text[:self.index+1])
+            self.index += 1
         else:
-            text += str(self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex])["length"])
-        self.node_info_label.setText(text)
+            self.timeHint.stop()
+
+    def hintAnimate(self, text):
+        self.index = 0
+        self.text = text
+        self.timeHint = QTimer()
+        self.timeHint.setInterval(10)
+        self.timeHint.timeout.connect(self.nextHintAnim)
+        self.timeHint.start()   
+
+    def InfoShow(self): #查看node資訊
+        #處理顯示文字
+        self.iw_pageCP_node()
+        text = "This is node: {}, you need to protect it before time {}".format(self.sender().getNum(),self.sender().getFireMinArrivalTime())
+        self.hintAnimate(text)
 
     def iw_pageCP_node(self):
         #part node
@@ -488,9 +506,16 @@ class turtorial(QtWidgets.QMainWindow):
         self.nextFFindex = (self.FFindex + 1) % self.firefighterNum
         self.__opacitySet()
         self.firefighterList[self.FFindex].setPixmap(self.firefighterList[self.FFindex].grab())
-        self.firefighterList[self.prevFFindex].closeaccessibleVisualize()
+        self.firefighterList[self.prevFFindex].closeaccessibleVisualize(self.nodeList)
         self.firefighterList[self.FFindex].accessibleVisualize(self.currentTime)
         self.descriptionAnimate("change to {}".format(self.firefighterList[self.FFindex].getName()))
+        image = self.firefighterList[self.FFindex].grab()
+        self.selectLabel.setPixmap(image.scaled(220,150))
+        if(self.firefighterList[self.FFindex].isSelected()):
+            warn = QPixmap("./image/warning.png")
+            self.warningLabel.setPixmap(warn.scaled(90,70))
+        else:
+            self.warningLabel.setPixmap(QPixmap())
 
     def __opacitySet(self): #調整FF的opacity
         def setOpacity(num, label):
@@ -501,7 +526,6 @@ class turtorial(QtWidgets.QMainWindow):
         for i in range(self.firefighterNum):
             opacity = 1 if i == self.FFindex else 0.3
             setOpacity(opacity, self.firefighterList[i])
-            #setOpacity(opacity, self.labels[i])
         setOpacity(1, self.firefighterList[self.FFindex])
 
     def printStatus(func):
@@ -511,30 +535,37 @@ class turtorial(QtWidgets.QMainWindow):
                 text = "already selected"
             else:
                 text = func(self)
-                if(text == "vaild choose"):
-                    self.sender().setText(str(self.firefighterList[self.FFindex].num))
+                self.assignedFF += text[1]
+                self.hintAnimate("firefighter available: {}".format(self.availFF - self.assignedFF))
+                if(not self.firefighterList[(self.FFindex + 1) % self.firefighterNum].isSelected() and text[1] == 1):
+                    self.selectFireFighter()
             self.updateFFStatus()
-            #if(self.practice):
-            #    self.descriptionAnimate(text)
+            self.descriptionAnimate(text[0])
+            
+            self.nextTime()
         return aa
     @printStatus
     def choose(self): #指派消防員移動至給定node
-        if(self.practice):
+        send = None
+        if(self.sender().objectName() == "defendButton"):
+            print("im here")
+            text = self.checkStatus(self.firefighterList[self.FFindex].curPos())
+            send = self.firefighterList[self.FFindex].curPos()
+        else:
             text = self.checkStatus(self.sender()) #檢查選擇的node是否符合限制
-            if(text == "vaild choose"):
-                if(self.firefighterList[self.FFindex].destNode == self.sender()): #是否選擇取消(再次點擊同node)
-                    self.firefighterList[self.FFindex].reset()
-                    self.sender().setStyleSheet("")
-                    return "{} reset".format(self.firefighterList[self.FFindex].getName())
-                if(self.turtorialIndex == 7 or self.turtorialIndex == 8):
-                    self.practice = False
-                    self.turtorialing = True
-                    self.nextPage()
-                text = self.firefighterList[self.FFindex].processCheck(self.sender())
-                self.descriptionAnimate(text)
-                return text
-            return text
-        return ""
+            send = self.sender()
+        if(text == "vaild choose"):
+            if(self.firefighterList[self.FFindex].destNode == send): #是否選擇取消(再次點擊同node)
+                self.firefighterList[self.FFindex].reset()
+                send.setStyleSheet("")
+                return ("{} reset".format(self.firefighterList[self.FFindex].getName()), -1)
+            text = self.firefighterList[self.FFindex].processCheck(send)
+            self.firefighterList[self.FFindex].ready()
+            self.firefighterList[self.FFindex].updateStatus()
+            self.clear_layout(self.verticalLayout)
+            self.generateblockFF_gameWindow()
+            return (text, 1)
+        return (text, 0)
 
     def checkStatus(self, node):
         if(self.firefighterList[self.FFindex].isProcess()):
@@ -557,29 +588,47 @@ class turtorial(QtWidgets.QMainWindow):
             if(ctr == len(self.fire)):
                 self.finish()
             self.dataRecord()
-            text = "moving"
-            for i in range(self.currentTime % 3):
-                text += "."
-            self.descriptionAnimate(text)  
             self.upadateInformation()
             self.currentTime+=1
             for i in self.fire:
                 i.fire_spread(self.currentTime)
             for i in self.firefighterList:
+                i.cancelReady()
+                i.updateStatus()
                 if(i.checkArrival(self.currentTime)):
                     self.timer.stop()
-                    self.nextPage()
+                    self.FFindex = i.num - 2
+                    self.selectFireFighter()
+                    self.descriptionAnimate("firefighter {} has finished task".format(i.num))
+                    self.howManyAvail()
+                    self.hintAnimate("firefighter available: {}".format(self.availFF))
+                    def setOpacity(num, label):
+                        opacity_effect = QGraphicsOpacityEffect()
+                        opacity_effect.setOpacity(num)
+                        label.setGraphicsEffect(opacity_effect)
+                    if(i.curPos().isProtected()):
+                        setOpacity(0.5,self.defendButton)
+                        self.defendButton.setEnabled(False)
+                    else:
+                        setOpacity(1,self.defendButton)
+                        self.defendButton.setEnabled(True)
+
             self.__opacitySet()
             self.timeIndexLabel.setText("t= "+str(self.currentTime))
-
-        for i in self.firefighterList:
-            if(not (i.isTraveling() or i.isProcess())):
-                i.finishTimeSet()
-            i.move(self.currentTime)
-        self.timer = QTimer()
-        self.timer.setInterval(300)
-        self.timer.timeout.connect(timeSkip)
-        self.timer.start()
+            self.clear_layout(self.verticalLayout)
+            self.generateblockFF_gameWindow()
+        if(self.assignedFF == self.availFF):
+            self.clear_layout(self.verticalLayout)
+            self.generateblockFF_gameWindow()
+            for i in self.firefighterList:
+                if(not (i.isTraveling() or i.isProcess())):
+                    i.finishTimeSet(self.spinBox.value())
+                    i.closeaccessibleVisualize(self.nodeList)
+                i.move()
+            self.timer = QTimer()
+            self.timer.setInterval(700)
+            self.timer.timeout.connect(timeSkip)
+            self.timer.start()
 
     def showInformationWindow(self):
         self.upadateInformation()
@@ -594,32 +643,41 @@ class turtorial(QtWidgets.QMainWindow):
         self.nw.tab_widget.setCurrentIndex(self.pageList)
         # x = self.nw.pos().x()
         # y = self.nw.pos().y()
-        # self.nw.move(x, y)
+        # self.nw.(x, y)
 
     def paintEvent(self, event):
         qpainter = QPainter()
         qpainter.begin(self)
         qpainter.setRenderHint(QPainter.Antialiasing)
-        
-        if(self.showFFnetwork):
-            qpen = QPen(Qt.black, 2, Qt.SolidLine)
-            qpainter.setPen(qpen)
-            for i in self.nodeList:
-                for j in i.getNeighbors():
-                    qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y()+ 3/2*i.height()), QPointF(j.x()+ j.width()/2, j.y()+ 3/2*j.height()))
         if(self.showFireNetwork):
-            qpen = QPen(Qt.darkRed, 4, Qt.DashLine)
-            qpen.setDashPattern([10, 50, 10, 50])
+            qpen = QPen(Qt.red, 4, Qt.SolidLine)
             qpainter.setPen(qpen)
             for i in self.fireNetwork.nodeList:
                 for j in i.getNeighbors():
                     qpainter.drawLine(QPointF(i.pos.x() + i.pos.width()/2, i.pos.y()+ 3/2*i.pos.height()), QPointF(j.pos.x()+ j.pos.width()/2, j.pos.y()+ 3/2*j.pos.height()))          
-
+            for i in self.nodeList:
+                i.setText(str(i.getFireMinArrivalTime()))
+        if(self.showFFnetwork):
+            qpen = QPen(Qt.black, 4, Qt.SolidLine)
+            qpainter.setPen(qpen)
+            for i in self.nodeList:
+                i.setText(str(i.getNum()))
+                for j in i.getNeighbors():
+                    if(not self.showFireNetwork):
+                        '''if(i.getArc(j)["length"] < 150):
+                            qpen = QPen(Qt.green, 4, Qt.SolidLine)
+                        elif(i.getArc(j)["length"] < 300):
+                            qpen = QPen(Qt.darkYellow, 4, Qt.SolidLine)
+                        else:
+                            qpen = QPen(Qt.red, 4, Qt.SolidLine)
+                            
+                    qpainter.setPen(qpen)'''
+                    qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y()+ 3/2*i.height()), QPointF(j.x()+ j.width()/2, j.y()+ 3/2*j.height()))
         for i in self.fire:
             for j in i.arcs:
                     tempXpercent = (j["node"].pos.x() + j["node"].pos.width()/2 - i.firePos.pos.x() - i.firePos.pos.width()/2) * i.getArcPercentage_Fire(j)
                     tempYpercent = (j["node"].pos.y() + 3/2*j["node"].pos.height() - i.firePos.pos.y() - 3/2*i.firePos.pos.height()) * i.getArcPercentage_Fire(j)
-                    qpen = QPen(Qt.red, 6, Qt.SolidLine)
+                    qpen = QPen(Qt.darkRed, 6, Qt.SolidLine)
                     qpainter.setPen(qpen)
                     qpainter.drawLine(QPointF(i.firePos.pos.x() + i.firePos.pos.width()/2, i.firePos.pos.y() + 3/2*i.firePos.pos.height()), QPointF(i.firePos.pos.x() + i.firePos.pos.width()/2 + tempXpercent, i.firePos.pos.y() + 3/2*i.firePos.pos.height() + tempYpercent))                 
         
@@ -663,6 +721,175 @@ class turtorial(QtWidgets.QMainWindow):
         self.window_FFnum.show()
 
 
+    def blockFFContent_gameWindow(self, num):
+        for i in self.firefighterList:
+            if(num == i.num):
+                font = QFont()
+                font.setPointSize(11)
+                font.setBold(True)
+
+                blockff = QWidget()
+                blockff.setObjectName(f'{num}')
+                blockff.setFixedSize(230,115)
+                blockff.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                pixmap = i.grab()
+                title_label_img = QLabel(blockff)
+                title_label_img.setGeometry(10, 10, 85,100)
+
+                title_label_img.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                title_label_img.setStyleSheet(
+                    "QLabel {"
+                    "   border: 2px solid #0078d7;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                scaled_pixmap = pixmap.scaled(title_label_img.width(), title_label_img.height())
+                title_label_img.setPixmap(scaled_pixmap)
+
+                title_label_name_des = QLabel(i.getName(), blockff)
+                title_label_name_des.setFont(font)
+                title_label_name_des.setGeometry(100, 75, 120, 30)
+
+                temp = str(i.status)
+                self.title_label_ready_des = QLabel(temp, blockff)
+                self.title_label_ready_des.setFont(font)
+                self.title_label_ready_des.setGeometry(100, 25, 120, 35)
+
+        return blockff
+    def blockFFComplete_gameWindow(self, num):
+        for i in self.firefighterList:
+            if(num == i.num):
+                font = QFont()
+                font.setPointSize(11)
+                font.setBold(True)
+
+                blockff = QWidget(self.centralwidget)
+                blockff.setObjectName(f'{num}')
+                blockff.setFixedSize(240,380)
+                blockff.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "background-color: white;"
+                    "}"
+                )
+
+                def delete_self(self):
+                    blockff.close()
+                button_delete = QPushButton("Close",blockff)
+                button_delete.setGeometry(180, 10, 50, 25)
+                button_delete.clicked.connect(delete_self)
+
+
+                pixmap = i.grab()
+                title_label_img = QLabel(blockff)
+                title_label_img.setGeometry(10, 10, 85,100)
+
+                title_label_img.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                title_label_img.setStyleSheet(
+                    "QLabel {"
+                    "   border: 2px solid #0078d7;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                scaled_pixmap = pixmap.scaled(title_label_img.width(), title_label_img.height())
+                title_label_img.setPixmap(scaled_pixmap)
+                title_label_name = QLabel("Name\t:", blockff)
+                title_label_name.setFont(font)
+                title_label_name.setGeometry(0, 115, 80, 30)
+                title_label_name_des = QLabel(i.getName(), blockff)
+                title_label_name_des.setFont(font)
+                title_label_name_des.setGeometry(0, 155, 120, 30)
+
+                title_label_wr = QLabel("Water Rate\t:", blockff)
+                title_label_wr.setFont(font)
+                title_label_wr.setGeometry(0, 205, 120, 30)
+                temp = str(i.rate_extinguish)
+                title_label_wr_des = QLabel(temp, blockff)
+                title_label_wr_des.setFont(font)
+                title_label_wr_des.setGeometry(0, 245, 150, 30)
+
+                title_label_mr = QLabel("Move Rate\t:", blockff)
+                title_label_mr.setFont(font)
+                title_label_mr.setGeometry(0, 295, 120, 30)
+                temp = str(i.move_man)
+                title_label_mr_des = QLabel(temp, blockff)
+                title_label_mr_des.setFont(font)
+                title_label_mr_des.setGeometry(0, 335, 150, 30)
+
+        return blockff
+
+    def generateblockFF_gameWindow(self):
+        self.blocklist = []
+        for i in self.firefighterList:
+            block = self.blockFFContent_gameWindow(i.num)
+            self.blocklist.append(block)
+            block.mousePressEvent = partial(self.blockFF_mousePressEvent,block.objectName())
+            block.enterEvent = partial(self.blockFF_mouseEnterEvent,block.objectName())
+            block.leaveEvent = partial(self.blockFF_mouseLeaveEvent,block.objectName())
+            self.verticalLayout.addWidget(block)
+
+    def clear_layout(self,layout):
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+
+    def checkAllReady(self):
+        templist = []
+        for i in self.firefighterList:
+            templist.append(i.nextRound)
+        if(False in templist):
+            self.ready = False
+        else:
+            self.ready = True
+
+    def blockFF_mousePressEvent(self,nums,event):
+        for i in self.block_completelist:
+            i.close()
+            self.block_completelist = []
+        for i in self.blocklist:
+            if(i.objectName() == nums):
+                nums = int(nums)
+                block_complete = self.blockFFComplete_gameWindow(nums)
+                self.block_completelist.append(block_complete)
+                block_complete.raise_()
+                block_complete.show()
+                block_complete.setGeometry(270,250,240,400)
+
+    def blockFF_mouseEnterEvent(self,nums ,event):
+        for i in self.blocklist:
+            if(i.objectName() == nums):
+                i.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid #FF4778 ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
+                i.setCursor(QCursor(Qt.PointingHandCursor))
+
+    def blockFF_mouseLeaveEvent(self,nums ,event):
+        for i in self.blocklist:
+            if(i.objectName() == nums):
+                i.setStyleSheet(
+                    "QWidget {"
+                    "   border: 2px solid  ;"  
+                    "   border-radius: 10px;"  
+                    "   padding: 5px;"  
+                    "}"
+                )
 
 
 

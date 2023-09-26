@@ -3,9 +3,9 @@ from PyQt5.QtCore import pyqtSignal, QObject
 import math
 import copy
 class Fire(QObject):
-    burnedSignal = pyqtSignal(int)
-    opacitySignal = pyqtSignal(float, int)
-    terminateSignal = pyqtSignal()
+    '''burnedSignal = pyqtSignal(int)
+    opacitySignal = pyqtSignal(float, int)'''
+    fireSignal = pyqtSignal(str, float, int)
     def __init__(self, network, depot, time):
         super().__init__()
         self.firePos = network.nodeList[depot-1]
@@ -20,8 +20,8 @@ class Fire(QObject):
 
     def burn(self):
         self.firePos.onFire()
-        self.burnedSignal.emit(self.firePos.getNum())
-
+        #self.burnedSignal.emit(self.firePos.getNum())
+        self.fireSignal.emit("burn", 0, self.firePos.getNum())
     def fire_spread(self, timer): #火焰傳遞邏輯
         if(self.firePos.isProtected()):
             self.firePos.burned = False
@@ -40,7 +40,8 @@ class Fire(QObject):
                 elif (self.__statusDetection(j)):
                     j["node"].onFire()
                     print("node {} is burned at time {}".format(j["node"].getNum(), timer))
-                    self.burnedSignal.emit(j["node"].getNum())
+                    #self.burnedSignal.emit(j["node"].getNum())
+                    self.fireSignal.emit("burn", 0, j["node"].getNum())
                     ctr+=1
                 else:
                     ctr+=1
@@ -63,10 +64,10 @@ class Fire(QObject):
     def __calculateCurrentFireArrive(self, arc): #更新火在arc上的移動情況
         arc["fire-travel"] += self.move_fire
     
-    def minTimeFireArrival(self, time):
-        self.__calculateMinTime(time)
+    def minTimeFireArrival(self):
+        self.__calculateMinTime()
 
-    def __calculateMinTime(self, time):
+    def __calculateMinTime(self):
         self.firePos.fireMinArrivalTime = self.startBurningTime
         tempList = [copy.copy(self.firePos)]
         while(tempList):
@@ -89,8 +90,7 @@ class Fire(QObject):
 
     def __burningVisualize(self): #UI設定
         opacity = 1 - self.firePos.getNodePercentage_Fire()
-        self.opacitySignal.emit(opacity, self.firePos.no)
-
+        self.fireSignal.emit("visual", opacity, self.firePos.no)
     def getArcPercentage_Fire(self, arc): #獲得火在arc上的移動進度
         if(arc in self.arcs):
                 return arc["fire-travel"]/ arc["length"]
