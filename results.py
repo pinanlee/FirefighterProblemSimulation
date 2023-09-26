@@ -15,7 +15,7 @@ class resultsWindow(QtWidgets.QMainWindow):
 
         self.folder_path = "image/timescreenshot"
         self.timestampList = []
-        for files in os.walk(self.folder_path):
+        for _, _, files in os.walk(self.folder_path):
             for file_name in files:
                 file_path = "image/timescreenshot/" + file_name
                 self.timestampList.append(file_path)
