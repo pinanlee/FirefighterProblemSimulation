@@ -3,8 +3,6 @@ from PyQt5.QtCore import pyqtSignal, QObject
 import math
 import copy
 class Fire(QObject):
-    '''burnedSignal = pyqtSignal(int)
-    opacitySignal = pyqtSignal(float, int)'''
     fireSignal = pyqtSignal(str, float, int)
     def __init__(self, network, depot, time):
         super().__init__()
@@ -16,12 +14,13 @@ class Fire(QObject):
         self.finishSpread = False
         self.arcs = []
         for i in self.firePos.getArcs():
-            self.arcs.append({"node" : i["node"], "length": i["length"], "fire-travel": 0})
+            self.arcs.append({"node" : i["node"], "length": i["length"], "fire-travel": 0, "travel-time": i["travel-time"]})
 
     def burn(self):
         self.firePos.onFire()
         #self.burnedSignal.emit(self.firePos.getNum())
         self.fireSignal.emit("burn", 0, self.firePos.getNum())
+
     def fire_spread(self, timer): #火焰傳遞邏輯
         if(self.firePos.isProtected()):
             self.firePos.burned = False
@@ -33,7 +32,8 @@ class Fire(QObject):
             ctr = 0
             for j in self.arcs:
                 #if(self.__statusDetection(j)): #若該點未被保護或未燒起來, 起火
-                if(j["length"] > j["fire-travel"]):
+                #if(j["length"] > j["fire-travel"]):
+                if(j["travel-time"] > j["fire-travel"]):    
                     self.__calculateCurrentFireArrive(j)
                     if(not self.__statusDetection(j)):
                         ctr+=1
@@ -56,14 +56,19 @@ class Fire(QObject):
         return not (node["node"].isProtected() or node["node"].isBurned())
 
     def __calculateCurrentCapacity(self): #更新該node的grass量
-        remain = self.firePos.getGrassAmount() - self.rate_fireburn
-        if(remain <= 0):
+        #remain = self.firePos.getGrassAmount() - self.rate_fireburn
+        #if(remain <= 0):
+        #    self.finishBurn = True
+        #self.firePos.updateGrassAmount(remain)
+        self.firePos.updateValue()
+        self.firePos.fireProgress += 1
+        if(self.firePos.fireProgress == self.firePos.burningTime):
             self.finishBurn = True
-        self.firePos.updateGrassAmount(remain)
 
     def __calculateCurrentFireArrive(self, arc): #更新火在arc上的移動情況
-        arc["fire-travel"] += self.move_fire
-    
+        #arc["fire-travel"] += self.move_fire
+        arc["fire-travel"] += 1
+
     def minTimeFireArrival(self):
         self.__calculateMinTime()
 
@@ -72,12 +77,14 @@ class Fire(QObject):
         tempList = [copy.copy(self.firePos)]
         while(tempList):
             tempTime = tempList[0].fireMinArrivalTime
-            tempTime += tempList[0].initialGrassAmount / self.rate_fireburn
-            
+            #tempTime += tempList[0].initialGrassAmount / self.rate_fireburn
+            tempTime += tempList[0].burningTime
             for j in tempList[0].getArcs():
                 if(self.__statusDetection(j)):
-                    if(j["node"].fireMinArrivalTime > math.ceil(tempTime + j["length"] / self.move_fire)):               
-                        j["node"].fireMinArrivalTime = math.ceil(tempTime + j["length"] / self.move_fire)
+                    '''if(j["node"].fireMinArrivalTime > math.ceil(tempTime + j["length"] / self.move_fire)):               
+                        j["node"].fireMinArrivalTime = math.ceil(tempTime + j["length"] / self.move_fire)'''
+                    if(j["node"].fireMinArrivalTime > math.ceil(tempTime + j["travel-time"] )):               
+                        j["node"].fireMinArrivalTime = math.ceil(tempTime + j["travel-time"])
                         tempList.append(copy.copy(j["node"]))             
             tempList.remove(tempList[0])
             for i in range(len(tempList)):
@@ -93,5 +100,5 @@ class Fire(QObject):
         self.fireSignal.emit("visual", opacity, self.firePos.no)
     def getArcPercentage_Fire(self, arc): #獲得火在arc上的移動進度
         if(arc in self.arcs):
-                return arc["fire-travel"]/ arc["length"]
+            return arc["fire-travel"]/ arc["travel-time"]
         return -1

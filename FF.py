@@ -6,9 +6,6 @@ import math
 
 class FireFighter(QLabel):
     FFSignal = pyqtSignal(str, int)
-    '''FFdoneSignal = pyqtSignal(str)
-    FFprotectSignal = pyqtSignal(int)
-    FFidleSignal = pyqtSignal(int)'''
     def __init__(self, widget, num, depot):
         super().__init__(widget)
         self.widget = widget
@@ -57,7 +54,6 @@ class FireFighter(QLabel):
     def finishTimeSet(self, value):
         if(self.isIdle()):
             self.__arrivalTime = value
-            #self.FFidleSignal.emit(self.curPos().getNum())
             self.FFSignal.emit("idle", self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
 
@@ -69,7 +65,6 @@ class FireFighter(QLabel):
             self.curPos().defend()
             self.process()
             self.curPos().nodeController.burned = False
-            #self.FFprotectSignal.emit(self.curPos().getNum())
             self.FFSignal.emit("protect",self.curPos().getNum())
         elif(self.destNode != None):
             self.traveling()
@@ -149,7 +144,8 @@ class FireFighter(QLabel):
             return ""
 
     def __safeDetection(self, node: Node, timer):
-        if(node.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(node)["length"] / self.move_man)):
+        #if(node.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(node)["length"] / self.move_man)):
+        if(node.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().nodeController.getArc(node.nodeController)["travel-time"])):
             return True
         return False
 
@@ -159,10 +155,12 @@ class FireFighter(QLabel):
         self.destNode = node
         if(node != self.curPos()):
             self.curMovingArc = self.curPos().getArc(node)
-            self.__arrivalTime = math.ceil(self.curPos().getArc(node)["length"] / self.move_man) 
+            self.__arrivalTime = self.curPos().nodeController.getArc(self.destNode.nodeController)["travel-time"]
+            #self.__arrivalTime = math.ceil(self.curPos().getArc(node)["length"] / self.move_man) 
             return "{} move to vertex {}".format(self.getName(), node.getNum())
         else:
-            self.__arrivalTime = self.curPos().getWaterAmount() / self.rate_extinguish
+            #self.__arrivalTime = self.curPos().getWaterAmount() / self.rate_extinguish
+            self.__arrivalTime = self.curPos().getProcessingTime() / self.rate_extinguish
             return "{} choose defend".format(self.getName()) if not self.curPos().isProtected() else "already protected"
 
     def __statusDetection(self, node): #check assigned node's status (burned or not burned)
@@ -175,16 +173,18 @@ class FireFighter(QLabel):
 
     def __calculateCurrentCapacity(self): #更新消防員在該node上的保護情況
         if(self.isProcess()):
-            remain = self.curPos().getWaterAmount() - self.rate_extinguish
-            self.curPos().updateWaterAmount(remain)
+            self.curPos().nodeController.ffProgress += 1
+            #remain = self.curPos().getWaterAmount() - self.rate_extinguish
+            #self.curPos().updateWaterAmount(remain)
 
     def __calculateCurrentFFArrive(self, arc): #更新消防員在arc上的移動情況
-        if(self.pathProgress < arc["length"]):
-            self.pathProgress += self.move_man
-
+        '''if(self.pathProgress < arc["length"]):
+            self.pathProgress += self.move_man'''
+        if(self.pathProgress < arc["travel-time"]):
+            self.pathProgress += 1
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
-            opacity = 1 - self.curPos().getNodePercentage_FF()
+            opacity = 1 - self.curPos().getNodePercentage_FF(self.rate_extinguish)
             self.curPos().nodeController.style = f'background-color: rgba(0, 255, 0, {opacity}); color: white;'
             self.curPos().setStyleSheet(self.curPos().nodeController.style)
     
@@ -202,7 +202,10 @@ class FireFighter(QLabel):
 
 
         self.arrowLabel = QLabel(self.widget)
-        arrow = QPixmap("image/arrow.png")
+        if(self.num == 1):
+            arrow = QPixmap("image/arrow_redr.png")
+        else:
+            arrow = QPixmap("image/arrow.png")
         self.arrowLabel.setPixmap(arrow)
         self.arrowLabel.raise_()
         self.arrowLabel.show()
@@ -214,7 +217,8 @@ class FireFighter(QLabel):
         if(not self.isTraveling() or not self.isProcess()):
             for i in (self.curPos().getNeighbors()):
                 if (i.isBurned() == False and i.isProtected() == False):
-                    if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["length"] / self.move_man)):
+                    #if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["length"] / self.move_man)):
+                    if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().nodeController.getArc(i.nodeController)["travel-time"])):
                         #i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
                         i.timer_nodeOpacity.start(100)
             if(not self.curPos().isProtected()):
@@ -222,10 +226,6 @@ class FireFighter(QLabel):
                 #self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
     def closeaccessibleVisualize(self, lst): #用於清除前一個消防員可以前往點的顏色
-        '''for i in (self.curPos().getNeighbors()):
-            if (i.isBurned() == False and i.isProtected() == False):
-                if (i.getFireMinArrivalTime() >= self.curPos().getArc(i)["length"] / self.move_man):
-                    i.setStyleSheet("")'''
         self.arrowLabel.setText("")
         self.arrowLabel.setPixmap(QPixmap())
         self.timer_arrow.stop()
@@ -236,7 +236,8 @@ class FireFighter(QLabel):
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
         for i in self.curPos().getArcs():
             if(i["node"] == node.nodeController): 
-                ratio = self.pathProgress/i["length"]
+                #ratio = self.pathProgress/i["length"]
+                ratio = self.pathProgress/i["travel-time"]
                 return ratio if ratio <= 1 else 1 
         return 0
 
@@ -249,5 +250,7 @@ class FireFighter(QLabel):
             self.status = "Traveling"
         elif(self.isIdle()):
             self.status = "Not Ready"
+        elif(self.isSelected()):
+            self.status = "Assigned!"
         else:
             self.status = "Not Ready"

@@ -112,15 +112,20 @@ class Node(QtWidgets.QPushButton):
     def getStatus(self):
         return self.nodeController.status
 
+    def getProcessingTime(self):
+        return self.nodeController.quantity * self.nodeController.burningTime
+
     #get function (計算獲得)
 
     def getNodePercentage_Fire(self): #獲得火在該node的燃燒進度
-        ratio = self.nodeController.grass_amount/self.nodeController.initialGrassAmount
-        return ratio if ratio >= 0 else 0
+        #ratio = self.nodeController.grass_amount/self.nodeController.initialGrassAmount
+        #return ratio if ratio >= 0 else 0
+        return self.nodeController.getNodePercentage_Fire()
     
-    def getNodePercentage_FF(self): #獲得消防員在該node的燃燒進度
-        ratio = self.nodeController.water_amount/self.nodeController.initialWaterAmount
-        return ratio if ratio >= 0 else 0
+    def getNodePercentage_FF(self, rate): #獲得消防員在該node的燃燒進度
+        #ratio = self.nodeController.water_amount/self.nodeController.initialWaterAmount
+        #return ratio if ratio >= 0 else 0
+        return self.nodeController.getNodePercentage_FF(rate)
 
     def updateStatus(self):
         if(self.nodeController.idle == True):

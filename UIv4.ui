@@ -339,10 +339,10 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="warningLabel">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>830</y>
-      <width>71</width>
-      <height>51</height>
+      <x>800</x>
+      <y>760</y>
+      <width>51</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -364,9 +364,9 @@ border: 2px solid blue;</string>
     <property name="geometry">
      <rect>
       <x>630</x>
-      <y>800</y>
-      <width>121</width>
-      <height>31</height>
+      <y>790</y>
+      <width>130</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
@@ -448,11 +448,17 @@ border: 2px solid blue;</string>
    <widget class="QLabel" name="label_selectedFF">
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>760</y>
-      <width>171</width>
+      <x>420</x>
+      <y>810</y>
+      <width>361</width>
       <height>51</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>TextLabel</string>
@@ -461,10 +467,10 @@ border: 2px solid blue;</string>
    <widget class="QLCDNumber" name="lcd_time">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>40</y>
-      <width>64</width>
-      <height>23</height>
+      <x>110</x>
+      <y>20</y>
+      <width>111</width>
+      <height>51</height>
      </rect>
     </property>
    </widget>
@@ -478,6 +484,9 @@ border: 2px solid blue;</string>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>10</number>
+     </property>
      <item>
       <widget class="QPushButton" name="idleButton">
        <property name="font">

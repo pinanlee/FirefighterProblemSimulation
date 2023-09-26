@@ -16,6 +16,10 @@ class NodeController():
         self.initialGrassAmount = 20   #火需要燒多少量才能移動
         self.water_amount = 20
         self.grass_amount = 20
+        self.burningTime = 0
+        self.fireProgress = 0
+        self.ffProgress = 0
+        self.quantity = 0
         self.__neighbors = [] #表示與那些node有相鄰關係
         self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
         self.burned = False
@@ -59,11 +63,12 @@ class NodeController():
         self.grass_amount = remain
         self.value = self.initValue * self.getNodePercentage_Fire()
 
-
-
     def updateWaterAmount(self, remain):
         remain = 0 if remain < 0 else remain
         self.water_amount = remain
+
+    def updateValue(self):
+        self.value = self.initValue * self.getNodePercentage_Fire()
 
     #get functions
     def isBurned(self):
@@ -100,11 +105,13 @@ class NodeController():
 
     #get function (計算獲得)
     def getNodePercentage_Fire(self): #獲得火在該node的燃燒進度
-        ratio = self.grass_amount/self.initialGrassAmount
+        ratio = 1-(self.fireProgress / self.burningTime)
+        #ratio = self.grass_amount/self.initialGrassAmount
         return ratio if ratio >= 0 else 0
     
-    def getNodePercentage_FF(self): #獲得消防員在該node的燃燒進度
-        ratio = self.water_amount/self.initialWaterAmount
+    def getNodePercentage_FF(self, rate): #獲得消防員在該node的燃燒進度
+        ratio = self.ffProgress / (self.burningTime * self.quantity / rate)
+        #ratio = self.water_amount/self.initialWaterAmount
         return ratio if ratio >= 0 else 0
 
     def updateStatus(self):
@@ -123,9 +130,9 @@ class NodeController():
 
 
     #一開始建立網路時使用
-    def connectNode(self, node, length):
+    def connectNode(self, node, length, time):
         self.__neighbors.append(node)
-        self.__adjArc.append({"node": node, "length": length, "fire-travel": 0})
+        self.__adjArc.append({"node": node, "length": length, "fire-travel": 0, "travel-time": time})
 
     def opacityAffect(self):
         self.node_opa_value += 0.1 * self.node_opa_shift
