@@ -25,6 +25,7 @@ from informationWindow import  InformationWindow
 from results import resultsWindow
 from turtorial import turtorial
 import sys
+from PIL import ImageGrab
 
 FFNum = 2
 
@@ -51,6 +52,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     totalValue = 0
     availFF = 0
     assignedFF = 0
+    screenshot_range = (400, 110, 1900, 700)
+
     def __init__(self):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
         
@@ -568,7 +571,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
-            self.lcd_time.display(self.currentTime)
+            #self.lcd_time.display(self.currentTime)
+            screenshot = ImageGrab.grab(self.screenshot_range)
+            screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
             ctr = 0
             for i in self.fire:
                 if(i.finishSpread):
@@ -585,6 +590,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.cancelReady()
                 i.updateStatus()
                 if(i.checkArrival(self.currentTime)):
+                    screenshot = ImageGrab.grab(self.screenshot_range)
+                    screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
                     self.timer.stop()
                     self.FFindex = i.num - 2
                     self.selectFireFighter()
@@ -604,7 +611,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName())
             self.__opacitySet()
             self.timeIndexLabel.setText("t= "+str(self.currentTime))
-            # self.lcd_time.display(self.currentTime)
+            self.lcd_time.display(self.currentTime)
             self.clear_layout(self.verticalLayout)
             self.generateblockFF_gameWindow()
         if(self.assignedFF == self.availFF):
@@ -622,7 +629,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def showInformationWindow(self):
         self.upadateInformation()
-        self.nw.show()
+        #self.nw.show()
         self.subwindows.append(self.nw)
 
     def onSubWindowPageChanged(self, index):
@@ -688,6 +695,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for subwindow in self.subwindows:
             subwindow.close()  # Close all open subwindows
         event.accept()
+
+        folder_path_to_delete = "image/timescreenshot"
+        try:
+            for filename in os.listdir(folder_path_to_delete):
+                file_path = os.path.join(folder_path_to_delete, filename)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+        except Exception as e:
+            print("Error")
 
     def dataRecord(self): #將資料傳入database
         self.db.currentTime = self.currentTime
