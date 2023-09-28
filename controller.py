@@ -37,7 +37,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     firefighterNum = 2
     nodeNum = len(nodeList)
     FFindex = 0 
-    focusIndex = 14
+    #focusIndex = 14
     labels : QtWidgets.QLabel = []
     timer = QTimer()
     currentTime = 0
@@ -47,10 +47,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     showFFnetwork : bool = True
     showFireNetwork : bool = True
     FFInfoDict = []
-    turtorialWindow = None
     totalValue = 0
     availFF = 0
-    assignedFF = 0
     screenshot_range = (290, -10, 1900, 751)
 
     def __init__(self):
@@ -79,8 +77,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def setup_control(self):
         def initNetwork(): #建立network class和node
             self.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
-            self.FFnetwork = Network("./network/testModel/G30_firefighter_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx")
-            self.fireNetwork = Network("./network/testModel/G30_fire_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx")
+            self.FFnetwork = Network("./network/testModel/G30_firefighter_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx", "N_D")
+            self.fireNetwork = Network("./network/testModel/G30_fire_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx", "N_F")
             for i in self.FFnetwork.nodeList:
                 node = Node(self.centralwidget, i)
                 node.clicked.connect(self.choose)
@@ -96,17 +94,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         def initUI(): # UI設定(可略)
             self.setStyleSheet("background-color: rgb(100, 100, 100);")
-            self.focusIndex = len(self.nodeList) - 1
+            #self.focusIndex = len(self.nodeList) - 1
             opacity_effect = QGraphicsOpacityEffect()
             opacity_effect.setOpacity(0.7)
             self.descriptionLabel.setGraphicsEffect(opacity_effect)
             self.actionProblem.triggered.connect(self.showProblem)
-            #self.actionControls.triggered.connect(self.showControls)
             self.actionAnimation.triggered.connect(self.showFFWindow)
             self.actionNew.triggered.connect(self.newNetwork)
-            self.yesButton.clicked.connect(self.turtorial)
+            self.yesButton.clicked.connect(self.showProblem)
             self.node_info_label.setVisible(False)
-            self.nodeList[self.focusIndex].setFocus()
+            #self.nodeList[self.focusIndex].setFocus()
             self.instruct.raise_()
             self.yesButton.raise_()
             self.noButton.raise_()
@@ -121,30 +118,22 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         def NodeConnection():
             for i in self.nodeList:
-                pos1 = np.array((i.geometry().x(),i.geometry().y()))
                 for j in self.FFnetwork.adjList[i.getNum()]:
-                    pos2 = np.array((self.nodeList[j[0]-1].x(),self.nodeList[j[0]-1].y()))
-                    length = np.linalg.norm(pos1-pos2)
-                    i.connectNode(self.nodeList[j[0]-1], length)
+                    i.connectNode(self.nodeList[j[0]-1])
         NodeConnection()
 
         def randomFireAndDepot(): #初始化火和消防員
             #初始化火
-            for i in self.FFnetwork.nodeList:
-                if(not i.getArcs()):
-                    a = i.getNum()
-            self.fire.append(Fire(self.fireNetwork, a, self.currentTime))
+            fireDepot = next((i.getNum() for i in self.fireNetwork.nodeList if i.isDepot()), None)
+            self.fire.append(Fire(self.fireNetwork, fireDepot, self.currentTime))
             self.fire[-1].burn()
-            self.nodeList[a-1].onFire()
+            self.nodeList[fireDepot-1].onFire()
             self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
-            #self.updateMinTime()
             #初始化消防員
-            for i in self.fireNetwork.nodeList:
-                if(not i.getArcs()):
-                    depot = i
-            for i in self.nodeList:
-                if(i.getNum() == depot.getNum()):
-                    depot = i
+            self.updateMinTime()
+
+            depot = next((i for i in self.nodeList if i.isDepot()), None)
+
             if os.path.exists("FFInfo.json"): #若有自定義的情況
                 with open("FFInfo.json", 'r') as file:
                     data = json.load(file)
@@ -154,9 +143,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     ff.FFSignal.connect(self.ffSignalDetermination)
                     depot.depotSetting()
                     self.firefighterList.append(ff)
-                self.networkUpdate(depot.getNum())
+                #self.networkUpdate(depot.getNum())
                 for i in self.firefighterList:
-                    tempNum = i.num
+                    tempNum = i.getNum()
                     pixmap = QPixmap(self.FFInfoDict[tempNum-1]["img"])
                     self.labels.append(pixmap)
                     scaled_pixmap = pixmap.scaled(self.labels[tempNum-1].size(), aspectRatioMode=Qt.KeepAspectRatio,
@@ -170,7 +159,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     ff.FFSignal.connect(self.ffSignalDetermination)
                     depot.depotSetting()
                     self.firefighterList.append(ff)
-                self.networkUpdate(depot.getNum())
+                #self.networkUpdate(depot.getNum())
                 #self.firefighterList[1].setPixmap(QPixmap("./image/fireman.png"))
 
         randomFireAndDepot()
@@ -194,26 +183,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         databaseInit()
         self.dataRecord()
 
-        def setOpacity(num, label):
-            opacity_effect = QGraphicsOpacityEffect()
-            opacity_effect.setOpacity(num)
-            label.setGraphicsEffect(opacity_effect)
-        if(self.firefighterList[self.FFindex].curPos().isProtected()):
-            setOpacity(0.5,self.defendButton)
-            self.defendButton.setEnabled(False)
-        else:
-            setOpacity(1,self.defendButton)
-            self.defendButton.setEnabled(True)
-
-    def turtorial(self):
-        self.showProblem()
+        self.defendButton.setEnabled(not self.firefighterList[self.FFindex].curPos().isProtected())
         
     def howManyAvail(self):
-        self.assignedFF = 0
-        self.availFF = 0
-        for i in self.firefighterList:
-            if(i.getcumArrivalTime() == self.currentTime):
-                self.availFF += 1
+        self.availFF = len([i for i in self.firefighterList if i.getcumArrivalTime() == self.currentTime])
 
     def intoGame(self):
         self.setStyleSheet("")
@@ -225,8 +198,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.inst.show()
 
     def assignIdle(self):
-        self.assignedFF += 1
-        self.hintAnimate("firefighter available: {}".format(self.availFF - self.assignedFF))
+        self.availFF -= 1
+        self.hintAnimate("firefighter available: {}".format(self.availFF))
         if(not self.firefighterList[(self.FFindex + 1) % self.firefighterNum].isSelected()):
             self.selectFireFighter()
         self.updateFFStatus()
@@ -236,26 +209,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def idleLock(self):
         if(self.checkBox.isChecked()):
             self.spinBox.setValue(99)
-            self.spinBox.setEnabled(False)
-        else:
-            self.spinBox.setEnabled(True)
+        self.spinBox.setEnabled(not self.checkBox.isChecked())
 
-    '''def showControls(self):
-        self.instruct.setGeometry(300,50,600,600)
-        font = QtGui.QFont()
-        font.setFamily("Arial Rounded MT Bold")
-        font.setPointSize(10)
-        self.instruct.setFont(font)
-        self.instruct.setAlignment(QtCore.Qt.AlignLeft)
-        self.instruct.setText("Instructions:\n\n"+
-        "Enter: \n\tMove to next time\n"+
-        "C: \n\tChange selected firefighter\n"+
-        "A, D: \n\tChange selected node\n"+
-        "Space: \n\tAssign firefighter to selected node\n"
-        +"S: \n\tChange the view of network\n")
-        self.instruct.setPixmap(QPixmap("testtur.png"))
-        self.noButton.setGeometry(799,599,101,51)
-        self.noButton.setText("back to game")'''
 
     '''---------------------------------------firefighter signal-----------------------------------------'''
     def ffSignalDetermination(self, text, no):
@@ -272,41 +227,40 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def updateMinTime(self): #更新FF network的fireMinArrivalTime
         self.fireNetwork.nodeList = [node for node in self.fireNetwork.nodeList if setattr(node, 'fireMinArrivalTime', 10000) is None]
-        for i in self.fire:
-            i.minTimeFireArrival()
+        [i.minTimeFireArrival() for i in self.fire]
         self.FFnetwork.nodeList = [node for node in self.FFnetwork.nodeList if setattr(node, 'fireMinArrivalTime', self.fireNetwork.nodeList[node.getNum()-1].fireMinArrivalTime) is None]
 
     def updateFFStatus(self): #消防員移動/澆水完成時呼叫，更新消防員的狀態
         for i in range(self.firefighterNum):
             self.firefighterList[i].updateStatus()
-            if(self.firefighterList[i].isTraveling()):
-                if (i == self.FFindex):
-                    return
-                    #self.nw.ffblockCP_sta1 = "Traveling to Node {}".format(self.firefighterList[i].destNode.getNum())
-                elif (i == self.prevFFindex):
-                    return
-                    # self.nw.ffblockCP_sta2 = "Traveling to Node {}".format(self.firefighterList[i].destNode.getNum())
-            elif(self.firefighterList[i].isProcess()):
-                if (i == self.FFindex):
-                    return
-                    #self.nw.ffblockCP_sta1 = "Processing Node {}".format(self.firefighterList[i].destNode.getNum())
-                elif (i == self.prevFFindex):
-                    return
-                    #self.nw.ffblockCP_sta2 = "Processing Node {}".format(self.firefighterList[i].destNode.getNum())
-            elif(self.firefighterList[i].isSelected()):
-                if(i == self.FFindex):
-                    return
-                    #self.nw.ffblockCP_sta1 = "Selected Node {}".format(self.firefighterList[i].destNode.getNum())
-                elif(i == self.prevFFindex):
-                    return
-                    #self.nw.ffblockCP_sta2 = "Selected Node {}".format(self.firefighterList[i].destNode.getNum())
-            else:
-                if(i == self.FFindex):
-                    return
-                    #self.nw.ffblockCP_sta1 = "Idle"
-                elif(i == self.prevFFindex):
-                    return
-                    #self.nw.ffblockCP_sta2 = "Idle"
+            # if(self.firefighterList[i].isTraveling()):
+            #     if (i == self.FFindex):
+            #         return
+            #         #self.nw.ffblockCP_sta1 = "Traveling to Node {}".format(self.firefighterList[i].destNode.getNum())
+            #     elif (i == self.prevFFindex):
+            #         return
+            #         # self.nw.ffblockCP_sta2 = "Traveling to Node {}".format(self.firefighterList[i].destNode.getNum())
+            # elif(self.firefighterList[i].isProcess()):
+            #     if (i == self.FFindex):
+            #         return
+            #         #self.nw.ffblockCP_sta1 = "Processing Node {}".format(self.firefighterList[i].destNode.getNum())
+            #     elif (i == self.prevFFindex):
+            #         return
+            #         #self.nw.ffblockCP_sta2 = "Processing Node {}".format(self.firefighterList[i].destNode.getNum())
+            # elif(self.firefighterList[i].isSelected()):
+            #     if(i == self.FFindex):
+            #         return
+            #         #self.nw.ffblockCP_sta1 = "Selected Node {}".format(self.firefighterList[i].destNode.getNum())
+            #     elif(i == self.prevFFindex):
+            #         return
+            #         #self.nw.ffblockCP_sta2 = "Selected Node {}".format(self.firefighterList[i].destNode.getNum())
+            # else:
+            #     if(i == self.FFindex):
+            #         return
+            #         #self.nw.ffblockCP_sta1 = "Idle"
+            #     elif(i == self.prevFFindex):
+            #         return
+            #         #self.nw.ffblockCP_sta2 = "Idle"
         self.iw_pageCP_FF()
 
     def updateNodeIdle(self, no):
@@ -326,9 +280,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def fireVisualize(self, opacity, no): #當fire network的節點正在燃燒時，更新ui上的opacity
         self.fireNetwork.nodeList[no-1].updateStatus()
-        self.nodeList[no-1].nodeController.style = f'background-color: rgba(255, 0, 0, {opacity}); color: white;'
-        self.nodeList[no-1].setStyleSheet(self.nodeList[no-1].nodeController.style)
-        self.nodeList[no-1].updateGrassAmount(self.fireNetwork.nodeList[no-1].getGrassAmount())
+        self.nodeList[no-1].setStyle(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
+        self.nodeList[no-1].setStyleSheet(self.nodeList[no-1].getStyle())
         self.nodeList[no-1].updateStatus()
 
         self.totalValue = self.fireNetwork.getTotalValue()
@@ -343,16 +296,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
         self.node_info_label.setVisible(False)
-        if(a0.key()==Qt.Key_Enter-1):
-            self.nextTime()
-        elif(a0.key() == Qt.Key_C):
-            self.selectFireFighter()
-            #self.iw_pageCP_FF()
-        elif(a0.key() == Qt.Key_S):
+        if(a0.key() == Qt.Key_S):
                 self.networkChange()
-        elif(a0.key() == Qt.Key_N):
+        if(a0.key() == Qt.Key_N):
             self.newNetwork()
-        elif(a0.key() == Qt.Key_Q):
+        if(a0.key() == Qt.Key_Q):
             self.finish()
         self.updateFFStatus()
         self.clear_layout(self.verticalLayout)
@@ -393,7 +341,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         QTimer.singleShot(1500, start)
 
     def descriptionAnimate(self, text):
-        
         self.descriptionLabel.setText(text)
         self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
         self.anim.setStartValue(QPoint(2200, 710))
@@ -422,25 +369,25 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def InfoShow(self): #查看node資訊
         #處理顯示文字
         self.iw_pageCP_node()
-        text = "This is node: {}, \nthe earlist burn time: {}, \nNode value: {}".format(self.sender().getNum(),self.sender().getFireMinArrivalTime(),self.sender().getValue())
+        text = "This is node: {}, \nthe earlist burn time: {}, \nNode value: {}, Processing time: {}".format(self.sender().getNum(),self.sender().getFireMinArrivalTime(),self.sender().getValue(), math.ceil(self.sender().getProcessingTime() / self.firefighterList[self.FFindex].rate_extinguish))
         self.hintAnimate(text)
 
     def iw_pageCP_node(self):
         #part node
         #self.nw.title_label_node_des.setText(str(self.nodeList[self.focusIndex].getNum()))
 
-        if (self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex]) == -1):
+        '''if (self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex]) == -1):
             #self.nw.nodeblock_textlen = "Not neighbor"
             temptta = "Not neighbor"
         else:
             #self.nw.nodeblock_textlen = str(math.ceil(self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex])["length"]))
             templen = self.firefighterList[self.FFindex].curPos().getArc(self.nodeList[self.focusIndex])["length"]
             tempextRate = self.firefighterList[self.FFindex].move_man
-            temptta = math.ceil(self.currentTime + templen / tempextRate)
+            temptta = math.ceil(self.currentTime + templen / tempextRate)'''
 
         #self.nw.title_label_length_des.setText(self.nw.nodeblock_textlen)
         #self.nw.title_label_tta_des.setText(str(temptta))
-        tempttb = self.nodeList[self.focusIndex].getFireMinArrivalTime()
+        #tempttb = self.nodeList[self.focusIndex].getFireMinArrivalTime()
         #self.nw.title_label_ttb_des.setText(str(tempttb))
         #self.nw.nodeblock_textsta =  self.nodeList[self.focusIndex].getStatus()
         #self.nw.title_label_sta_des.setText(self.nw.nodeblock_textsta)
@@ -469,22 +416,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
     def selectFireFighter(self): #切換選擇消防員
-        self.prevFFindex = self.FFindex
+        #self.prevFFindex = self.FFindex
         self.FFindex = (self.FFindex + 1) % self.firefighterNum
-        self.nextFFindex = (self.FFindex + 1) % self.firefighterNum
+        #self.nextFFindex = (self.FFindex + 1) % self.firefighterNum
         self.__opacitySet()
         self.firefighterList[self.FFindex].setPixmap(self.firefighterList[self.FFindex].grab())
-        self.firefighterList[self.prevFFindex].closeaccessibleVisualize(self.nodeList)
-        self.firefighterList[self.FFindex].accessibleVisualize(self.currentTime)
+        self.firefighterList[self.FFindex].accessibleVisualize(self.currentTime,self.nodeList)
         self.descriptionAnimate("change to {}".format(self.firefighterList[self.FFindex].getName()))
         image = self.firefighterList[self.FFindex].grab()
         scaled_pixmap = image.scaled(self.selectLabel.width(), self.selectLabel.height())
         self.selectLabel.setPixmap(scaled_pixmap)
-        if(self.firefighterList[self.FFindex].isSelected()):
-            warn = QPixmap("./image/warning.png")
-            self.warningLabel.setPixmap(warn.scaled(90,70))
-        else:
-            self.warningLabel.setPixmap(QPixmap())
 
     def __opacitySet(self): #調整FF的opacity
         def setOpacity(num, label):
@@ -504,8 +445,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 text = "already selected"
             else:
                 text = func(self)
-                self.assignedFF += text[1]
-                self.hintAnimate("firefighter available: {}".format(self.availFF - self.assignedFF))
+                self.availFF -= text[1]
+                self.hintAnimate("firefighter available: {}".format(self.availFF))
                 if(not self.firefighterList[(self.FFindex + 1) % self.firefighterNum].isSelected() and text[1] == 1):
                     self.selectFireFighter()
             self.updateFFStatus()
@@ -525,7 +466,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 send.setStyleSheet("")
                 return ("{} reset".format(self.firefighterList[self.FFindex].getName()), -1)
             text = self.firefighterList[self.FFindex].processCheck(send)
-            self.firefighterList[self.FFindex].ready()
+            #self.firefighterList[self.FFindex].ready()
             self.firefighterList[self.FFindex].updateStatus()
             self.clear_layout(self.verticalLayout)
             self.generateblockFF_gameWindow()
@@ -545,60 +486,37 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         
     def nextTime(self): #跳轉至下一個時間點
         def timeSkip():
-            #self.lcd_time.display(self.currentTime)
             screenshot = ImageGrab.grab(self.screenshot_range)
-            if(self.currentTime < 10):
-                screenshot.save(f"image/timescreenshot/time00{self.currentTime}.png")
-            elif(self.currentTime < 100):
-                screenshot.save(f"image/timescreenshot/time0{self.currentTime}.png")
-            else:
-                screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
-            ctr = 0
-            for i in self.fire:
-                if(i.finishSpread):
-                    ctr+=1
-            print("ctr: {}, all: {}".format(ctr, len(self.fire)))
-            if(ctr == len(self.fire)):
+            screenshot.save(f"image/timescreenshot/time00{self.currentTime:03d}.png")
+            gameTerminated = all(i.finishSpread for i in self.fire)
+            if gameTerminated:
                 self.finish()
+
             self.dataRecord()
             self.upadateInformation()
             self.currentTime+=1
             for i in self.fire:
                 i.fire_spread(self.currentTime)
             for i in self.firefighterList:
-                i.cancelReady()
+                #i.cancelReady()
                 i.updateStatus()
                 if(i.checkArrival(self.currentTime)):
                     screenshot = ImageGrab.grab(self.screenshot_range)
-                    if(self.currentTime < 10):
-                        screenshot.save(f"image/timescreenshot/time00{self.currentTime}.png")
-                    elif(self.currentTime < 100):
-                        screenshot.save(f"image/timescreenshot/time0{self.currentTime}.png")
-                    else:
-                        screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
+                    screenshot.save(f"image/timescreenshot/time00{self.currentTime:03d}.png")
                     self.timer.stop()
-                    self.FFindex = i.num - 2
+                    self.FFindex = i.getNum() - 2
                     self.selectFireFighter()
-                    self.descriptionAnimate("firefighter {} has finished task".format(i.num))
+                    self.descriptionAnimate("firefighter {} has finished task".format(i.getNum()))
                     self.howManyAvail()
                     self.hintAnimate("firefighter available: {}".format(self.availFF))
-                    def setOpacity(num, label):
-                        opacity_effect = QGraphicsOpacityEffect()
-                        opacity_effect.setOpacity(num)
-                        label.setGraphicsEffect(opacity_effect)
-                    if(i.curPos().isProtected()):
-                        setOpacity(0.5,self.defendButton)
-                        self.defendButton.setEnabled(False)
-                    else:
-                        setOpacity(1,self.defendButton)
-                        self.defendButton.setEnabled(True)
+                    self.defendButton.setEnabled(not i.curPos().isProtected())
+
             self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName())
             self.__opacitySet()
-            #self.timeIndexLabel.setText("t= "+str(self.currentTime))
             self.lcd_time.display(self.currentTime)
             self.clear_layout(self.verticalLayout)
             self.generateblockFF_gameWindow()
-        if(self.assignedFF == self.availFF):
+        if(not self.availFF):
             self.clear_layout(self.verticalLayout)
             self.generateblockFF_gameWindow()
             for i in self.firefighterList:
@@ -646,28 +564,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             for i in self.nodeList:
                 i.setText(str(i.getNum()))
                 for j in i.getNeighbors():
-                    if(not self.showFireNetwork):
-                        '''if(i.getArc(j)["length"] < 150):
-                            qpen = QPen(Qt.green, 4, Qt.SolidLine)
-                        elif(i.getArc(j)["length"] < 300):
-                            qpen = QPen(Qt.darkYellow, 4, Qt.SolidLine)
-                        else:
-                            qpen = QPen(Qt.red, 4, Qt.SolidLine)
-                            
-                    qpainter.setPen(qpen)'''
                     qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y()+ 3/2*i.height()), QPointF(j.x()+ j.width()/2, j.y()+ 3/2*j.height()))
         for i in self.fire:
             for j in i.arcs:
-                    tempXpercent = (j["node"].pos.x() + j["node"].pos.width()/2 - i.firePos.pos.x() - i.firePos.pos.width()/2) * i.getArcPercentage_Fire(j)
-                    tempYpercent = (j["node"].pos.y() + 3/2*j["node"].pos.height() - i.firePos.pos.y() - 3/2*i.firePos.pos.height()) * i.getArcPercentage_Fire(j)
+                    tempXpercent = (j["node"].pos.x() + j["node"].pos.width()/2 - i.pos.x() - i.pos.width()/2) * i.getArcPercentage_Fire(j)
+                    tempYpercent = (j["node"].pos.y() + 3/2*j["node"].pos.height() - i.pos.y() - 3/2*i.pos.height()) * i.getArcPercentage_Fire(j)
                     qpen = QPen(Qt.darkRed, 6, Qt.SolidLine)
                     qpainter.setPen(qpen)
-                    qpainter.drawLine(QPointF(i.firePos.pos.x() + i.firePos.pos.width()/2, i.firePos.pos.y() + 3/2*i.firePos.pos.height()), QPointF(i.firePos.pos.x() + i.firePos.pos.width()/2 + tempXpercent, i.firePos.pos.y() + 3/2*i.firePos.pos.height() + tempYpercent))                 
+                    qpainter.drawLine(QPointF(i.pos.x() + i.pos.width()/2, i.pos.y() + 3/2*i.pos.height()), QPointF(i.pos.x() + i.pos.width()/2 + tempXpercent, i.pos.y() + 3/2*i.pos.height() + tempYpercent))                 
         
         for i in self.firefighterList:
             if(i.curMovingArc != None):
-                    tempXpercent = (i.curMovingArc["node"].x() + i.curMovingArc["node"].width()/2 - i.curPos().x() - i.curPos().width()/2) * i.getArcPercentage_FF(i.curMovingArc["node"])
-                    tempYpercent = (i.curMovingArc["node"].y() + 3/2*i.curMovingArc["node"].height() - i.curPos().y() - 3/2*i.curPos().height()) * i.getArcPercentage_FF(i.curMovingArc["node"])
+                    tempXpercent = (i.curMovingArc["nodeButton"].x() + i.curMovingArc["nodeButton"].width()/2 - i.curPos().x() - i.curPos().width()/2) * i.getArcPercentage_FF(i.curMovingArc["nodeButton"])
+                    tempYpercent = (i.curMovingArc["nodeButton"].y() + 3/2*i.curMovingArc["nodeButton"].height() - i.curPos().y() - 3/2*i.curPos().height()) * i.getArcPercentage_FF(i.curMovingArc["nodeButton"])
                     qpen = QPen(Qt.darkGreen, 6, Qt.SolidLine)
                     qpainter.setPen(qpen)
                     qpainter.drawLine(QPointF(i.curPos().x() + i.curPos().width()/2, i.curPos().y() + 3/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 3/2*i.curPos().height()+tempYpercent))                
@@ -715,7 +624,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def blockFFContent_gameWindow(self, num):
         for i in self.firefighterList:
-            if(num == i.num):
+            if(num == i.getNum()):
                 font = QFont()
                 font.setPointSize(11)
                 font.setBold(True)
@@ -757,7 +666,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return blockff
     def blockFFComplete_gameWindow(self, num):
         for i in self.firefighterList:
-            if(num == i.num):
+            if(num == i.getNum()):
                 font = QFont()
                 font.setPointSize(11)
                 font.setBold(True)
@@ -823,7 +732,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def generateblockFF_gameWindow(self):
         self.blocklist = []
         for i in self.firefighterList:
-            block = self.blockFFContent_gameWindow(i.num)
+            block = self.blockFFContent_gameWindow(i.getNum())
             self.blocklist.append(block)
             block.mousePressEvent = partial(self.blockFF_mousePressEvent,block.objectName())
             block.enterEvent = partial(self.blockFF_mouseEnterEvent,block.objectName())
@@ -838,14 +747,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if widget is not None:
                     widget.deleteLater()
 
-    def checkAllReady(self):
+    '''def checkAllReady(self):
         templist = []
         for i in self.firefighterList:
             templist.append(i.nextRound)
         if(False in templist):
             self.ready = False
         else:
-            self.ready = True
+            self.ready = True'''
 
     def blockFF_mousePressEvent(self,nums,event):
         for i in self.block_completelist:

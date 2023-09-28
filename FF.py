@@ -8,8 +8,8 @@ class FireFighter(QLabel):
     FFSignal = pyqtSignal(str, int)
     def __init__(self, widget, num, depot):
         super().__init__(widget)
-        self.widget = widget
-        self.num = num
+        self.__widget = widget
+        self.__num = num
         self.__name = "firefighter " + str(num) #消防員編號
         self.__path = [depot] #紀錄FF經過的node
         self.newPos()
@@ -19,7 +19,7 @@ class FireFighter(QLabel):
         self.__select = False #是否被指派
         self.__travel = False #是否在移動
         self.__process = False #是否在澆水
-        self.__ready = False #是否已準備好
+        #self.__ready = False #是否已準備好
         self.rate_extinguish = 3#澆水速率
         self.move_man = 4 #移動速率
         self.destNode = None #下一個目的
@@ -30,8 +30,11 @@ class FireFighter(QLabel):
         self.setPixmap(QPixmap("./image/firefighter.png"))
         self.pixmaploc = "./image/firefighter.png"
         self.curPos().defend()
-        self.arrowLabel = QLabel(self.widget)
+        self.arrowLabel = QLabel(self.__widget)
         self.timer_arrow = QTimer(self)
+
+    def getNum(self):
+        return self.__num
 
     def newPos(self):
         self.setGeometry(QRect(self.curPos().x()+20, self.curPos().y(),self.curPos().width()+ 20, self.curPos().height()+20))
@@ -58,9 +61,9 @@ class FireFighter(QLabel):
         if(self.destNode == self.curPos()):
             self.curPos().defend()
             self.process()
-            self.curPos().nodeController.burned = False
+            #self.curPos().nodeController.burned = False
             self.FFSignal.emit("protect",self.curPos().getNum())
-        elif(self.destNode != None):
+        if(self.destNode != None):
             self.traveling()
 
     def process(self): #消防員標記為澆水中
@@ -78,11 +81,11 @@ class FireFighter(QLabel):
     def selected(self): #消防員標記為被指派
         self.__select = True
 
-    def ready(self):
+    '''def ready(self):
         self.__ready = True
 
     def cancelReady(self):
-        self.__ready = False
+        self.__ready = False'''
 
     def isSelected(self): #回傳是否消防員被指派
         return self.__select
@@ -90,20 +93,14 @@ class FireFighter(QLabel):
     def isIdle(self):
         return not (self.__select or self.__process or self.__travel or self.destNode != None)
 
-    def isReady(self):
-        return self.__ready
+    # def isReady(self):
+    #     return self.__ready
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
         self.destNode = self.curPos() if self.destNode == None else self.destNode
         if(self.__cumArrivalTime <= timer):
             self.__cumArrivalTime = timer
-            prev = self.curPos()
             self.__path.append(self.destNode)
-            if(prev != self.curPos()):
-                self.curPos().setStyleSheet("")
-            if(self.curPos().isDepot()):
-                self.curPos().style = "background-color: black;"
-                self.curPos().setStyleSheet(self.curPos().style)
             self.newPos()
             self.reset()
             self.FFSignal.emit("done", 0)
@@ -112,18 +109,18 @@ class FireFighter(QLabel):
             self.__calculateCurrentCapacity()
             self.__wateringVisualize()
             self.setGeometry(QRect(self.curPos().x() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.x() - self.curPos().x())), self.curPos().y() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.y() - self.curPos().y())),self.curPos().width()+ 20, self.curPos().height()+20))
-            for i in self.curPos().nodeController.getArcs(): #對於現在位置的相鄰點
-                if(i["node"] == self.destNode.nodeController):
+            for i in self.curPos().getArcs(): #對於現在位置的相鄰點
+                if(i["nodeButton"] == self.destNode):
                     self.__calculateCurrentFFArrive(i)
         return False
 
     def curPos(self) -> Node: #回傳現在位置
         return self.__path[-1]
 
-    def getName(self):
+    def getName(self) -> str: 
         return self.__name
 
-    def next_Pos_Accessment(self, node: Node, timer): #判斷消防員是否可以指派去給定的目的地 
+    def next_Pos_Accessment(self, node: Node, timer) -> str: #判斷消防員是否可以指派去給定的目的地 
         if(self.__statusDetection(node) and self.__distanceDetection(node) and self.__safeDetection(node, timer)):
             return "vaild choose"
         elif (not self.__statusDetection(node)):
@@ -135,52 +132,45 @@ class FireFighter(QLabel):
         else:
             return ""
 
-    def __safeDetection(self, node: Node, timer):
-        #if(node.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(node)["length"] / self.move_man)):
-        if(node.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().nodeController.getArc(node.nodeController)["travel-time"])):
-            return True
-        return False
+    def __safeDetection(self, node: Node, timer) -> bool:
+        earliestTime = timer + math.ceil(self.curPos().getArc(node)["travel-time"])
+        return True if node.getFireMinArrivalTime() >= timer + earliestTime else False
 
-    def processCheck(self, node: Node):
+    def processCheck(self, node: Node) -> str:
         self.selected()
-        node.preDefend()
         self.destNode = node
         if(node != self.curPos()):
             self.curMovingArc = self.curPos().getArc(node)
-            self.__arrivalTime = self.curPos().nodeController.getArc(self.destNode.nodeController)["travel-time"]
-            #self.__arrivalTime = math.ceil(self.curPos().getArc(node)["length"] / self.move_man) 
+            self.__arrivalTime = self.curPos().getArc(self.destNode)["travel-time"]
             return "{} move to vertex {}".format(self.getName(), node.getNum())
         else:
-            #self.__arrivalTime = self.curPos().getWaterAmount() / self.rate_extinguish
             self.__arrivalTime = self.curPos().getProcessingTime() / self.rate_extinguish
             return "{} choose defend".format(self.getName()) if not self.curPos().isProtected() else "already protected"
 
-    def __statusDetection(self, node): #check assigned node's status (burned or not burned)
+    def __statusDetection(self, node) -> bool: #check assigned node's status (burned or not burned)
         return not node.isBurned()
     
-    def __distanceDetection(self, node): #check if assigned node is adjacent to selected FireFighter
+    def __distanceDetection(self, node) -> bool: #check if assigned node is adjacent to selected FireFighter
         if(node == self.curPos()):
             return True
         return node in self.curPos().getNeighbors()
 
     def __calculateCurrentCapacity(self): #更新消防員在該node上的保護情況
         if(self.isProcess()):
-            self.curPos().nodeController.ffProgress += 1
-            #remain = self.curPos().getWaterAmount() - self.rate_extinguish
-            #self.curPos().updateWaterAmount(remain)
+            self.curPos().nextFFProgress()
 
     def __calculateCurrentFFArrive(self, arc): #更新消防員在arc上的移動情況
-        '''if(self.pathProgress < arc["length"]):
-            self.pathProgress += self.move_man'''
         if(self.pathProgress < arc["travel-time"]):
             self.pathProgress += 1
+            
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
             opacity = self.curPos().getNodePercentage_FF(self.rate_extinguish)
-            self.curPos().nodeController.style = f'background-color: rgba(0, 255, 0, {opacity}); color: white;'
-            self.curPos().setStyleSheet(self.curPos().nodeController.style)
+            self.curPos().setStyle(f'background-color: rgba(0, 255, 0, {opacity}); color: white;')
+            self.curPos().setStyleSheet(self.curPos().getStyle())
     
-    def accessibleVisualize(self, timer): #消防員可以前往的點可視化
+    def accessibleVisualize(self, timer,lst): #消防員可以前往的點可視化
+        self.closeaccessibleVisualize(lst)
         self.arrowdirection = 1
 
         def arrowAnimation():
@@ -193,13 +183,12 @@ class FireFighter(QLabel):
             self.arrowLabel.move(current_pos.x(), new_y)
 
 
-        self.arrowLabel = QLabel(self.widget)
-        if(self.num == 1):
+        self.arrowLabel = QLabel(self.__widget)
+        if(self.__num == 1):
             arrow = QPixmap("image/arrow_redr.png")
         else:
             arrow = QPixmap("image/arrow.png")
         self.arrowLabel.setPixmap(arrow)
-        #self.arrowLabel.raise_()
         self.arrowLabel.show()
         self.arrowLabel.lower()
         self.arrowLabel.setGeometry(self.x()-5,self.y()-110,50,70)
@@ -210,8 +199,7 @@ class FireFighter(QLabel):
         if(not self.isTraveling() or not self.isProcess()):
             for i in (self.curPos().getNeighbors()):
                 if (i.isBurned() == False and i.isProtected() == False):
-                    #if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["length"] / self.move_man)):
-                    if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().nodeController.getArc(i.nodeController)["travel-time"])):
+                    if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["travel-time"])):
                         #i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
                         i.timer_nodeOpacity.start(100)
             if(not self.curPos().isProtected()):
@@ -225,20 +213,19 @@ class FireFighter(QLabel):
         self.timer_arrow.stop()
 
         for i in lst:
-            i.setStyleSheet(i.nodeController.style)
+            i.setStyleSheet(i.getStyle())
             i.timer_nodeOpacity.stop()
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
         for i in self.curPos().getArcs():
-            if(i["node"] == node.nodeController): 
-                #ratio = self.pathProgress/i["length"]
+            if(i["nodeButton"] == node): 
                 ratio = self.pathProgress/i["travel-time"]
                 return ratio if ratio <= 1 else 1 
         return 0
 
     def updateStatus(self):
-        if(self.isReady()):
-            self.status = "Ready"
-        elif(self.isProcess()):
+        # if(self.isReady()):
+        #     self.status = "Ready"
+        if(self.isProcess()):
             self.status = "Processing"
         elif(self.isTraveling()):
             self.status = "Traveling"

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\Users\Yung-li\Desktop\ff\pull - 複製\UIv4.ui'
+# Form implementation generated from reading ui file 'c:\Users\Yung-li\Desktop\ff\new input format\UIv4.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -50,9 +50,6 @@ class Ui_MainWindow(object):
         self.networkLabel.setFont(font)
         self.networkLabel.setWordWrap(False)
         self.networkLabel.setObjectName("networkLabel")
-        self.backButton = QtWidgets.QPushButton(self.centralwidget)
-        self.backButton.setGeometry(QtCore.QRect(1810, 0, 111, 41))
-        self.backButton.setObjectName("backButton")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(300, 660, 211, 61))
         font = QtGui.QFont()
@@ -107,9 +104,6 @@ class Ui_MainWindow(object):
         self.selectLabel.setGeometry(QtCore.QRect(300, 800, 121, 81))
         self.selectLabel.setText("")
         self.selectLabel.setObjectName("selectLabel")
-        self.warningLabel = QtWidgets.QLabel(self.centralwidget)
-        self.warningLabel.setGeometry(QtCore.QRect(800, 760, 51, 41))
-        self.warningLabel.setObjectName("warningLabel")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(20, 130, 251, 761))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
@@ -218,7 +212,6 @@ class Ui_MainWindow(object):
         self.node_info_label.raise_()
         self.backgroundLabel.raise_()
         self.networkLabel.raise_()
-        self.backButton.raise_()
         self.label.raise_()
         self.progressBar.raise_()
         self.consoleLabel.raise_()
@@ -227,7 +220,6 @@ class Ui_MainWindow(object):
         self.noButton.raise_()
         self.yesButton.raise_()
         self.selectLabel.raise_()
-        self.warningLabel.raise_()
         self.verticalLayoutWidget.raise_()
         self.defendButton.raise_()
         self.label_4.raise_()
@@ -264,7 +256,6 @@ class Ui_MainWindow(object):
         self.actionControls = QtWidgets.QAction(MainWindow)
         self.actionControls.setObjectName("actionControls")
         self.menuinfromations.addAction(self.actionProblem)
-        self.menuinfromations.addAction(self.actionControls)
         self.menuFile.addAction(self.actionNew)
         self.menuSettings.addAction(self.actionAnimation)
         self.menubar.addAction(self.menuFile.menuAction())
@@ -280,7 +271,6 @@ class Ui_MainWindow(object):
         self.descriptionLabel.setText(_translate("MainWindow", "TextLabel"))
         self.node_info_label.setText(_translate("MainWindow", "TextLabel"))
         self.networkLabel.setText(_translate("MainWindow", "Hybrid network"))
-        self.backButton.setText(_translate("MainWindow", "Back to game"))
         self.label.setText(_translate("MainWindow", "Total value: "))
         self.progressBar.setFormat(_translate("MainWindow", "%v"))
         self.consoleLabel.setText(_translate("MainWindow", "TextLabel"))
@@ -288,7 +278,6 @@ class Ui_MainWindow(object):
         self.instruct.setText(_translate("MainWindow", "<html><head/><body><p>Do you need</p><p>step by step turtorial?</p></body></html>"))
         self.noButton.setText(_translate("MainWindow", "No"))
         self.yesButton.setText(_translate("MainWindow", "Yes"))
-        self.warningLabel.setText(_translate("MainWindow", "TextLabel"))
         self.defendButton.setText(_translate("MainWindow", "Defend"))
         self.label_4.setText(_translate("MainWindow", "Assign firefighters to new position or protect the current node"))
         self.label_5.setText(_translate("MainWindow", "firefighters:"))
