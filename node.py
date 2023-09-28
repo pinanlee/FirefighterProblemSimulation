@@ -75,10 +75,11 @@ class Node(QtWidgets.QPushButton):
         self.nodeController.idle = True
         self.nodeController.protected = False
 
+    #get functions
+
     def getValue(self):
         return self.nodeController.value
 
-    #get functions
     def isBurned(self):
         return self.nodeController.burned
 

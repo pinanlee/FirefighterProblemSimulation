@@ -55,7 +55,7 @@ class NodeController():
 
     def ffidle(self):
         self.idle = True
-        self.protected = False
+        #self.protected = False
 
     #update變數
     def updateGrassAmount(self, remain):

@@ -23,11 +23,11 @@ import numpy as np
 from dataBase import DataBase
 from informationWindow import  InformationWindow
 from results import resultsWindow
-from turtorial import turtorial
 import sys
 from PIL import ImageGrab
+from instruction import Instruction
 
-FFNum = 2
+FFNum = 1
 
 
 class MainWindow_controller(QtWidgets.QMainWindow):
@@ -36,7 +36,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
     firefighterNum = 2
     nodeNum = len(nodeList)
-    selectedStyle : str = "border: 2px solid blue;"
     FFindex = 0 
     focusIndex = 14
     labels : QtWidgets.QLabel = []
@@ -52,7 +51,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     totalValue = 0
     availFF = 0
     assignedFF = 0
-    screenshot_range = (400, 110, 1900, 700)
+    screenshot_range = (290, -10, 1900, 751)
 
     def __init__(self):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
@@ -65,6 +64,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             FFNum = int(data["FFnumber"])
         #self.db = DataBase()
         #self.nw = InformationWindow(self.db)
+        self.inst = Instruction(self.centralWidget())
+        self.inst.intoGame()
         self.firefighterNum = FFNum
         self.subwindows = []
         self.setup_control()
@@ -95,13 +96,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         def initUI(): # UI設定(可略)
             self.setStyleSheet("background-color: rgb(100, 100, 100);")
-            self.hintLabel.setGeometry(-100,-300, self.hintLabel.width(),self.hintLabel.height())
             self.focusIndex = len(self.nodeList) - 1
             opacity_effect = QGraphicsOpacityEffect()
             opacity_effect.setOpacity(0.7)
             self.descriptionLabel.setGraphicsEffect(opacity_effect)
             self.actionProblem.triggered.connect(self.showProblem)
-            self.actionControls.triggered.connect(self.showControls)
+            #self.actionControls.triggered.connect(self.showControls)
             self.actionAnimation.triggered.connect(self.showFFWindow)
             self.actionNew.triggered.connect(self.newNetwork)
             self.yesButton.clicked.connect(self.turtorial)
@@ -134,9 +134,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 if(not i.getArcs()):
                     a = i.getNum()
             self.fire.append(Fire(self.fireNetwork, a, self.currentTime))
-            self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
             self.fire[-1].burn()
-            self.updateMinTime()
+            self.nodeList[a-1].onFire()
+            self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
+            #self.updateMinTime()
             #初始化消防員
             for i in self.fireNetwork.nodeList:
                 if(not i.getArcs()):
@@ -205,9 +206,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.defendButton.setEnabled(True)
 
     def turtorial(self):
-        self.turtorialWindow = turtorial(self)
-        self.turtorialWindow.show()
-        self.close()
+        self.showProblem()
         
     def howManyAvail(self):
         self.assignedFF = 0
@@ -223,14 +222,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.noButton.setGeometry(-200,-200,101,51)
         
     def showProblem(self):
-        self.instruct.setGeometry(300,50,600,600)
-        font = QtGui.QFont()
-        font.setFamily("Arial Rounded MT Bold")
-        font.setPointSize(10)
-        self.instruct.setFont(font)
-        self.instruct.setText("This is a firefighter simulation problem")
-        self.noButton.setGeometry(799,599,101,51)
-        self.noButton.setText("back to game")
+        self.inst.show()
 
     def assignIdle(self):
         self.assignedFF += 1
@@ -248,7 +240,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         else:
             self.spinBox.setEnabled(True)
 
-    def showControls(self):
+    '''def showControls(self):
         self.instruct.setGeometry(300,50,600,600)
         font = QtGui.QFont()
         font.setFamily("Arial Rounded MT Bold")
@@ -263,7 +255,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         +"S: \n\tChange the view of network\n")
         self.instruct.setPixmap(QPixmap("testtur.png"))
         self.noButton.setGeometry(799,599,101,51)
-        self.noButton.setText("back to game")
+        self.noButton.setText("back to game")'''
 
     '''---------------------------------------firefighter signal-----------------------------------------'''
     def ffSignalDetermination(self, text, no):
@@ -362,12 +354,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.newNetwork()
         elif(a0.key() == Qt.Key_Q):
             self.finish()
-        elif(a0.key() == Qt.Key_L):
-            self.firefighterList[self.FFindex].lock()
-            if(self.firefighterList[self.FFindex].idleLock):
-                self.descriptionAnimate("FF {} : idle locked".format(self.FFindex+1))
-            else:
-                self.descriptionAnimate("FF {} : idle unlocked".format(self.FFindex+1))
         self.updateFFStatus()
         self.clear_layout(self.verticalLayout)
         self.generateblockFF_gameWindow()
@@ -436,7 +422,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def InfoShow(self): #查看node資訊
         #處理顯示文字
         self.iw_pageCP_node()
-        text = "This is node: {}, \nthe earlist burn time: {}".format(self.sender().getNum(),self.sender().getFireMinArrivalTime())
+        text = "This is node: {}, \nthe earlist burn time: {}, \nNode value: {}".format(self.sender().getNum(),self.sender().getFireMinArrivalTime(),self.sender().getValue())
         self.hintAnimate(text)
 
     def iw_pageCP_node(self):
@@ -561,7 +547,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         def timeSkip():
             #self.lcd_time.display(self.currentTime)
             screenshot = ImageGrab.grab(self.screenshot_range)
-            #screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
+            if(self.currentTime < 10):
+                screenshot.save(f"image/timescreenshot/time00{self.currentTime}.png")
+            elif(self.currentTime < 100):
+                screenshot.save(f"image/timescreenshot/time0{self.currentTime}.png")
+            else:
+                screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
             ctr = 0
             for i in self.fire:
                 if(i.finishSpread):
@@ -579,7 +570,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 i.updateStatus()
                 if(i.checkArrival(self.currentTime)):
                     screenshot = ImageGrab.grab(self.screenshot_range)
-                    #screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
+                    if(self.currentTime < 10):
+                        screenshot.save(f"image/timescreenshot/time00{self.currentTime}.png")
+                    elif(self.currentTime < 100):
+                        screenshot.save(f"image/timescreenshot/time0{self.currentTime}.png")
+                    else:
+                        screenshot.save(f"image/timescreenshot/time{self.currentTime}.png")
                     self.timer.stop()
                     self.FFindex = i.num - 2
                     self.selectFireFighter()
@@ -598,7 +594,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                         self.defendButton.setEnabled(True)
             self.label_selectedFF.setText(self.firefighterList[self.FFindex].getName())
             self.__opacitySet()
-            self.timeIndexLabel.setText("t= "+str(self.currentTime))
+            #self.timeIndexLabel.setText("t= "+str(self.currentTime))
             self.lcd_time.display(self.currentTime)
             self.clear_layout(self.verticalLayout)
             self.generateblockFF_gameWindow()
@@ -611,7 +607,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     i.closeaccessibleVisualize(self.nodeList)
                 i.move()
             self.timer = QTimer()
-            self.timer.setInterval(700)
+            self.timer.setInterval(300)
             self.timer.timeout.connect(timeSkip)
             self.timer.start()
 

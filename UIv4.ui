@@ -67,28 +67,6 @@
      <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QLabel" name="timeIndexLabel">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>131</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>22</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>t=0</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-   </widget>
    <widget class="QLabel" name="backgroundLabel">
     <property name="geometry">
      <rect>
@@ -131,32 +109,6 @@
     </property>
     <property name="margin">
      <number>0</number>
-    </property>
-   </widget>
-   <widget class="QLabel" name="hintLabel">
-    <property name="geometry">
-     <rect>
-      <x>770</x>
-      <y>170</y>
-      <width>311</width>
-      <height>161</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);
-border: 2px solid blue;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="backButton">
@@ -450,7 +402,7 @@ border: 2px solid blue;</string>
      <rect>
       <x>420</x>
       <y>810</y>
-      <width>361</width>
+      <width>201</width>
       <height>51</height>
      </rect>
     </property>
@@ -464,7 +416,6 @@ border: 2px solid blue;</string>
      <string>TextLabel</string>
     </property>
    </widget>
-
    <widget class="QLCDNumber" name="lcd_time">
     <property name="geometry">
      <rect>
@@ -595,13 +546,12 @@ border: 2px solid blue;</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <zorder>label_selectedFF</zorder>
    <zorder>backgroundLabel_2</zorder>
    <zorder>descriptionLabel</zorder>
    <zorder>node_info_label</zorder>
-   <zorder>timeIndexLabel</zorder>
    <zorder>backgroundLabel</zorder>
    <zorder>networkLabel</zorder>
-   <zorder>hintLabel</zorder>
    <zorder>backButton</zorder>
    <zorder>label</zorder>
    <zorder>progressBar</zorder>
@@ -627,7 +577,7 @@ border: 2px solid blue;</string>
      <x>0</x>
      <y>0</y>
      <width>1923</width>
-     <height>25</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="sizePolicy">

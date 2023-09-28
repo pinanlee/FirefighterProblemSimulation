@@ -74,18 +74,25 @@ class Fire(QObject):
 
     def __calculateMinTime(self):
         self.firePos.fireMinArrivalTime = self.startBurningTime
-        tempList = [copy.copy(self.firePos)]
+        print("start burning time: {}".format(self.startBurningTime))
+        tempList = [self.firePos]
+        
         while(tempList):
+            print("---")
             tempTime = tempList[0].fireMinArrivalTime
+            print(f"temp time: {tempTime}")
             #tempTime += tempList[0].initialGrassAmount / self.rate_fireburn
             tempTime += tempList[0].burningTime
+            print(f"add burning time: {tempTime}")
+            
             for j in tempList[0].getArcs():
                 if(self.__statusDetection(j)):
                     '''if(j["node"].fireMinArrivalTime > math.ceil(tempTime + j["length"] / self.move_fire)):               
                         j["node"].fireMinArrivalTime = math.ceil(tempTime + j["length"] / self.move_fire)'''
                     if(j["node"].fireMinArrivalTime > math.ceil(tempTime + j["travel-time"] )):               
                         j["node"].fireMinArrivalTime = math.ceil(tempTime + j["travel-time"])
-                        tempList.append(copy.copy(j["node"]))             
+                        print("node {} turn to: {}".format(j["node"].getNum(),j["node"].fireMinArrivalTime))
+                        tempList.append(j["node"])             
             tempList.remove(tempList[0])
             for i in range(len(tempList)):
                 for j in range(len(tempList)):

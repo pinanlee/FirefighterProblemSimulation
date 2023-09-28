@@ -20,12 +20,11 @@ class FireFighter(QLabel):
         self.__travel = False #是否在移動
         self.__process = False #是否在澆水
         self.__ready = False #是否已準備好
-        self.rate_extinguish = 2#澆水速率
+        self.rate_extinguish = 3#澆水速率
         self.move_man = 4 #移動速率
         self.destNode = None #下一個目的
         self.curMovingArc : dict = None
         self.pathProgress = 0
-        self.idleLock = False
         self.status = "Not Ready"
         #UI設定
         self.setPixmap(QPixmap("./image/firefighter.png"))
@@ -33,8 +32,6 @@ class FireFighter(QLabel):
         self.curPos().defend()
         self.arrowLabel = QLabel(self.widget)
         self.timer_arrow = QTimer(self)
-
-
 
     def newPos(self):
         self.setGeometry(QRect(self.curPos().x()+20, self.curPos().y(),self.curPos().width()+ 20, self.curPos().height()+20))
@@ -47,9 +44,6 @@ class FireFighter(QLabel):
         self.__arrivalTime = 0
         self.curMovingArc = None
         self.pathProgress = 0
-
-    def lock(self):
-        self.idleLock = not self.idleLock
 
     def finishTimeSet(self, value):
         if(self.isIdle()):
@@ -101,8 +95,6 @@ class FireFighter(QLabel):
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
         self.destNode = self.curPos() if self.destNode == None else self.destNode
-        if(self.idleLock):
-            return False
         if(self.__cumArrivalTime <= timer):
             self.__cumArrivalTime = timer
             prev = self.curPos()
@@ -184,7 +176,7 @@ class FireFighter(QLabel):
             self.pathProgress += 1
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
-            opacity = 1 - self.curPos().getNodePercentage_FF(self.rate_extinguish)
+            opacity = self.curPos().getNodePercentage_FF(self.rate_extinguish)
             self.curPos().nodeController.style = f'background-color: rgba(0, 255, 0, {opacity}); color: white;'
             self.curPos().setStyleSheet(self.curPos().nodeController.style)
     
@@ -207,9 +199,10 @@ class FireFighter(QLabel):
         else:
             arrow = QPixmap("image/arrow.png")
         self.arrowLabel.setPixmap(arrow)
-        self.arrowLabel.raise_()
+        #self.arrowLabel.raise_()
         self.arrowLabel.show()
-        self.arrowLabel.setGeometry(self.x()-5,self.y()-110,100,100)
+        self.arrowLabel.lower()
+        self.arrowLabel.setGeometry(self.x()-5,self.y()-110,50,70)
         self.timer_arrow = QTimer(self)
         self.timer_arrow.timeout.connect(arrowAnimation)
         self.timer_arrow.start(200)
@@ -228,6 +221,7 @@ class FireFighter(QLabel):
     def closeaccessibleVisualize(self, lst): #用於清除前一個消防員可以前往點的顏色
         self.arrowLabel.setText("")
         self.arrowLabel.setPixmap(QPixmap())
+        self.arrowLabel.lower()
         self.timer_arrow.stop()
 
         for i in lst:
