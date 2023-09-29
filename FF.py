@@ -22,10 +22,9 @@ class FireFighter(QLabel):
         #self.__ready = False #是否已準備好
         self.rate_extinguish = 3#澆水速率
         self.move_man = 4 #移動速率
-        self.destNode = None #下一個目的
-        self.curMovingArc : dict = None
-        self.pathProgress = 0
-        self.status = "Not Ready"
+        self.__destNode = None #下一個目的
+        self.__pathProgress = 0
+        self.__status = "Not Ready"
         #UI設定
         self.setPixmap(QPixmap("./image/firefighter.png"))
         self.pixmaploc = "./image/firefighter.png"
@@ -43,27 +42,29 @@ class FireFighter(QLabel):
         self.__select = False 
         self.__travel = False 
         self.__process = False
-        self.destNode = None
+        self.__destNode = None
         self.__arrivalTime = 0
-        self.curMovingArc = None
-        self.pathProgress = 0
+        self.__pathProgress = 0
 
     def finishTimeSet(self, value):
         if(self.isIdle()):
             self.__arrivalTime = value
-            self.FFSignal.emit("idle", self.curPos().getNum())
+            #self.FFSignal.emit("idle", self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
+
+    def destination(self):
+        return self.__destNode
 
     def getcumArrivalTime(self):
         return self.__cumArrivalTime
 
     def move(self): #開始移動至目的地
-        if(self.destNode == self.curPos()):
+        if(self.__destNode == self.curPos()):
             self.curPos().defend()
             self.process()
             #self.curPos().nodeController.burned = False
             self.FFSignal.emit("protect",self.curPos().getNum())
-        if(self.destNode != None):
+        if(self.__destNode != None):
             self.traveling()
 
     def process(self): #消防員標記為澆水中
@@ -91,16 +92,16 @@ class FireFighter(QLabel):
         return self.__select
     
     def isIdle(self):
-        return not (self.__select or self.__process or self.__travel or self.destNode != None)
+        return not (self.__select or self.__process or self.__travel or self.__destNode != None)
 
     # def isReady(self):
     #     return self.__ready
 
     def checkArrival(self, timer): #是否在timer時抵達目的地
-        self.destNode = self.curPos() if self.destNode == None else self.destNode
+        self.__destNode = self.curPos() if self.__destNode == None else self.__destNode
         if(self.__cumArrivalTime <= timer):
             self.__cumArrivalTime = timer
-            self.__path.append(self.destNode)
+            self.__path.append(self.__destNode)
             self.newPos()
             self.reset()
             self.FFSignal.emit("done", 0)
@@ -108,9 +109,9 @@ class FireFighter(QLabel):
         else:
             self.__calculateCurrentCapacity()
             self.__wateringVisualize()
-            self.setGeometry(QRect(self.curPos().x() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.x() - self.curPos().x())), self.curPos().y() + int(self.getArcPercentage_FF(self.destNode)*(self.destNode.y() - self.curPos().y())),self.curPos().width()+ 20, self.curPos().height()+20))
+            self.setGeometry(QRect(self.curPos().x() + int(self.getArcPercentage_FF(self.__destNode)*(self.__destNode.x() - self.curPos().x())), self.curPos().y() + int(self.getArcPercentage_FF(self.__destNode)*(self.__destNode.y() - self.curPos().y())),self.curPos().width()+ 20, self.curPos().height()+20))
             for i in self.curPos().getArcs(): #對於現在位置的相鄰點
-                if(i["nodeButton"] == self.destNode):
+                if(i["nodeButton"] == self.__destNode):
                     self.__calculateCurrentFFArrive(i)
         return False
 
@@ -134,14 +135,13 @@ class FireFighter(QLabel):
 
     def __safeDetection(self, node: Node, timer) -> bool:
         earliestTime = timer + math.ceil(self.curPos().getArc(node)["travel-time"])
-        return True if node.getFireMinArrivalTime() >= timer + earliestTime else False
+        return True if node.getFireMinArrivalTime() >= earliestTime else False
 
     def processCheck(self, node: Node) -> str:
         self.selected()
-        self.destNode = node
+        self.__destNode = node
         if(node != self.curPos()):
-            self.curMovingArc = self.curPos().getArc(node)
-            self.__arrivalTime = self.curPos().getArc(self.destNode)["travel-time"]
+            self.__arrivalTime = self.curPos().getArc(self.__destNode)["travel-time"]
             return "{} move to vertex {}".format(self.getName(), node.getNum())
         else:
             self.__arrivalTime = self.curPos().getProcessingTime() / self.rate_extinguish
@@ -160,8 +160,8 @@ class FireFighter(QLabel):
             self.curPos().nextFFProgress()
 
     def __calculateCurrentFFArrive(self, arc): #更新消防員在arc上的移動情況
-        if(self.pathProgress < arc["travel-time"]):
-            self.pathProgress += 1
+        if(self.__pathProgress < arc["travel-time"]):
+            self.__pathProgress += 1
             
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
@@ -215,23 +215,27 @@ class FireFighter(QLabel):
         for i in lst:
             i.setStyleSheet(i.getStyle())
             i.timer_nodeOpacity.stop()
+
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
         for i in self.curPos().getArcs():
             if(i["nodeButton"] == node): 
-                ratio = self.pathProgress/i["travel-time"]
+                ratio = self.__pathProgress/i["travel-time"]
                 return ratio if ratio <= 1 else 1 
         return 0
 
+    def getStatus(self):
+        return self.__status
+
     def updateStatus(self):
         # if(self.isReady()):
-        #     self.status = "Ready"
+        #     self.__status = "Ready"
         if(self.isProcess()):
-            self.status = "Processing"
+            self.__status = "Processing"
         elif(self.isTraveling()):
-            self.status = "Traveling"
+            self.__status = "Traveling"
         elif(self.isIdle()):
-            self.status = "Not Ready"
+            self.__status = "Not Ready"
         elif(self.isSelected()):
-            self.status = "Assigned!"
+            self.__status = "Assigned!"
         else:
-            self.status = "Not Ready"
+            self.__status = "Not Ready"

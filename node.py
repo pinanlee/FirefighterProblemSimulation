@@ -1,24 +1,23 @@
-from PyQt5.QtGui import QPixmap, QCursor
+from PyQt5.QtGui import QPixmap, QCursor, QResizeEvent
 from PyQt5.QtCore import QTimer, pyqtSignal, Qt
 from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5 import QtWidgets,QtCore,QtGui
 from nodeButtonController import NodeController
+from nodePropertyVisualization import nodePropertyVis
 
 class Node(QtWidgets.QPushButton):
     showSignal = pyqtSignal(int)
     def __init__(self, widgets, __nodeController: NodeController):
         super().__init__(widgets)
         self.__nodeController = __nodeController
-        self.__UIsettings(self.__nodeController.pos)
-       
-        self.__neighbors = [] #表示與那些node有相鄰關係
-        #self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
-
+        self.__UIsettings(self.__nodeController.getPos())
         # UI設定
         self.__node_opa_value = 0.3
         self.__node_opa_shift = 1
         self.timer_nodeOpacity = QTimer()
         self.timer_nodeOpacity.timeout.connect(self.opacityAffect)
+        self.grassVisualize = nodePropertyVis(widgets,self.__nodeController)
+    
 
     #UI設定
     def __UIsettings(self, pos):
@@ -45,7 +44,7 @@ class Node(QtWidgets.QPushButton):
     def onFire(self):
         #onFire setting
         self.__nodeController.onFire()
-        self.setStyleSheet(self.__nodeController.style)
+        self.setStyleSheet(self.__nodeController.getStyle())
 
     def defend(self):
         self.__nodeController.defend()
@@ -56,7 +55,7 @@ class Node(QtWidgets.QPushButton):
         self.setStyleSheet("background-color: black;")
         
     def isDepot(self):
-        return self.__nodeController.depot
+        return self.__nodeController.isDepot()
 
     def ffidle(self):
         self.__nodeController.ffidle()
@@ -65,12 +64,12 @@ class Node(QtWidgets.QPushButton):
         return self.__nodeController.setStyle(style)
 
     def nextFFProgress(self):
-        self.__nodeController.ffProgress += 1
+        self.__nodeController.ffProgressing()
 
     #get functions
 
     def getValue(self):
-        return self.__nodeController.value
+        return self.__nodeController.getValue()
 
     def isBurned(self):
         return self.__nodeController.isBurned()
@@ -82,8 +81,7 @@ class Node(QtWidgets.QPushButton):
         return self.__nodeController.idle
 
     def getNeighbors(self):
-        return self.__neighbors
-        #return self.__nodeController.getNeighbors()
+        return self.__nodeController.getNeighborButton()
 
     def getArc(self, node):
         return self.__nodeController.getArc(node.__nodeController)
@@ -95,10 +93,10 @@ class Node(QtWidgets.QPushButton):
         return self.__nodeController.getArcs()
 
     def getStatus(self):
-        return self.__nodeController.status
+        return self.__nodeController.getStatus()
 
     def getProcessingTime(self):
-        return self.__nodeController.quantity * self.__nodeController.burningTime
+        return self.__nodeController.getGrassAmount()
 
     def getStyle(self):
         return self.__nodeController.getStyle()
@@ -116,7 +114,4 @@ class Node(QtWidgets.QPushButton):
 
     #一開始建立網路時使用
     def connectNode(self, node):
-        self.__neighbors.append(node)
-        #self.__adjArc = self.__nodeController.getArcs()
         self.__nodeController.connectButton(node)
-        #self.__adjArc.append({"node": node, "length": length})
