@@ -165,7 +165,9 @@ class FireFighter(QLabel):
             
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
+            
             opacity = self.curPos().getNodePercentage_FF(self.rate_extinguish)
+            opacity = 1 if opacity > 1 else opacity
             self.curPos().setStyle(f'background-color: rgba(0, 255, 0, {opacity}); color: white;')
             self.curPos().setStyleSheet(self.curPos().getStyle())
     

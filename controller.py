@@ -27,7 +27,7 @@ import sys
 from PIL import ImageGrab
 from instruction import Instruction
 
-FFNum = 1
+FFNum = 2
 
 
 class MainWindow_controller(QtWidgets.QMainWindow):
@@ -227,9 +227,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.updateMinTime()
 
     def updateMinTime(self): #更新FF network的fireMinArrivalTime
-        self.fireNetwork.nodeList = [node for node in self.fireNetwork.nodeList if setattr(node, '__fireMinArrivalTime', 10000) is None]
+        for i in self.fireNetwork.nodeList:
+            i.setFireMinArrivalTime(10000)
+        
         [i.minTimeFireArrival() for i in self.fire]
-        self.FFnetwork.nodeList = [node for node in self.FFnetwork.nodeList if setattr(node, '__fireMinArrivalTime', self.fireNetwork.nodeList[node.getNum()-1].getFireMinArrivalTime) is None]
+        for i in self.FFnetwork.nodeList:
+            i.setFireMinArrivalTime(self.fireNetwork.nodeList[i.getNum()-1].getFireMinArrivalTime())
 
     def updateFFStatus(self): #消防員移動/澆水完成時呼叫，更新消防員的狀態
         for i in range(self.firefighterNum):
@@ -424,6 +427,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         #self.nextFFindex = (self.FFindex + 1) % self.firefighterNum
         self.__opacitySet()
         self.firefighterList[self.FFindex].setPixmap(self.firefighterList[self.FFindex].grab())
+        self.firefighterList[self.FFindex - 1].closeaccessibleVisualize(self.nodeList)
         self.firefighterList[self.FFindex].accessibleVisualize(self.currentTime,self.nodeList)
         self.descriptionAnimate("change to {}".format(self.firefighterList[self.FFindex].getName()))
         image = self.firefighterList[self.FFindex].grab()

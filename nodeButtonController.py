@@ -121,7 +121,7 @@ class NodeController():
         return ratio if ratio >= 0 else 0
     
     def getNodePercentage_FF(self, rate): #獲得消防員在該node的燃燒進度
-        ratio = self.__ffProgress / (self.__burningTime * self.__grassAmount / rate)
+        ratio = self.__ffProgress / (self.__grassAmount / rate)
         return ratio if ratio >= 0 else 0
 
     def updateStatus(self):
