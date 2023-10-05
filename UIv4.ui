@@ -67,28 +67,6 @@
      <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QLabel" name="timeIndexLabel">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>131</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>22</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>t=0</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-   </widget>
    <widget class="QLabel" name="backgroundLabel">
     <property name="geometry">
      <rect>
@@ -131,45 +109,6 @@
     </property>
     <property name="margin">
      <number>0</number>
-    </property>
-   </widget>
-   <widget class="QLabel" name="hintLabel">
-    <property name="geometry">
-     <rect>
-      <x>770</x>
-      <y>170</y>
-      <width>311</width>
-      <height>161</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);
-border: 2px solid blue;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="backButton">
-    <property name="geometry">
-     <rect>
-      <x>1810</x>
-      <y>0</y>
-      <width>111</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Back to game</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -336,19 +275,6 @@ border: 2px solid blue;</string>
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="warningLabel">
-    <property name="geometry">
-     <rect>
-      <x>420</x>
-      <y>830</y>
-      <width>71</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
@@ -364,9 +290,9 @@ border: 2px solid blue;</string>
     <property name="geometry">
      <rect>
       <x>630</x>
-      <y>800</y>
-      <width>121</width>
-      <height>31</height>
+      <y>790</y>
+      <width>130</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
@@ -445,6 +371,25 @@ border: 2px solid blue;</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QLabel" name="label_selectedFF">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>810</y>
+      <width>201</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
    <widget class="QLCDNumber" name="lcd_time">
     <property name="geometry">
      <rect>
@@ -465,6 +410,9 @@ border: 2px solid blue;</string>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>10</number>
+     </property>
      <item>
       <widget class="QPushButton" name="idleButton">
        <property name="font">
@@ -572,14 +520,12 @@ border: 2px solid blue;</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <zorder>label_selectedFF</zorder>
    <zorder>backgroundLabel_2</zorder>
    <zorder>descriptionLabel</zorder>
    <zorder>node_info_label</zorder>
-   <zorder>timeIndexLabel</zorder>
    <zorder>backgroundLabel</zorder>
    <zorder>networkLabel</zorder>
-   <zorder>hintLabel</zorder>
-   <zorder>backButton</zorder>
    <zorder>label</zorder>
    <zorder>progressBar</zorder>
    <zorder>consoleLabel</zorder>
@@ -588,7 +534,6 @@ border: 2px solid blue;</string>
    <zorder>noButton</zorder>
    <zorder>yesButton</zorder>
    <zorder>selectLabel</zorder>
-   <zorder>warningLabel</zorder>
    <zorder>verticalLayoutWidget</zorder>
    <zorder>defendButton</zorder>
    <zorder>label_4</zorder>
@@ -604,7 +549,7 @@ border: 2px solid blue;</string>
      <x>0</x>
      <y>0</y>
      <width>1923</width>
-     <height>25</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -618,7 +563,6 @@ border: 2px solid blue;</string>
      <string>Instructions</string>
     </property>
     <addaction name="actionProblem"/>
-    <addaction name="actionControls"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">

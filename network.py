@@ -5,30 +5,29 @@ from node import Node
 from nodeButtonController import NodeController
 
 class Network:
-    def __init__(self, adjFile, posFile) -> None:
-        self.adjList = [[]]
+    def __init__(self, adjFile, posFile, depot) -> None:
         self.nodeList : list[NodeController] = []
-        df = pd.read_excel(posFile)
-        df_num = len(df.index)
-        for i in range(df_num):
-            self.adjList.append([])
-            nodePos = QtCore.QRect(df.iloc[i]["x"] + 100, df.iloc[i]["y"], 30, 25)
-            nodeButton = NodeController(i+1, nodePos)
-            self.nodeList.append(nodeButton)
-        df = pd.read_excel(adjFile)
-        for j in df.iloc:
-            self.adjList[int(j["i"])].append([int(j["j"]), 1])
-        self.connect()
+        self.__createNode(posFile, depot)
+        self.__connectNode(adjFile)
     
-    def connect(self):
-        for i in self.nodeList:
-            pos1 = np.array((i.pos.x(),i.pos.y()))
-            for j in self.adjList[i.getNum()]:
-                pos2 = np.array((self.nodeList[j[0]-1].pos.x(),self.nodeList[j[0]-1].pos.y()))
-                length = int(np.linalg.norm(pos1-pos2))
-                i.connectNode(self.nodeList[j[0]-1], length)
+    def __connectNode(self, adjFile):
+        df = pd.read_excel(adjFile)
+        for i in df.iloc:
+            length = int(i["d"])
+            time = i["travel time"]
+            nodeNum = int(i["j"]) - 1
+            self.nodeList[int(i["i"]) - 1].connectNode(self.nodeList[nodeNum], length, time)
+    
     def getTotalValue(self) -> int:
-        value = 0
-        for i in self.nodeList:
-            value += i.value
-        return int(value)
+        return int(sum(node.getValue() for node in self.nodeList))
+
+    def __createNode(self,posFile, depot):
+        df = pd.read_excel(posFile, sheet_name=None)
+        ctr = 1
+        for i in df["coordinates"].iloc:
+            #self.__adjList.append([])
+            nodePos = QtCore.QRect(i["x"] + 300, i["y"], 30, 25)
+            nodeButton = NodeController(ctr, nodePos, i["value"], i["burning time"],  i["quantity"])
+            self.nodeList.append(nodeButton)
+            ctr+=1
+        self.nodeList[df["source"].iloc[0][depot]-1].depotSetting()

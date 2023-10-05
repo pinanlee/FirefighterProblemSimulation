@@ -5,132 +5,148 @@ from PyQt5 import QtWidgets,QtCore,QtGui
 import math
 
 class NodeController():
-    def __init__(self, i, pos: QtCore.QRect):
-        self.pos = pos
+    def __init__(self, i, pos: QtCore.QRect, value, burnTime, quantity):
+        self.__pos = pos
         #variables
-        self.no = i
-        self.initValue = 100
-        self.value = 100
-        self.fireMinArrivalTime = 10000
-        self.initialWaterAmount = 20   #消防員需澆多少水才能保護
-        self.initialGrassAmount = 20   #火需要燒多少量才能移動
-        self.water_amount = 20
-        self.grass_amount = 20
-        self.__neighbors = [] #表示與那些node有相鄰關係
-        self.__adjArc = [] #以dict紀錄arc {node: 相鄰節點, length: 之間arc的長度, fire-travel: 火在arc上已移動多少, FF-travel: FF在arc上已移動多少}
-        self.burned = False
-        self.protected = False
-        self.depot = False
-        self.idle = False
-        self.__neighbors = []
-        self.__adjArc = []
-        self.status = "Normal"
-        self.style = ""
-        #UI設定
-        self.node_opa_value = 0.3
-        self.node_opa_shift = 1
-        self.timer_nodeOpacity = QTimer()
-        self.timer_nodeOpacity.timeout.connect(self.opacityAffect)
+        self.__no = i
+        self.__initValue = value
+        self.__value = value
+        self.__fireMinArrivalTime = 10000
+        self.__burningTime = burnTime
+        self.__fireProgress = 0
+        self.__ffProgress = 0
+        self.__burned = False
+        self.__protected = False
+        self.__depot = False
+        #self.idle = False
+        self.__adjArc : dict = []
+        self.__status = "Normal"
+        self.__style = ""
+        self.__grassAmount = int(quantity * self.__burningTime)
 
+    def getPos(self):
+        return self.__pos
+    def x(self):
+        return self.__pos.x()
+    def y(self):
+        return self.__pos.y()
+    def width(self):
+        return self.__pos.width()
+    def height(self):
+        return self.__pos.height()
 
     #設置node狀態
     def onFire(self):
         #onFire setting
-        self.burned = True
+        self.__burned = True
+        self.__style = f'background-color: rgba(255, 0, 0, {0.1});'
 
     def defend(self):
-        self.protected = True
-        self.idle = False
+        self.__protected = True
+        #self.idle = False
 
     def depotSetting(self):
-        self.protected = True
-        self.depot = True
-        
+        self.__protected = True
+        self.__depot = True
+        self.__style = "background-color: black;"
+
+    def getStyle(self):
+        return self.__style
+
+    def getGrassAmount(self):
+        return self.__grassAmount
+    
+    def setStyle(self, style):
+        self.__style = style
+
     def isDepot(self):
-        return self.depot
+        return self.__depot
 
-    def ffidle(self):
-        self.idle = True
-        self.protected = False
+    #def ffidle(self):
+        #self.idle = True
+        #self.__protected = False
 
-    #update變數
-    def updateGrassAmount(self, remain):
-        remain = 0 if remain < 0 else remain
-        self.grass_amount = remain
-        self.value = self.initValue * self.getNodePercentage_Fire()
+    def fireProgressing(self):
+        self.__fireProgress+=1
+        
+    def ffProgressing(self):
+        self.__ffProgress+=1
 
+    def getFireProgress(self):
+        return self.__fireProgress
 
+    def updateValue(self):
+        self.__value = self.__initValue * self.getNodePercentage_Fire()
 
-    def updateWaterAmount(self, remain):
-        remain = 0 if remain < 0 else remain
-        self.water_amount = remain
+    def getBurningTime(self):
+        return self.__burningTime
+
+    def getValue(self):
+        return self.__value
 
     #get functions
     def isBurned(self):
-        return self.burned
+        return self.__burned
 
     def isProtected(self):
-        return self.protected
+        return self.__protected
 
-    def isIdle(self):
-        return self.idle
+    '''def isIdle(self):
+        return self.idle'''
 
     def getNeighbors(self):
-        return self.__neighbors
+        return [arc["node"] for arc in self.__adjArc]
 
     def getArc(self, node):
-        for i in self.__adjArc:
-            if(i["node"] == node):
-                return i
-        return -1
+        return next((i for i in self.__adjArc if i["node"] == node), None)
 
     def getNum(self):
-        return self.no
-
-    def getWaterAmount(self):
-        return self.water_amount
-
-    def getGrassAmount(self):
-        return self.grass_amount
+        return self.__no
 
     def getArcs(self):
         return self.__adjArc
+
     def getStatus(self):
-        return self.status
+        return self.__status
+    
+    def getFireMinArrivalTime(self):
+        return self.__fireMinArrivalTime
+
+    def setFireMinArrivalTime(self, time):
+        self.__fireMinArrivalTime = time
 
     #get function (計算獲得)
     def getNodePercentage_Fire(self): #獲得火在該node的燃燒進度
-        ratio = self.grass_amount/self.initialGrassAmount
+        ratio = 1 - (self.__fireProgress / self.__burningTime)
         return ratio if ratio >= 0 else 0
     
-    def getNodePercentage_FF(self): #獲得消防員在該node的燃燒進度
-        ratio = self.water_amount/self.initialWaterAmount
+    def getNodePercentage_FF(self, rate): #獲得消防員在該node的燃燒進度
+        ratio = self.__ffProgress / (self.__grassAmount / rate)
         return ratio if ratio >= 0 else 0
 
     def updateStatus(self):
-        if (self.idle == True):
-            self.status = "FF Idle"
-        elif(self.protected == True and self.water_amount > 0):
-            self.status = "Protected"
-        elif (self.protected == True and self.water_amount <= 0):
-            self.status = "Safe"
-        elif (self.burned == True and self.grass_amount > 0):
-            self.status = "Burned"
-        elif (self.burned == True and self.grass_amount <= 0):
-            self.status = "Damaged"
+        # if (self.idle == True):
+        #     self.__status = "FF Idle"
+        if(self.__protected == True and self.__ffProgress > 0):
+            self.__status = "Protected"
+        elif (self.__protected == True and self.__ffProgress <= 0):
+            self.__status = "Safe"
+        elif (self.__burned == True and self.__fireProgress > 0):
+            self.__status = "Burned"
+        elif (self.__burned == True and self.__fireProgress == self.__burningTime):
+            self.__status = "Damaged"
         else:
-            self.status = "Normal"
+            self.__status = "Normal"
 
 
     #一開始建立網路時使用
-    def connectNode(self, node, length):
-        self.__neighbors.append(node)
-        self.__adjArc.append({"node": node, "length": length, "fire-travel": 0})
+    def connectNode(self, node, length, time):
+        self.__adjArc.append({"node": node, "nodeButton": None, "length": length, "fire-travel": 0, "travel-time": time})
+    
+    def connectButton(self, button):
+        for i in self.__adjArc:
+            if(button.getNum() == i["node"].getNum()):
+                i["nodeButton"] = button
 
-    def opacityAffect(self):
-        self.node_opa_value += 0.1 * self.node_opa_shift
-        if self.node_opa_value >= 0.8:
-            self.node_opa_shift = -1
-        elif self.node_opa_value <= 0.3:
-            self.node_opa_shift = 1
-        self.setStyleSheet(f'background-color: rgba(0, 255, 255, {self.node_opa_value}); color: white;')
+    def getNeighborButton(self):
+        return [arc["nodeButton"] for arc in self.__adjArc]
