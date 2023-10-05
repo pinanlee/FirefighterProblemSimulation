@@ -16,7 +16,7 @@ from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor, QIcon
 from PyQt5 import uic
 import pandas as pd
 import numpy as np
@@ -51,19 +51,27 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     availFF = 0
     screenshot_range = (290, -10, 1900, 751)
 
-    def __init__(self):
+    def __init__(self,mode):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
-        
+        self.mode = mode
         global FFNum
-        uic.loadUi("UIv4.ui",self)
+        if mode == 1:
+            uic.loadUi("UIv4.ui",self)
+        elif mode == 2:
+            uic.loadUi("case1.ui",self)
+            pixmap = QPixmap("image/case1image.jpg")  # 替换为您的图像文件路径
+            self.label_background.setPixmap(pixmap)
+
+            self.backgroundLabel_2
+
         if os.path.exists("FFInfo.json"):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
             FFNum = int(data["FFnumber"])
         #self.db = DataBase()
         #self.nw = InformationWindow(self.db)
-        self.inst = Instruction(self.centralWidget())
-        self.inst.intoGame()
+        #self.inst = Instruction(self.centralWidget())
+        #self.inst.intoGame()
         self.firefighterNum = FFNum
         self.subwindows = []
         self.setup_control()
@@ -76,11 +84,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     '''------------------------------------初始化--------------------------------------------------------'''
     def setup_control(self):
         def initNetwork(): #建立network class和node
-            self.backgroundLabel.setStyleSheet("background-color: rgba(200, 200, 200, 100);")
-            self.FFnetwork = Network("./network/testModel/G30_firefighter_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx", "N_D")
-            self.fireNetwork = Network("./network/testModel/G30_fire_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx", "N_F")
+            if self.mode == 1:
+                self.FFnetwork = Network("./network/testModel/G30_firefighter_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx", "N_D")
+                self.fireNetwork = Network("./network/testModel/G30_fire_route.xlsx", "./network/testModel/G30_nodeInformation.xlsx", "N_F")
+            elif self.mode == 2:
+                self.FFnetwork = Network("./network/case1/case1_firefighter_route.xlsx", "network/case1/case1_nodeInformation.xlsx", "N_D")
+                self.fireNetwork = Network("./network/case1/case1_fire_route.xlsx", "network/case1/case1_nodeInformation.xlsx", "N_F")
+
             for i in self.FFnetwork.nodeList:
-                node = Node(self.centralwidget, i)
+                node = Node(self.gamewidget, i)
+                if self.mode == 2:
+                    if i.getNum() == 2:
+                        image1 = QIcon("image/tent.png")
+                        node.setIcon(image1)
                 node.clicked.connect(self.choose)
                 node.showSignal.connect(self.InfoShow)
                 self.nodeList.append(node)
@@ -93,22 +109,25 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
         def initUI(): # UI設定(可略)
-            self.setStyleSheet("background-color: rgb(100, 100, 100);")
+            #self.setStyleSheet("background-color: rgb(100, 100, 100);")
             #self.focusIndex = len(self.nodeList) - 1
+            self.button_menu.clicked.connect(self.backMenu)
             opacity_effect = QGraphicsOpacityEffect()
             opacity_effect.setOpacity(0.7)
             self.descriptionLabel.setGraphicsEffect(opacity_effect)
-            self.actionProblem.triggered.connect(self.showProblem)
+            if self.mode == 1:
+                self.actionProblem.triggered.connect(self.showProblem)
             self.actionAnimation.triggered.connect(self.showFFWindow)
             self.actionNew.triggered.connect(self.newNetwork)
-            self.yesButton.clicked.connect(self.showProblem)
-            self.node_info_label.setVisible(False)
-            #self.nodeList[self.focusIndex].setFocus()
-            self.instruct.raise_()
-            self.yesButton.raise_()
-            self.noButton.raise_()
-            self.yesButton.clicked.connect(self.intoGame)
-            self.noButton.clicked.connect(self.intoGame)
+            # self.nodeList[self.focusIndex].setFocus()
+            if self.mode == 1:
+                self.yesButton.clicked.connect(self.showProblem)
+                self.node_info_label.setVisible(False)
+                self.instruct.raise_()
+                self.yesButton.raise_()
+                self.noButton.raise_()
+                self.yesButton.clicked.connect(self.intoGame)
+                self.noButton.clicked.connect(self.intoGame)
             self.idleButton.clicked.connect(self.assignIdle)
             self.defendButton.clicked.connect(self.choose)
             self.checkBox.toggled.connect(self.idleLock)
@@ -140,7 +159,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     data = json.load(file)
                 self.FFInfoDict = data["FFinfo"]
                 for i in range(self.firefighterNum):
-                    ff = FireFighter(self.centralwidget, i+1, depot)
+                    ff = FireFighter(self.gamewidget, i+1, depot)
                     ff.FFSignal.connect(self.ffSignalDetermination)
                     depot.depotSetting()
                     self.firefighterList.append(ff)
@@ -156,7 +175,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     i.move_man = int(self.FFInfoDict[tempNum-1]["ts"])
             else:
                 for i in range(self.firefighterNum):
-                    ff = FireFighter(self.centralwidget, i+1, depot)
+                    ff = FireFighter(self.gamewidget, i+1, depot)
                     ff.FFSignal.connect(self.ffSignalDetermination)
                     depot.depotSetting()
                     self.firefighterList.append(ff)
@@ -299,7 +318,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
-        self.node_info_label.setVisible(False)
+        #self.node_info_label.setVisible(False)
         if(a0.key() == Qt.Key_S):
                 self.networkChange()
         if(a0.key() == Qt.Key_N):
@@ -555,7 +574,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # self.nw.(x, y)
 
     def paintEvent(self, event):
-        qpainter = QPainter()
+        if self.mode == 1:
+            qpainter = QPainter()
+        elif self.mode == 2 :
+            qpainter = QPainter(self.label_background.pixmap())
         qpainter.begin(self)
         qpainter.setRenderHint(QPainter.Antialiasing)
         if(self.showFireNetwork):
@@ -567,7 +589,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     i.grassVisualize.show()
             for i in self.fireNetwork.nodeList:
                 for j in i.getNeighbors():
-                    qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y()+ 3/2*i.height()), QPointF(j.x()+ j.width()/2, j.y()+ 3/2*j.height()))          
+                    if self.mode == 1:
+                        qpainter.drawLine(
+                            QPointF(i.x() + self.gamewidget.x() + i.width() / 2, i.y() + 3 / 2 * i.height()),
+                            QPointF(j.x() + self.gamewidget.x() + j.width() / 2, j.y() + 3 / 2 * j.height()))
+                    elif self.mode == 2:
+                        qpainter.drawLine(
+                            QPointF(i.x()  + i.width() / 2, i.y() + 3 / 2 * i.height()),
+                            QPointF(j.x()  + j.width() / 2, j.y() + 3 / 2 * j.height()))
+
             for i in self.nodeList:
                 i.setText(str(i.getFireMinArrivalTime()))
         if(self.showFFnetwork):
@@ -581,15 +611,24 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     i.grassVisualize.hide()
                 i.setText(str(i.getNum()))
                 for j in i.getNeighbors():
-                    qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y()+ 3/2*i.height()), QPointF(j.x()+ j.width()/2, j.y()+ 3/2*j.height()))
-        
+                    if self.mode == 1:
+                        qpainter.drawLine(
+                            QPointF(i.x() + self.gamewidget.x() + i.width() / 2, i.y() + 3 / 2 * i.height()),
+                            QPointF(j.x() + self.gamewidget.x() + j.width() / 2, j.y() + 3 / 2 * j.height()))
+                    elif self.mode == 2:
+                        qpainter.drawLine(
+                            QPointF(i.x()  + i.width() / 2, i.y() + 3 / 2 * i.height()),
+                            QPointF(j.x()  + j.width() / 2, j.y() + 3 / 2 * j.height()))
         for i in self.fire:
             for j in i.getArcs():
                     tempXpercent = (j["node"].x() + j["node"].width()/2 - i.x() - i.width()/2) * i.getArcPercentage_Fire(j)
                     tempYpercent = (j["node"].y() + 3/2*j["node"].height() - i.y() - 3/2*i.height()) * i.getArcPercentage_Fire(j)
                     qpen = QPen(Qt.darkRed, 6, Qt.SolidLine)
                     qpainter.setPen(qpen)
-                    qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x() + i.width()/2 + tempXpercent, i.y() + 3/2*i.height() + tempYpercent))
+                    if self.mode == 1:
+                        qpainter.drawLine(QPointF(i.x() + self.gamewidget.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x() + self.gamewidget.x() + i.width()/2 + tempXpercent, i.y() + 3/2*i.height() + tempYpercent))
+                    elif self.mode == 2:
+                        qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x()  + i.width()/2 + tempXpercent, i.y() + 3/2*i.height() + tempYpercent))
 
         for i in self.firefighterList:
             if(i.destination() != None):
@@ -597,7 +636,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     tempYpercent = (i.destination().y() + 3/2*i.destination().height() - i.curPos().y() - 3/2*i.curPos().height()) * i.getArcPercentage_FF(i.destination())
                     qpen = QPen(Qt.darkGreen, 6, Qt.SolidLine)
                     qpainter.setPen(qpen)
-                    qpainter.drawLine(QPointF(i.curPos().x() + i.curPos().width()/2, i.curPos().y() + 3/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 3/2*i.curPos().height()+tempYpercent))  
+                    if self.mode == 1:
+                        qpainter.drawLine(QPointF(i.curPos().x() + self.gamewidget.x() + i.curPos().width()/2, i.curPos().y() + 3/2*i.curPos().height()), QPointF(i.curPos().x() + self.gamewidget.x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 3/2*i.curPos().height()+tempYpercent))
+                    elif self.mode == 2:
+                        qpainter.drawLine(QPointF(i.curPos().x()+ i.curPos().width()/2, i.curPos().y() + 3/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 3/2*i.curPos().height()+tempYpercent))
 
         self.update()
         qpainter.end()
@@ -737,13 +779,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 title_label_wr_des.setFont(font)
                 title_label_wr_des.setGeometry(0, 245, 150, 30)
 
-                title_label_mr = QLabel("Move Rate\t:", blockff)
-                title_label_mr.setFont(font)
-                title_label_mr.setGeometry(0, 295, 120, 30)
-                temp = str(i.move_man)
-                title_label_mr_des = QLabel(temp, blockff)
-                title_label_mr_des.setFont(font)
-                title_label_mr_des.setGeometry(0, 335, 150, 30)
+                # title_label_mr = QLabel("Move Rate\t:", blockff)
+                # title_label_mr.setFont(font)
+                # title_label_mr.setGeometry(0, 295, 120, 30)
+                # temp = str(i.move_man)
+                # title_label_mr_des = QLabel(temp, blockff)
+                # title_label_mr_des.setFont(font)
+                # title_label_mr_des.setGeometry(0, 335, 150, 30)
 
         return blockff
 
@@ -809,6 +851,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     "   padding: 5px;"  
                     "}"
                 )
+    def backMenu(self):
+        from titleScreen import titleScreen
+        self.menu = titleScreen()
+        self.menu.show()
+        self.close()
+        self.deleteLater()
 
 
 

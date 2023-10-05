@@ -42,31 +42,6 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="networkLabel">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>0</y>
-      <width>311</width>
-      <height>71</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Hybrid network</string>
-    </property>
-    <property name="wordWrap">
-     <bool>false</bool>
-    </property>
-    <property name="margin">
-     <number>0</number>
-    </property>
-   </widget>
    <widget class="QLabel" name="consoleLabel">
     <property name="geometry">
      <rect>
@@ -351,10 +326,13 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>20</y>
+      <y>10</y>
       <width>1611</width>
       <height>731</height>
      </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
     </property>
     <widget class="QProgressBar" name="progressBar">
      <property name="geometry">
@@ -406,50 +384,6 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="instruct">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>270</y>
-       <width>400</width>
-       <height>200</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: white;border: 2px solid blue;</string>
-     </property>
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Do you need&lt;/p&gt;&lt;p&gt;step by step turtorial?&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignHCenter|Qt::AlignTop</set>
-     </property>
-     <property name="margin">
-      <number>150</number>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="yesButton">
-     <property name="geometry">
-      <rect>
-       <x>480</x>
-       <y>400</y>
-       <width>101</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: white;border: 2px solid blue;</string>
-     </property>
-     <property name="text">
-      <string>Yes</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
@@ -469,54 +403,56 @@
       <string>Total value: </string>
      </property>
     </widget>
-    <widget class="QPushButton" name="noButton">
+    <widget class="QLabel" name="networkLabel">
      <property name="geometry">
       <rect>
-       <x>670</x>
-       <y>400</y>
-       <width>101</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: white;border: 2px solid blue;</string>
-     </property>
-     <property name="text">
-      <string>No</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="node_info_label">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>750</x>
-       <y>500</y>
-       <width>241</width>
-       <height>141</height>
+       <x>10</x>
+       <y>0</y>
+       <width>311</width>
+       <height>71</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <family>Agency FB</family>
-       <pointsize>14</pointsize>
+       <family>Arial Rounded MT Bold</family>
+       <pointsize>16</pointsize>
       </font>
      </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 178, 102, 255), stop:0.55 rgba(235, 148, 61, 255), stop:0.98 rgba(0, 0, 0, 255), stop:1 rgba(0, 0, 0, 0));</string>
-     </property>
      <property name="text">
-      <string>TextLabel</string>
+      <string>Hybrid network</string>
+     </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
+     <property name="margin">
+      <number>0</number>
      </property>
     </widget>
+    <widget class="QLabel" name="label_background">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>-30</y>
+       <width>1611</width>
+       <height>761</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <zorder>label_background</zorder>
+    <zorder>label</zorder>
+    <zorder>label_4</zorder>
+    <zorder>networkLabel</zorder>
+    <zorder>progressBar</zorder>
    </widget>
    <widget class="QPushButton" name="button_menu">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>20</x>
       <y>20</y>
-      <width>51</width>
+      <width>41</width>
       <height>61</height>
      </rect>
     </property>
@@ -527,7 +463,6 @@
    <zorder>label_selectedFF</zorder>
    <zorder>backgroundLabel_2</zorder>
    <zorder>descriptionLabel</zorder>
-   <zorder>networkLabel</zorder>
    <zorder>consoleLabel</zorder>
    <zorder>label_2</zorder>
    <zorder>selectLabel</zorder>

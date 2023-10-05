@@ -26,7 +26,7 @@ class Network:
         ctr = 1
         for i in df["coordinates"].iloc:
             #self.__adjList.append([])
-            nodePos = QtCore.QRect(i["x"] + 300, i["y"], 30, 25)
+            nodePos = QtCore.QRect(i["x"] , i["y"], 30, 25)
             nodeButton = NodeController(ctr, nodePos, i["value"], i["burning time"],  i["quantity"])
             self.nodeList.append(nodeButton)
             ctr+=1

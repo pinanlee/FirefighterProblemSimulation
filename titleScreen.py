@@ -16,14 +16,16 @@ class titleScreen(QtWidgets.QMainWindow):
         for i in self.buttonlist:
             i.setCheckable(True)
             i.clicked.connect(self.buttonClicked)
-
-        self.startButton.clicked.connect(self.goto)
+        self.startButton.clicked.connect(lambda: self.goto(1))
+        self.button_case1.clicked.connect(lambda: self.goto(2))
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, False)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, False)
         self.button_home.setChecked(True)
-
-    def goto(self):
-        self.result = MainWindow_controller()
+        self.button_home.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
+        self.button_tutorial.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+        self.button_case.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(2))
+    def goto(self, mode):
+        self.result = MainWindow_controller(mode)
         self.result.show()
         self.close()
 

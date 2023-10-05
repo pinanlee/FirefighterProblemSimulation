@@ -192,7 +192,7 @@ class FireFighter(QLabel):
             arrow = QPixmap("image/arrow.png")
         self.arrowLabel.setPixmap(arrow)
         self.arrowLabel.show()
-        self.arrowLabel.lower()
+        #self.arrowLabel.lower()
         self.arrowLabel.setGeometry(self.x()-5,self.y()-110,50,70)
         self.timer_arrow = QTimer(self)
         self.timer_arrow.timeout.connect(arrowAnimation)
