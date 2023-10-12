@@ -1,6 +1,5 @@
 import pandas as pd
-import numpy as np
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
 from node import Node
 from nodeButtonController import NodeController
 from dataBase import DataBase
@@ -29,7 +28,7 @@ class Network:
     def __createNode(self,posFile, depot):
         df = pd.read_excel(posFile, sheet_name=None)
         for index, i in enumerate(df["coordinates"].iloc):
-            nodePos = QtCore.QRect(i["x"] + 300, i["y"], 30, 25)
+            nodePos = QtCore.QRect(i["x"], i["y"], 30, 25)
             nodeButton = NodeController(index + 1, nodePos, i["value"], i["burning time"],  i["quantity"])
             self.nodeList.append(nodeButton)
         self.nodeList[df["source"].iloc[0][depot]-1].depotSetting()

@@ -49,7 +49,6 @@ class FireFighter(QLabel):
     def finishTimeSet(self, value):
         if(self.isIdle()):
             self.__arrivalTime = value
-            #self.FFSignal.emit("idle", self.curPos().getNum())
         self.__cumArrivalTime += self.__arrivalTime
 
     def destination(self):
@@ -62,7 +61,6 @@ class FireFighter(QLabel):
         if(self.__destNode == self.curPos()):
             self.curPos().defend()
             self.process()
-            #self.curPos().nodeController.burned = False
             self.FFSignal.emit("protect",self.curPos().getNum())
         if(self.__destNode != None):
             self.traveling()
@@ -165,7 +163,6 @@ class FireFighter(QLabel):
             
     def __wateringVisualize(self): #UI設定
         if(self.isProcess()):
-            
             opacity = self.curPos().getNodePercentage_FF(self.rate_extinguish)
             opacity = 1 if opacity > 1 else opacity
             self.curPos().setStyle(f'background-color: rgba(0, 255, 0, {opacity}); color: white;')
@@ -192,7 +189,6 @@ class FireFighter(QLabel):
             arrow = QPixmap("image/arrow.png")
         self.arrowLabel.setPixmap(arrow)
         self.arrowLabel.show()
-        self.arrowLabel.lower()
         self.arrowLabel.setGeometry(self.x()-5,self.y()-110,50,70)
         self.timer_arrow = QTimer(self)
         self.timer_arrow.timeout.connect(arrowAnimation)
@@ -202,11 +198,9 @@ class FireFighter(QLabel):
             for i in (self.curPos().getNeighbors()):
                 if (i.isBurned() == False and i.isProtected() == False):
                     if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["travel-time"])):
-                        #i.setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
                         i.timer_nodeOpacity.start(100)
             if(not self.curPos().isProtected()):
                 self.curPos().timer_nodeOpacity.start(100)
-                #self.curPos().setStyleSheet(f'background-color: rgba(0, 255, 255, {0.3}); color: white;')
 
     def closeaccessibleVisualize(self, lst): #用於清除前一個消防員可以前往點的顏色
         self.arrowLabel.setText("")

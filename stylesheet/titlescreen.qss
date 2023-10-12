@@ -1,0 +1,24 @@
+#MainWindow {
+    background-color: #fff;
+}
+
+#widget_sidebar {
+    background-color: #313a46;
+}
+
+#widget_sidebar QPushButton{
+    border: none;
+    border-radius: 3px;
+    text-align: left;
+    padding: 8px 0 8px 15px;
+    color: #788596
+}
+#widget_sidebar QPushButton:hover{
+    background-color: rgba(86, 101, 115, 0.5);
+}
+#widget_sidebar QPushButton:checked {
+    color: #fff;
+    background-color: rgba(86, 101, 115, 0.5);
+    font-weight: bold;
+}
+
