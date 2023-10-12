@@ -6,6 +6,7 @@ import math
 
 class NodeController():
     def __init__(self, i, pos: QtCore.QRect, value, burnTime, quantity):
+        from dataBase import DataBase
         self.__pos = pos
         #variables
         self.__no = i

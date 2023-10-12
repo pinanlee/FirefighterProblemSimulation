@@ -77,8 +77,8 @@ class Node(QtWidgets.QPushButton):
     def isProtected(self):
         return self.__nodeController.isProtected()
 
-    def isIdle(self):
-        return self.__nodeController.idle
+    '''def isIdle(self):
+        return self.__nodeController.idle'''
 
     def getNeighbors(self):
         return self.__nodeController.getNeighborButton()

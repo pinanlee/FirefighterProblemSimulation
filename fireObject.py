@@ -31,36 +31,36 @@ class Fire(QObject):
         self.__firePos.onFire()
         self.fireSignal.emit("burn", 0, self.__firePos.getNum())
 
-    def fire_spread(self, timer): #火焰傳遞邏輯
+    def fire_spread(self): #火焰傳遞邏輯
         if(self.__finishSpread):
             return
         if(self.__finishBurn):
             all_arc_burned = True
-            for j in self.__arcs:
-                if(j["travel-time"] > j["fire-travel"]):    
-                    self.__calculateCurrentFireArrive(j)
-                    if(self.__statusDetection(j)):
+            for arc in self.__arcs:
+                if(arc["travel-time"] > arc["fire-travel"]):    
+                    self.__fireSpreadContinuation(arc)
+                    if(self.__fireExpandDetection(arc)):
                         all_arc_burned = False
                 else:
-                    if(self.__statusDetection(j)):
-                        j["node"].onFire()
-                        print("node {} is burned at time {}".format(j["node"].getNum(), timer))
-                        self.fireSignal.emit("burn", 0, j["node"].getNum())
+                    if(self.__fireExpandDetection(arc)):
+                        arc["node"].onFire()
+                        #print("node {} is burned at time {}".format(arc["node"].getNum(), timer))
+                        self.fireSignal.emit("burn", 0, arc["node"].getNum())
             if(all_arc_burned):
                 self.__finishSpread = True            
         else:
-            self.__calculateCurrentCapacity()
+            self.__fireBurnContinuation()
             self.__burningVisualize()
 
-    def __statusDetection(self, node): #check assigned node's status
-        return not (node["node"].isProtected() or node["node"].isBurned())
+    def __fireExpandDetection(self, arc): #check assigned node's status
+        return not (arc["node"].isProtected() or arc["node"].isBurned())
 
-    def __calculateCurrentCapacity(self): #更新該node的grass量
+    def __fireBurnContinuation(self): #更新該node的grass量
         self.__firePos.updateValue()
         self.__firePos.fireProgressing()
         self.__finishBurn = (self.__firePos.getFireProgress() == self.__firePos.getBurningTime())
 
-    def __calculateCurrentFireArrive(self, arc): #更新火在arc上的移動情況
+    def __fireSpreadContinuation(self, arc): #更新火在arc上的移動情況
         arc["fire-travel"] += 1
 
     def minTimeFireArrival(self):
@@ -68,13 +68,16 @@ class Fire(QObject):
         tempList = [self.__firePos]
         
         while(tempList):
-            tempTime = tempList[0].getFireMinArrivalTime() + tempList[0].getBurningTime()
-            for j in tempList[0].getArcs():
-                if(self.__statusDetection(j) and j["node"].getFireMinArrivalTime() > math.ceil(tempTime + j["travel-time"])):              
-                    j["node"].setFireMinArrivalTime(math.ceil(tempTime + j["travel-time"]))
-                    tempList.append(j["node"])             
-            tempList.remove(tempList[0])
-            tempList.sort(key= lambda x: x.getFireMinArrivalTime())
+            selectedNode = tempList.pop(0)
+            tempTime = selectedNode.getFireMinArrivalTime() + selectedNode.getBurningTime()
+            for arc in selectedNode.getArcs():
+                if(self.__fireExpandDetection(arc) and self.__minTimeIsIteratable(arc, tempTime)):              
+                    arc["node"].setFireMinArrivalTime(math.ceil(tempTime + arc["travel-time"]))
+                    tempList.append(arc["node"])             
+            tempList.sort(key= lambda node: node.getFireMinArrivalTime())
+
+    def __minTimeIsIteratable(self, arc, time):
+        return arc["node"].getFireMinArrivalTime() > math.ceil(time + arc["travel-time"])
 
     def __burningVisualize(self): #UI設定
         opacity = 1 - self.__firePos.getNodePercentage_Fire()

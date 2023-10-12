@@ -3,18 +3,23 @@ import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from node import Node
 from nodeButtonController import NodeController
+from dataBase import DataBase
 
 class Network:
     def __init__(self, adjFile, posFile, depot) -> None:
         self.nodeList : list[NodeController] = []
         self.__createNode(posFile, depot)
-        self.__connectNode(adjFile)
+        self.__connectNode(adjFile, depot)
     
-    def __connectNode(self, adjFile):
+    def __connectNode(self, adjFile, depot):
         df = pd.read_excel(adjFile)
         for i in df.iloc:
             length = int(i["d"])
             time = i["travel time"]
+            if(depot == "N_D"):
+                DataBase.tau.append(time)
+            else:
+                DataBase.lamb.append(time)
             nodeNum = int(i["j"]) - 1
             self.nodeList[int(i["i"]) - 1].connectNode(self.nodeList[nodeNum], length, time)
     
@@ -23,11 +28,8 @@ class Network:
 
     def __createNode(self,posFile, depot):
         df = pd.read_excel(posFile, sheet_name=None)
-        ctr = 1
-        for i in df["coordinates"].iloc:
-            #self.__adjList.append([])
+        for index, i in enumerate(df["coordinates"].iloc):
             nodePos = QtCore.QRect(i["x"] + 300, i["y"], 30, 25)
-            nodeButton = NodeController(ctr, nodePos, i["value"], i["burning time"],  i["quantity"])
+            nodeButton = NodeController(index + 1, nodePos, i["value"], i["burning time"],  i["quantity"])
             self.nodeList.append(nodeButton)
-            ctr+=1
         self.nodeList[df["source"].iloc[0][depot]-1].depotSetting()
