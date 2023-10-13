@@ -151,7 +151,7 @@
          </font>
         </property>
         <property name="text">
-         <string>FireFighter Simulatior</string>
+         <string>FireFighter Simulator</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

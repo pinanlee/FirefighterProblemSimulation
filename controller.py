@@ -304,9 +304,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def fireVisualize(self, opacity, no): #當fire network的節點正在燃燒時，更新ui上的opacity
         self.fireNetwork.nodeList[no-1].updateStatus()
         self.nodeList[no-1].setStyle(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
+        if(opacity==1):
+            self.nodeList[no - 1].setStyle(f'background-color: rgba(139, 0, 0, {opacity}); color: white;')
         self.nodeList[no-1].setStyleSheet(self.nodeList[no-1].getStyle())
         self.nodeList[no-1].updateStatus()
-
         self.totalValue = self.fireNetwork.getTotalValue()
         self.progressBar.setValue(self.totalValue)
 
@@ -852,11 +853,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     "}"
                 )
     def backMenu(self):
-        from titleScreen import titleScreen
-        self.menu = titleScreen()
-        self.menu.show()
-        self.close()
-        self.deleteLater()
+        import os
+        p = sys.executable
+        os.execl(p, p, *sys.argv)
 
 
 

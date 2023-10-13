@@ -9,6 +9,7 @@ class titleScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         loadUi("titleScreen.ui", self)
+        self.stackedWidget.setCurrentIndex(0)
         self.buttonlist.append(self.button_home)
         self.buttonlist.append(self.button_tutorial)
         self.buttonlist.append(self.startButton)
