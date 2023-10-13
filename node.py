@@ -57,9 +57,6 @@ class Node(QtWidgets.QPushButton):
     def isDepot(self):
         return self.__nodeController.isDepot()
 
-    def ffidle(self):
-        self.__nodeController.ffidle()
-
     def setStyle(self, style) -> None:
         return self.__nodeController.setStyle(style)
 
@@ -76,9 +73,6 @@ class Node(QtWidgets.QPushButton):
 
     def isProtected(self):
         return self.__nodeController.isProtected()
-
-    def isIdle(self):
-        return self.__nodeController.idle
 
     def getNeighbors(self):
         return self.__nodeController.getNeighborButton()

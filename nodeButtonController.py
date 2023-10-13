@@ -8,6 +8,7 @@ class NodeController():
     def __init__(self, i, pos: QtCore.QRect, value, burnTime, quantity):
         self.__pos = pos
         #variables
+        
         self.__no = i
         self.__initValue = value
         self.__value = value
@@ -18,7 +19,6 @@ class NodeController():
         self.__burned = False
         self.__protected = False
         self.__depot = False
-        #self.idle = False
         self.__adjArc : dict = []
         self.__status = "Normal"
         self.__style = ""
@@ -43,7 +43,6 @@ class NodeController():
 
     def defend(self):
         self.__protected = True
-        #self.idle = False
 
     def depotSetting(self):
         self.__protected = True
@@ -61,10 +60,6 @@ class NodeController():
 
     def isDepot(self):
         return self.__depot
-
-    #def ffidle(self):
-        #self.idle = True
-        #self.__protected = False
 
     def fireProgressing(self):
         self.__fireProgress+=1
@@ -90,9 +85,6 @@ class NodeController():
 
     def isProtected(self):
         return self.__protected
-
-    '''def isIdle(self):
-        return self.idle'''
 
     def getNeighbors(self):
         return [arc["node"] for arc in self.__adjArc]
@@ -125,8 +117,6 @@ class NodeController():
         return ratio if ratio >= 0 else 0
 
     def updateStatus(self):
-        # if (self.idle == True):
-        #     self.__status = "FF Idle"
         if(self.__protected == True and self.__ffProgress > 0):
             self.__status = "Protected"
         elif (self.__protected == True and self.__ffProgress <= 0):

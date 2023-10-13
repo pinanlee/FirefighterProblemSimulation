@@ -15,6 +15,7 @@ if __name__ == '__main__':
     app.setStyleSheet(style_str)
     window = titleScreen()
     window.show()
+    
     sys.exit(app.exec_())
 
 
