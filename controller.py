@@ -16,7 +16,7 @@ from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor, QIcon
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor, QIcon, QBrush, QPolygon
 from PyQt5 import uic
 import pandas as pd
 import numpy as np
@@ -50,7 +50,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     FFInfoDict = []
     totalValue = 0
     availFF = 0
-    screenshot_range = (290, -10, 1900, 751)
+    screenshot_range = (290, 60, 1900, 751)
     gameTerminated = False
     model_dir = "./network/testModel1/"
 
@@ -62,11 +62,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             uic.loadUi("UIv4.ui",self)
         elif mode == 2:
             uic.loadUi("case1.ui",self)
-            pixmap = QPixmap("image/case1image.jpg")  # 替换为您的图像文件路径
+            pixmap = QPixmap("image/case1.jpg")
             self.label_background.setPixmap(pixmap)
-
-            self.backgroundLabel_2
-
         if os.path.exists("FFInfo.json"):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
@@ -97,9 +94,20 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 node = Node(self.gamewidget, i)
                 node.raise_()
                 if self.mode == 2:
-                    if i.getNum() == 2:
-                        image1 = QIcon("image/tent.png")
-                        node.setIcon(image1)
+                    # node.setFlat(True)
+                    # tentList = [1,2,4,6,8,9,10,15,17,18,23]
+                    # forestList = [3,5,7,11,12,13,14,16,19,20,21,22]
+                    # if i.getNum() in tentList:
+                    #     node.setFixedSize(60,50)
+                    #     image1 = QIcon("image/tent.png")
+                    #     node.setIcon(image1)
+                    #     node.setIconSize(QtCore.QSize(50, 50))
+                    # elif i.getNum() in forestList:
+                    #     node.setFixedSize(75,50)
+                    #     image = QIcon("image/tree.png")
+                    #     node.setIcon(image)
+                    #     node.setIconSize(QtCore.QSize(60, 50))
+                    node.setFlat(False)
                 node.clicked.connect(self.choose)
                 node.showSignal.connect(self.InfoShow)
                 self.nodeList.append(node)
@@ -112,7 +120,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
         def initUI(): # UI設定(可略)
-            self.setStyleSheet("background-color: rgb(100, 100, 100);")
+            if self.mode == 1:
+                self.setStyleSheet("background-color: rgb(100, 100, 100);")
             self.focusIndex = len(self.nodeList) - 1
             self.button_menu.clicked.connect(self.backMenu)
             opacity_effect = QGraphicsOpacityEffect()
@@ -713,7 +722,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     if self.mode == 1:
                         qpainter.drawLine(QPointF(i.x() + self.gamewidget.x() + i.width()/2, i.y() + 5/2*i.height()), QPointF(i.x() + self.gamewidget.x() + i.width()/2 + tempXpercent, i.y() + 5/2*i.height() + tempYpercent))
                     elif self.mode == 2:
-                        qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 5/2*i.height()), QPointF(i.x()  + i.width()/2 + tempXpercent, i.y() + 5/2*i.height() + tempYpercent))
+                        qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x()  + i.width()/2 + tempXpercent, i.y() + 3/2*i.height() + tempYpercent))
+                        current_x = int(i.x() + tempXpercent - 4*i.width()/2)
+                        current_y = int(i.y() + tempYpercent - 3*i.height()/2)
+                        qpainter.setPen(Qt.NoPen)
+                        qpainter.drawEllipse(current_x, current_y, 150, 150)
+                        brush = QBrush(QColor(100, 0, 0, 2))
+                        qpainter.setBrush(brush)
+                        qpainter.drawEllipse(current_x, current_y, 150, 150)
 
         for i in self.firefighterList:
             if(i.destination() != None):
@@ -724,7 +740,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     if self.mode == 1:
                         qpainter.drawLine(QPointF(i.curPos().x() + self.gamewidget.x() + i.curPos().width()/2, i.curPos().y() + 5/2*i.curPos().height()), QPointF(i.curPos().x() + self.gamewidget.x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 5/2*i.curPos().height()+tempYpercent))
                     elif self.mode == 2:
-                        qpainter.drawLine(QPointF(i.curPos().x()+ i.curPos().width()/2, i.curPos().y() + 5/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 5/2*i.curPos().height()+tempYpercent))
+                        qpainter.drawLine(QPointF(i.curPos().x()+ i.curPos().width()/2, i.curPos().y() + 3/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 3/2*i.curPos().height()+tempYpercent))
 
         self.update()
         qpainter.end()

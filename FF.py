@@ -26,6 +26,7 @@ class FireFighter(QLabel):
         self.__pathProgress = 0
         self.__status = "Not Ready"
         #UI設定
+        self.setStyleSheet("border: none; background: transparent;")
         self.setPixmap(QPixmap("./image/firefighter.png"))
         self.pixmaploc = "./image/firefighter.png"
         self.curPos().defend()
@@ -180,8 +181,6 @@ class FireFighter(QLabel):
             elif new_y <= self.y()-110:
                 self.arrowdirection = 1
             self.arrowLabel.move(current_pos.x(), new_y)
-
-
         self.arrowLabel = QLabel(self.__widget)
         if(self.__num == 1):
             arrow = QPixmap("image/arrow_redr.png")
@@ -196,6 +195,7 @@ class FireFighter(QLabel):
 
         if(not self.isTraveling() or not self.isProcess()):
             for i in (self.curPos().getNeighbors()):
+                i.setFlat(False)
                 if (i.isBurned() == False and i.isProtected() == False):
                     if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["travel-time"])):
                         i.timer_nodeOpacity.start(100)
