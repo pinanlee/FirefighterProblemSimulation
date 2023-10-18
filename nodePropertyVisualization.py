@@ -11,17 +11,22 @@ class nodePropertyVis(QLabel):
         self.__valueAmount = controller.getGrassAmount()
         self.showValue()
         self.__pix = QPixmap(self.size())
+        font = QtGui.QFont()
+        font.setFamily("Arial Rounded MT Bold")
+        font.setPointSize(10)
+        self.setFont(font)
         self.hide()
     
-    def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
-        painter = QtGui.QPainter(self.__pix)
-        painter.setBrush(QColor(255,255,255))
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        painter.drawEllipse(self.rect())
-        painter.end()
+    # def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
+    #     painter = QtGui.QPainter(self.__pix)
+    #     painter.setBrush(QColor(255,255,255))
+    #     painter.setRenderHint(QtGui.QPainter.Antialiasing)
+    #     painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceOver)
+    #     painter.drawEllipse(self.rect())
+    #     painter.end()
     
     def showValue(self):
-        self.__valueAmount = self.__nodeController.getValue() *3
+        self.__valueAmount = self.__nodeController.getValue() *5
         self.setText("")
         self.setGeometry(self.__nodeController.x()-int((self.__valueAmount - self.__nodeController.width())/2 ), self.__nodeController.y()-int((self.__valueAmount - self.__nodeController.height())/2), self.__valueAmount, self.__valueAmount)
         self.setStyleSheet("background-color: yellow; border: 3px solid blue;")

@@ -67,35 +67,10 @@
      <number>0</number>
     </property>
    </widget>
-   <widget class="QLabel" name="consoleLabel">
-    <property name="geometry">
-     <rect>
-      <x>1280</x>
-      <y>760</y>
-      <width>631</width>
-      <height>131</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border: 2px solid blue;</string>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>30</x>
       <y>750</y>
       <width>261</width>
       <height>61</height>
@@ -114,7 +89,7 @@
    <widget class="QLabel" name="selectLabel">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>30</x>
       <y>800</y>
       <width>121</width>
       <height>81</height>
@@ -130,7 +105,7 @@
       <x>20</x>
       <y>130</y>
       <width>251</width>
-      <height>761</height>
+      <height>591</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout"/>
@@ -138,7 +113,7 @@
    <widget class="QPushButton" name="defendButton">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>360</x>
       <y>790</y>
       <width>130</width>
       <height>30</height>
@@ -157,7 +132,7 @@
    <widget class="QLabel" name="backgroundLabel_2">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>20</x>
       <y>760</y>
       <width>921</width>
       <height>131</height>
@@ -201,7 +176,7 @@
    <widget class="QLabel" name="label_selectedFF">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>150</x>
       <y>810</y>
       <width>201</width>
       <height>51</height>
@@ -230,9 +205,9 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>360</x>
       <y>810</y>
-      <width>551</width>
+      <width>491</width>
       <height>80</height>
      </rect>
     </property>
@@ -306,7 +281,7 @@
    <widget class="QLabel" name="label_selectedFF">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>240</x>
       <y>750</y>
       <width>261</width>
       <height>61</height>
@@ -390,7 +365,7 @@
        <x>760</x>
        <y>680</y>
        <width>841</width>
-       <height>41</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="font">
@@ -510,6 +485,28 @@
       <string>TextLabel</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>1010</x>
+       <y>720</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial Rounded MT Bold</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Live Stream</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="button_menu">
     <property name="geometry">
@@ -524,11 +521,89 @@
      <string>menu</string>
     </property>
    </widget>
+   <widget class="QListWidget" name="listWidget">
+    <property name="geometry">
+     <rect>
+      <x>1320</x>
+      <y>760</y>
+      <width>581</width>
+      <height>131</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="consoleLabel">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>760</y>
+      <width>321</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid blue;</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>740</y>
+      <width>151</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Control Panel</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>960</x>
+      <y>740</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Information Window</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
    <zorder>label_selectedFF</zorder>
    <zorder>backgroundLabel_2</zorder>
    <zorder>descriptionLabel</zorder>
    <zorder>networkLabel</zorder>
-   <zorder>consoleLabel</zorder>
    <zorder>label_2</zorder>
    <zorder>selectLabel</zorder>
    <zorder>verticalLayoutWidget</zorder>
@@ -540,6 +615,10 @@
    <zorder>label_6</zorder>
    <zorder>gamewidget</zorder>
    <zorder>button_menu</zorder>
+   <zorder>listWidget</zorder>
+   <zorder>consoleLabel</zorder>
+   <zorder>label_7</zorder>
+   <zorder>label_8</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -547,7 +626,7 @@
      <x>0</x>
      <y>0</y>
      <width>1923</width>
-     <height>25</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="sizePolicy">
