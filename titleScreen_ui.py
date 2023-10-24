@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\Users\Yung-li\Desktop\ff\new input format\titleScreen.ui'
+# Form implementation generated from reading ui file 'c:\Users\Yung-li\Desktop\ff\final version\titleScreen.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -96,8 +96,26 @@ class Ui_MainWindow(object):
         self.page_3 = QtWidgets.QWidget()
         self.page_3.setObjectName("page_3")
         self.button_case1 = QtWidgets.QPushButton(self.page_3)
-        self.button_case1.setGeometry(QtCore.QRect(80, 80, 141, 161))
+        self.button_case1.setGeometry(QtCore.QRect(410, 320, 141, 41))
         self.button_case1.setObjectName("button_case1")
+        self.label_casename = QtWidgets.QLabel(self.page_3)
+        self.label_casename.setGeometry(QtCore.QRect(10, 10, 351, 61))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(24)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_casename.setFont(font)
+        self.label_casename.setObjectName("label_casename")
+        self.label_3 = QtWidgets.QLabel(self.page_3)
+        self.label_3.setGeometry(QtCore.QRect(20, 100, 531, 111))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_3.setFont(font)
+        self.label_3.setObjectName("label_3")
         self.stackedWidget.addWidget(self.page_3)
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -112,6 +130,10 @@ class Ui_MainWindow(object):
         self.startButton.setText(_translate("MainWindow", "Random Graph Mode"))
         self.button_tutorial.setText(_translate("MainWindow", "Tutorial"))
         self.button_home.setText(_translate("MainWindow", "Introduction"))
-        self.lable_pagetitle.setText(_translate("MainWindow", "FireFighter Simulatior"))
+        self.lable_pagetitle.setText(_translate("MainWindow", "FireFighter Simulator"))
         self.label_2.setText(_translate("MainWindow", "TextLabel"))
         self.button_case1.setText(_translate("MainWindow", "case1"))
+        self.label_casename.setText(_translate("MainWindow", "2021玉山森林大火"))
+        self.label_3.setText(_translate("MainWindow", "2021年5月15日，森林火勢延燒達12天，延燒面積達79.7公頃，森林區被害全損面積達22.0877公頃\n"
+"，造成救災人事、設備支出、林相改良費用、林木損失以\n"
+"及生態系服務價值損失總計新台幣2億2800多萬元。"))

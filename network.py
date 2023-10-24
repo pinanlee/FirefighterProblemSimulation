@@ -43,10 +43,11 @@ class Network:
     def __createNode(self,posFile, depot):
         df = pd.read_excel(posFile, sheet_name=None)
         for index, i in enumerate(df["coordinates"].iloc):
-            nodePos = QtCore.QRect(i["x"], i["y"], 30, 25)
+            nodePos = QtCore.QRect(i["x"], int(i["y"]/2), 30, 25)
             nodeButton = NodeController(index + 1, nodePos, i["value"], i["burning time"],  i["quantity"])
             self.nodeList.append(nodeButton)
         if(depot=="N_D"):
             self.nodeList[int(df["ff_source"].iloc[0][depot])-1].depotSetting()
         else:
             self.nodeList[int(df["fire_source"].iloc[0][depot])-1].depotSetting()
+        DataBase.T =  df["T"].iloc[0]["T"]

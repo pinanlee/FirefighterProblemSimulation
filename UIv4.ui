@@ -110,25 +110,6 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout"/>
    </widget>
-   <widget class="QPushButton" name="defendButton">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>790</y>
-      <width>130</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Defend</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="backgroundLabel_2">
     <property name="geometry">
      <rect>
@@ -281,7 +262,7 @@
    <widget class="QLabel" name="label_selectedFF">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>170</x>
       <y>750</y>
       <width>261</width>
       <height>61</height>
@@ -600,6 +581,43 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>750</y>
+      <width>381</width>
+      <height>78</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;hold Z: check node value&lt;/p&gt;&lt;p&gt;hold X: check firefighter's process time&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="defendButton">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>780</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Rounded MT Bold</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Defend</string>
+    </property>
+   </widget>
    <zorder>label_selectedFF</zorder>
    <zorder>backgroundLabel_2</zorder>
    <zorder>descriptionLabel</zorder>
@@ -607,7 +625,6 @@
    <zorder>label_2</zorder>
    <zorder>selectLabel</zorder>
    <zorder>verticalLayoutWidget</zorder>
-   <zorder>defendButton</zorder>
    <zorder>label_5</zorder>
    <zorder>lcd_time</zorder>
    <zorder>horizontalLayoutWidget</zorder>
@@ -619,6 +636,8 @@
    <zorder>consoleLabel</zorder>
    <zorder>label_7</zorder>
    <zorder>label_8</zorder>
+   <zorder>label_10</zorder>
+   <zorder>defendButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

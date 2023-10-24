@@ -59,7 +59,7 @@ class resultsWindow(QtWidgets.QMainWindow):
             self.setCurrentTime()
 
         self.timer_animation = QTimer()
-        self.timer_animation.setInterval(500)
+        self.timer_animation.setInterval(300)
         self.timer_animation.timeout.connect(animation)
         self.timer_animation.start()
 

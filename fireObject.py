@@ -32,8 +32,8 @@ class Fire(QObject):
         self.fireSignal.emit("burn", 0, self.__firePos.getNum())
 
     def fire_spread(self): #火焰傳遞邏輯
-        if(self.__finishSpread):
-            return
+        # if(self.__finishSpread):
+        #     return
         if(self.__finishBurn):
             all_arc_burned = True
             for arc in self.__arcs:

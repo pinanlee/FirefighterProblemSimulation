@@ -151,7 +151,7 @@
          </font>
         </property>
         <property name="text">
-         <string>FireFighter Simulatior</string>
+         <string>FireFighter Simulator</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -205,14 +205,58 @@
       <widget class="QPushButton" name="button_case1">
        <property name="geometry">
         <rect>
-         <x>80</x>
-         <y>80</y>
+         <x>410</x>
+         <y>320</y>
          <width>141</width>
-         <height>161</height>
+         <height>41</height>
         </rect>
        </property>
        <property name="text">
         <string>case1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_casename">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>351</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Segoe UI</family>
+         <pointsize>24</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>2021玉山森林大火</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>100</y>
+         <width>531</width>
+         <height>111</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Segoe UI</family>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>2021年5月15日，森林火勢延燒達12天，延燒面積達79.7公頃，森林區被害全損面積達22.0877公頃
+，造成救災人事、設備支出、林相改良費用、林木損失以
+及生態系服務價值損失總計新台幣2億2800多萬元。</string>
        </property>
       </widget>
      </widget>

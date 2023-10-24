@@ -26,6 +26,7 @@ class FireFighter(QLabel):
         self.__pathProgress = 0
         self.__status = "Not Ready"
         #UI設定
+        self.setStyleSheet("border: none; background: transparent;")
         self.setPixmap(QPixmap("./image/firefighter.png"))
         self.pixmaploc = "./image/firefighter.png"
         self.curPos().defend()
@@ -104,9 +105,9 @@ class FireFighter(QLabel):
             text = ""
             if(self.isProcess()):
                 text = f"At time {timer}, firefighter {self.__num} had finished process on node {self.curPos().getNum()}"
-            if(self.isTraveling()):
+            elif(self.isTraveling()):
                 text = f"At time {timer}, firefighter {self.__num} had traveled from node {self.curPos().getNum()} to node {self.__destNode.getNum()}"
-            if(self.isIdle()):
+            else:
                 text = f"At time {timer}, firefighter {self.__num} had idled on node {self.curPos().getNum()} for {self.__arrivalTime} time step(s)"
             self.__path.append(self.__destNode)
             self.newPos()
@@ -189,8 +190,6 @@ class FireFighter(QLabel):
             elif new_y <= self.y()-110:
                 self.arrowdirection = 1
             self.arrowLabel.move(current_pos.x(), new_y)
-
-
         self.arrowLabel = QLabel(self.__widget)
         if(self.__num == 1):
             arrow = QPixmap("image/arrow_redr.png")
@@ -211,6 +210,9 @@ class FireFighter(QLabel):
             for i in accessibleNeighbors:
                 if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["travel-time"][f"{self.__num}"])):
                     i.timer_nodeOpacity.start(100)                
+            for i in (self.curPos().getNeighbors()):
+                i.setFlat(False)
+
             if(not self.curPos().isProtected()):
                 self.curPos().timer_nodeOpacity.start(100)
 

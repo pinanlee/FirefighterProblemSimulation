@@ -48,6 +48,8 @@ class Node(QtWidgets.QPushButton):
         #onFire setting
         self.__nodeController.onFire()
         self.setStyleSheet(self.__nodeController.getStyle())
+        self.setFlat(False)
+
 
     def defend(self):
         self.__nodeController.defend()

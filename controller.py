@@ -16,7 +16,7 @@ from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor, QIcon
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor, QIcon, QBrush, QPolygon
 from PyQt5 import uic
 from dataBase import DataBase
 from results import resultsWindow
@@ -47,9 +47,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     FFInfoDict = []
     totalValue = 0
     availFF = 0
-    screenshot_range = (290, -10, 1900, 751)
+    screenshot_range = (290, 60, 1900, 751)
     gameTerminated = False
-    model_dir = "./network/testModel/"
+    model_dir = "./network/FF1test/"
+    mode=1
 
     def __init__(self,mode):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
@@ -59,11 +60,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             uic.loadUi("UIv4.ui",self)
         elif mode == 2:
             uic.loadUi("case1.ui",self)
-            pixmap = QPixmap("image/case1image.jpg")  # 替换为您的图像文件路径
+            pixmap = QPixmap("image/case1.jpg")
             self.label_background.setPixmap(pixmap)
-
-            self.backgroundLabel_2
-
         if os.path.exists("FFInfo.json"):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
@@ -84,21 +82,35 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def setup_control(self):
         def initNetwork(): #建立network class和node
             if self.mode == 1:
-                self.FFnetwork =Network("./network/FF2test/FFP_n20_no1.xlsx", depot="N_D")
-                self.fireNetwork = Network("./network/FF2test/FFP_n20_no1.xlsx", depot="N_F")
+                self.FFnetwork =Network("./network/FFP_n20_no4.xlsx", depot="N_D")
+                self.fireNetwork = Network("./network/FFP_n20_no4.xlsx", depot="N_F")
 
                 #self.FFnetwork = Network(f"{self.model_dir}G30_firefighter_route.xlsx", f"{self.model_dir}G30_nodeInformation.xlsx", "N_D")
                 #self.fireNetwork = Network(f"{self.model_dir}G30_fire_route.xlsx", f"{self.model_dir}G30_nodeInformation.xlsx", "N_F")
             elif self.mode == 2:
-                self.FFnetwork = Network("./network/case1/case1_firefighter_route.xlsx", "network/case1/case1_nodeInformation.xlsx", "N_D")
-                self.fireNetwork = Network("./network/case1/case1_fire_route.xlsx", "network/case1/case1_nodeInformation.xlsx", "N_F")
+                # self.FFnetwork = Network("./network/case1/case1_firefighter_route.xlsx", "network/case1/case1_nodeInformation.xlsx", "N_D")
+                # self.fireNetwork = Network("./network/case1/case1_fire_route.xlsx", "network/case1/case1_nodeInformation.xlsx", "N_F")
+
+                self.FFnetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_D")
+                self.fireNetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_F")
 
             for i in self.FFnetwork.nodeList:
                 node = Node(self.gamewidget, i)
                 if self.mode == 2:
-                    if i.getNum() == 2:
-                        image1 = QIcon("image/tent.png")
-                        node.setIcon(image1)
+                    # node.setFlat(True)
+                    # tentList = [1,2,4,6,8,9,10,15,17,18,23]
+                    # forestList = [3,5,7,11,12,13,14,16,19,20,21,22]
+                    # if i.getNum() in tentList:
+                    #     node.setFixedSize(60,50)
+                    #     image1 = QIcon("image/tent.png")
+                    #     node.setIcon(image1)
+                    #     node.setIconSize(QtCore.QSize(50, 50))
+                    # elif i.getNum() in forestList:
+                    #     node.setFixedSize(75,50)
+                    #     image = QIcon("image/tree.png")
+                    #     node.setIcon(image)
+                    #     node.setIconSize(QtCore.QSize(60, 50))
+                    node.setFlat(False)
                 node.clicked.connect(self.choose)
                 node.showSignal.connect(self.InfoShow)
                 self.nodeList.append(node)
@@ -111,7 +123,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
 
         def initUI(): # UI設定(可略)
-            self.setStyleSheet("background-color: rgb(100, 100, 100);")
+            if self.mode == 1:
+                self.setStyleSheet("background-color: rgb(100, 100, 100);")
             self.focusIndex = len(self.nodeList) - 1
             self.button_menu.clicked.connect(self.backMenu)
             opacity_effect = QGraphicsOpacityEffect()
@@ -283,10 +296,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def assignIdle(self):
         if(self.firefighterList[self.FFindex].isSelected()):
             return "this firefighter is busy"
-        self.availFF -= 1
+        
         if(self.firefighterList[self.FFindex].curPos().getFireMinArrivalTime() < self.currentTime + self.spinBox.value()):
             self.hintAnimate("fire will arrive during idle")
             return
+        self.availFF -= 1
         if(not self.modelTest):
             self.hintAnimate("firefighter available: {}".format(self.availFF))
         if(not self.firefighterList[(self.FFindex + 1) % self.firefighterNum].isSelected()):
@@ -369,16 +383,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def networkUpdateF(self,no): #當fire network有新的節點燒起來時，更新ff network並增加新的"火"物件
         self.nodeList[no - 1].onFire()
         self.fire.append(Fire(self.fireNetwork, no, self.currentTime))
-        self.listWidget.addItem(f"At time {self.currentTime}, node {no} had burned")
-        self.listWidget.scrollToItem(self.listWidget.item(self.listWidget.count() - 1))
+        if self.mode == 1:
+            self.listWidget.addItem(f"At time {self.currentTime}, node {no} had burned")
+            self.listWidget.scrollToItem(self.listWidget.item(self.listWidget.count() - 1))
         self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
 
     def fireVisualize(self, opacity, no): #當fire network的節點正在燃燒時，更新ui上的opacity
         self.fireNetwork.nodeList[no-1].updateStatus()
         self.nodeList[no-1].setStyle(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
+        if(opacity==1):
+            self.nodeList[no - 1].setStyle(f'background-color: rgba(139, 0, 0, {opacity}); color: white;')
         self.nodeList[no-1].setStyleSheet(self.nodeList[no-1].getStyle())
         self.nodeList[no-1].updateStatus()
-
         self.totalValue = self.fireNetwork.getTotalValue()
         self.progressBar.setValue(self.totalValue)
 
@@ -628,8 +644,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         def timeSkip():
             screenshot = ImageGrab.grab(self.screenshot_range)
             screenshot.save(f"image/timescreenshot/time00{self.currentTime:03d}.png")
-            self.gameTerminated = all(i.isComplete() for i in self.fire)
-            if self.gameTerminated:
+            #self.gameTerminated = all(i.isComplete() for i in self.fire)
+            #if self.gameTerminated:
+            print(DataBase.T)
+            if self.currentTime >= DataBase.T:
                 self.finish()
 
             self.dataRecord()
@@ -649,8 +667,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     screenshot = ImageGrab.grab(self.screenshot_range)
                     screenshot.save(f"image/timescreenshot/time00{self.currentTime:03d}.png")
                     self.timer.stop()
-                    self.listWidget.addItem(text)
-                    self.listWidget.scrollToItem(self.listWidget.item(self.listWidget.count() - 1))
+                    if self.mode == 1:
+                        self.listWidget.addItem(text)
+                        self.listWidget.scrollToItem(self.listWidget.item(self.listWidget.count() - 1))
                     # self.FFindex = i.getNum() - 2
                     # self.selectFireFighter()
                     self.howManyAvail()
@@ -746,7 +765,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     if self.mode == 1:
                         qpainter.drawLine(QPointF(i.x() + self.gamewidget.x() + i.width()/2, i.y() + 5/2*i.height()), QPointF(i.x() + self.gamewidget.x() + i.width()/2 + tempXpercent, i.y() + 5/2*i.height() + tempYpercent))
                     elif self.mode == 2:
-                        qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 5/2*i.height()), QPointF(i.x()  + i.width()/2 + tempXpercent, i.y() + 5/2*i.height() + tempYpercent))
+                        qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x()  + i.width()/2 + tempXpercent, i.y() + 3/2*i.height() + tempYpercent))
+                        current_x = int(i.x() + tempXpercent - 4*i.width()/2)
+                        current_y = int(i.y() + tempYpercent - 3*i.height()/2)
+                        qpainter.setPen(Qt.NoPen)
+                        qpainter.drawEllipse(current_x, current_y, 150, 150)
+                        brush = QBrush(QColor(100, 0, 0, 2))
+                        qpainter.setBrush(brush)
+                        qpainter.drawEllipse(current_x, current_y, 150, 150)
 
         for i in self.firefighterList:
             if(i.destination() != None):
@@ -757,7 +783,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     if self.mode == 1:
                         qpainter.drawLine(QPointF(i.curPos().x() + self.gamewidget.x() + i.curPos().width()/2, i.curPos().y() + 5/2*i.curPos().height()), QPointF(i.curPos().x() + self.gamewidget.x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 5/2*i.curPos().height()+tempYpercent))
                     elif self.mode == 2:
-                        qpainter.drawLine(QPointF(i.curPos().x()+ i.curPos().width()/2, i.curPos().y() + 5/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 5/2*i.curPos().height()+tempYpercent))
+                        qpainter.drawLine(QPointF(i.curPos().x()+ i.curPos().width()/2, i.curPos().y() + 3/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 3/2*i.curPos().height()+tempYpercent))
 
         self.update()
         qpainter.end()
@@ -970,11 +996,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     "}"
                 )
     def backMenu(self):
-        from titleScreen import titleScreen
-        self.menu = titleScreen()
-        self.menu.show()
-        self.close()
-        self.deleteLater()
+        import os
+        p = sys.executable
+        os.execl(p, p, *sys.argv)
 
 
 
