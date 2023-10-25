@@ -5,13 +5,10 @@ from nodeButtonController import NodeController
 from dataBase import DataBase
 
 class Network:
-    def __init__(self, adjFile, posFile=None, depot=None) -> None:
+    def __init__(self, adjFile, depot=None) -> None:
         self.nodeList : list[NodeController] = []
         self.ffNum = 0
-        if(posFile==None):
-            self.__createNode(adjFile, depot)
-        else:
-            self.__createNode(posFile, depot)
+        self.__createNode(adjFile, depot)
         self.__connectNode(adjFile, depot)
 
 
