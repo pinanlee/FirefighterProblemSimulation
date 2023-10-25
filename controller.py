@@ -3,13 +3,11 @@
 import json
 import os
 from functools import partial
-
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF,pyqtSignal
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QVBoxLayout, QLabel, QSizePolicy, QPushButton, QWidget
 from PyQt5 import QtWidgets, QtCore, QtGui
 import random
 import math
-
 from FFSettingsWindow import FFSettingsWindow
 from FFSettingsWindow import FFnumWindow
 from FF import FireFighter
@@ -60,6 +58,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         global FFNum
         if mode == 1:
             uic.loadUi("UIv4.ui",self)
+            self.inst = Instruction(self.centralWidget())
+            self.inst.intoGame()
         elif mode == 2:
             uic.loadUi("case1.ui",self)
             pixmap = QPixmap("image/case1.jpg")
@@ -70,8 +70,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             FFNum = int(data["FFnumber"])
         #self.db = DataBase()
         #self.nw = InformationWindow(self.db)
-        #self.inst = Instruction(self.centralWidget())
-        #self.inst.intoGame()
+
         self.firefighterNum = FFNum
         self.subwindows = []
         self.setup_control()
@@ -94,20 +93,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 node = Node(self.gamewidget, i)
                 node.raise_()
                 if self.mode == 2:
-                    # node.setFlat(True)
-                    # tentList = [1,2,4,6,8,9,10,15,17,18,23]
-                    # forestList = [3,5,7,11,12,13,14,16,19,20,21,22]
-                    # if i.getNum() in tentList:
-                    #     node.setFixedSize(60,50)
-                    #     image1 = QIcon("image/tent.png")
-                    #     node.setIcon(image1)
-                    #     node.setIconSize(QtCore.QSize(50, 50))
-                    # elif i.getNum() in forestList:
-                    #     node.setFixedSize(75,50)
-                    #     image = QIcon("image/tree.png")
-                    #     node.setIcon(image)
-                    #     node.setIconSize(QtCore.QSize(60, 50))
-                    node.setFlat(False)
+                    node.setFlat(True)
+                    tentList = [1,2,4,6,8,9,10,15,17,18,23]
+                    forestList = [3,5,7,11,12,13,14,16,19,20,21,22]
+                    if i.getNum() in tentList:
+                        node.setFixedSize(60,50)
+                        image1 = QIcon("image/tent.png")
+                        node.setIcon(image1)
+                        node.setIconSize(QtCore.QSize(50, 50))
+                    elif i.getNum() in forestList:
+                        node.setFixedSize(60,50)
+                        image = QIcon("image/tree.png")
+                        node.setIcon(image)
+                        node.setIconSize(QtCore.QSize(60, 50))
                 node.clicked.connect(self.choose)
                 node.showSignal.connect(self.InfoShow)
                 self.nodeList.append(node)
@@ -694,8 +692,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                             QPointF(j.x() + self.gamewidget.x() + j.width() / 2, j.y() + 5 / 2 * j.height()))
                     elif self.mode == 2:
                         qpainter.drawLine(
-                            QPointF(i.x()  + i.width() / 2, i.y() + 3 / 2 * i.height()),
-                            QPointF(j.x()  + j.width() / 2, j.y() + 3 / 2 * j.height()))
+                            QPointF(i.x()  +  2.1 * i.width() / 2, i.y() + 6 / 2 * i.height()),
+                            QPointF(j.x()  +  2.1 * j.width() / 2, j.y() + 6 / 2 * j.height()))
 
             for i in self.nodeList:
                 i.setText(str(i.getFireMinArrivalTime()))
@@ -710,9 +708,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                             QPointF(i.x() + self.gamewidget.x() + i.width() / 2, i.y() + 5 / 2 * i.height()),
                             QPointF(j.x() + self.gamewidget.x() + j.width() / 2, j.y() + 5 / 2 * j.height()))
                     elif self.mode == 2:
+                        qpen = QPen(Qt.black, 6, Qt.SolidLine)
+                        qpainter.setPen(qpen)
                         qpainter.drawLine(
                             QPointF(i.x()  + i.width() / 2, i.y() + 3 / 2 * i.height()),
                             QPointF(j.x()  + j.width() / 2, j.y() + 3 / 2 * j.height()))
+                        if i.getNodePercentage_FF(self.firefighterList[self.FFindex].rate_extinguish)>=0.5 and j.getNodePercentage_FF(self.firefighterList[self.FFindex].rate_extinguish)>=0.5 :
+                            qpen = QPen(Qt.yellow, 6, Qt.SolidLine)
+                            qpainter.setPen(qpen)
+                            qpainter.drawLine(
+                                QPointF(i.x() + i.width() / 2, i.y() + 3 / 2 * i.height()),
+                                QPointF(j.x() + j.width() / 2, j.y() + 3 / 2 * j.height()))
+
         for i in self.fire:
             for j in i.getArcs():
                     tempXpercent = (j["node"].x() + j["node"].width()/2 - i.x() - i.width()/2) * i.getArcPercentage_Fire(j)
@@ -722,7 +729,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     if self.mode == 1:
                         qpainter.drawLine(QPointF(i.x() + self.gamewidget.x() + i.width()/2, i.y() + 5/2*i.height()), QPointF(i.x() + self.gamewidget.x() + i.width()/2 + tempXpercent, i.y() + 5/2*i.height() + tempYpercent))
                     elif self.mode == 2:
-                        qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x()  + i.width()/2 + tempXpercent, i.y() + 3/2*i.height() + tempYpercent))
+                        qpainter.drawLine(QPointF(i.x() + 2.1 * i.width()/2, i.y() + 6/2*i.height()), QPointF(i.x()  + 2.1 * i.width()/2 + tempXpercent, i.y() + 6/2*i.height() + tempYpercent))
                         current_x = int(i.x() + tempXpercent - 4*i.width()/2)
                         current_y = int(i.y() + tempYpercent - 3*i.height()/2)
                         qpainter.setPen(Qt.NoPen)
@@ -730,6 +737,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                         brush = QBrush(QColor(100, 0, 0, 2))
                         qpainter.setBrush(brush)
                         qpainter.drawEllipse(current_x, current_y, 150, 150)
+
 
         for i in self.firefighterList:
             if(i.destination() != None):
