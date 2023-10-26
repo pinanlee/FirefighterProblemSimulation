@@ -66,7 +66,6 @@ class Instruction(QLabel):
             self.index += 1
         self.setPixmap(QPixmap(self.folder_path + self.file_list[self.index]))
 
-
     def prevImg(self):
         self.nextButton.setEnabled(True)
         if(self.index == 0):

@@ -28,6 +28,9 @@ class Node(QtWidgets.QPushButton):
     def enterEvent(self, a0: QtCore.QEvent) -> None:
         self.showSignal.emit(self.getNum())
         self.setCursor(QCursor(Qt.PointingHandCursor))
+    
+    def leaveEvent(self, a0: QtCore.QEvent) -> None:
+        self.showSignal.emit(-1)
 
     def getFireMinArrivalTime(self):
         return self.__nodeController.getFireMinArrivalTime()

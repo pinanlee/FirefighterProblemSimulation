@@ -113,7 +113,7 @@ class NodeController():
         return ratio if ratio >= 0 else 0
     
     def getNodePercentage_FF(self, rate): #獲得消防員在該node的燃燒進度
-        ratio = self.__ffProgress / (self.__grassAmount / rate)
+        ratio = self.__ffProgress / int(self.__grassAmount / rate)
         return ratio if ratio >= 0 else 0
 
     def updateStatus(self):
@@ -128,11 +128,17 @@ class NodeController():
         else:
             self.__status = "Normal"
 
+    def arcAddTime(self, node, no, time):
+        for i in self.__adjArc:
+            if i["node"] == node:
+                i["travel-time"][f"{int(no)}"] = time
 
     #一開始建立網路時使用
-    def connectNode(self, node, length, time):
-        self.__adjArc.append({"node": node, "nodeButton": None, "length": length, "fire-travel": 0, "travel-time": time})
-    
+    def connectNode(self, node, length, no, time):
+        if(no==None):
+            self.__adjArc.append({"node": node, "nodeButton": None, "length": length, "fire-travel": 0, "travel-time": time})
+        else:
+            self.__adjArc.append({"node": node, "nodeButton": None, "length": length, "fire-travel": 0, "travel-time": {f"{int(no)}":time}})
     def connectButton(self, button):
         for i in self.__adjArc:
             if(button.getNum() == i["node"].getNum()):

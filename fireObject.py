@@ -32,8 +32,8 @@ class Fire(QObject):
         self.fireSignal.emit("burn", 0, self.__firePos.getNum())
 
     def fire_spread(self): #火焰傳遞邏輯
-        if(self.__finishSpread):
-            return
+        # if(self.__finishSpread):
+        #     return
         if(self.__finishBurn):
             all_arc_burned = True
             for arc in self.__arcs:
@@ -56,8 +56,8 @@ class Fire(QObject):
         return not (arc["node"].isProtected() or arc["node"].isBurned())
 
     def __fireBurnContinuation(self): #更新該node的grass量
-        self.__firePos.updateValue()
         self.__firePos.fireProgressing()
+        self.__firePos.updateValue()
         self.__finishBurn = (self.__firePos.getFireProgress() == self.__firePos.getBurningTime())
 
     def __fireSpreadContinuation(self, arc): #更新火在arc上的移動情況

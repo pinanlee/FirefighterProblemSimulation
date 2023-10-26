@@ -183,7 +183,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QLabel" name="label_2">
@@ -191,12 +191,14 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>291</width>
+         <width>511</width>
          <height>111</height>
         </rect>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string>Due to global climate change, forest fires are causing severe ecological damage in many areas. Effectively containing the spread of fires has become an important issue that is highly relevant to the “firefighter problem” in operational research and graph theory. The firefighter problem aims to determine the optimal assignment of firefighters to protect the maximum number of nodes from catching fire. However, the traditional firefighter problem overly simplifies assumptions by modeling fire spread speed as constant and mandating that fire spreads across one edge per time unit. It also unrealistically assumes that firefighters can teleport between nodes instantly. In addition, fuel management for wildfire control focuses on managing flammable vegetation in forests and wilderness to reduce fire risk and impact. This study proposes incorporating fuel management data on each node’s value (resource richness), risk, estimated burn time, and bidirectional fire spread speed across edges into the firefighter problem formulation. We also impose more realistic constraints of firefighters traversing edges at a fixed speed and requiring a certain protection time at each node. This yields a practical moving firefighter problem for determining the minimum-loss firefighting strategy.
+In this problem, fire spreads from burned nodes to adjacent unprotected nodes, while firefighters can move from their current node to unburned nodes to protect them before proceeding along edges. 
+</string>
        </property>
       </widget>
      </widget>
@@ -257,6 +259,196 @@
         <string>2021年5月15日，森林火勢延燒達12天，延燒面積達79.7公頃，森林區被害全損面積達22.0877公頃
 ，造成救災人事、設備支出、林相改良費用、林木損失以
 及生態系服務價值損失總計新台幣2億2800多萬元。</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_4">
+      <widget class="QPushButton" name="button_startGame">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>310</y>
+         <width>121</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>GO</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>130</y>
+         <width>251</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>File Information:</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="button_file">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>101</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Select File</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>40</y>
+         <width>151</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Use Default File</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>170</y>
+         <width>141</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Firefighter numbers</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_filename">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>70</y>
+         <width>411</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>101</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>File Name: </string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>220</y>
+         <width>141</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Depot node </string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>270</y>
+         <width>141</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Fire Source</string>
+       </property>
+      </widget>
+      <widget class="QTextBrowser" name="textBrowser_ffn">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>180</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QTextBrowser" name="textBrowser_dn">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>230</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QTextBrowser" name="textBrowser_fs">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>280</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>330</x>
+         <y>170</y>
+         <width>91</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Node numbers</string>
+       </property>
+      </widget>
+      <widget class="QTextBrowser" name="textBrowser_nn">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>180</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
        </property>
       </widget>
      </widget>
