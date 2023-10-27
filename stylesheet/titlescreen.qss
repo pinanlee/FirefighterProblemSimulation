@@ -1,5 +1,6 @@
 #MainWindow {
-    background-color: #fff;
+    background-color: #f4f6f9;
+    border-bottom: 10px solid #f4f6f9;
 }
 
 #widget_sidebar {
@@ -22,3 +23,35 @@
     font-weight: bold;
 }
 
+#widget_downbar {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+}
+#widget_leftbar {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+}
+
+#widget_downmiddle{
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+}
+
+#widget_downright {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+}
+
+#widget_progress{
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+}
+
+#gamewidget {
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+}

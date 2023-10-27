@@ -4,19 +4,18 @@ import json
 import os
 from functools import partial
 import pandas as pd
-from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF,pyqtSignal
-from PyQt5.QtWidgets import QGraphicsOpacityEffect, QVBoxLayout, QLabel, QSizePolicy, QPushButton, QWidget
+from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
+from PyQt5.QtWidgets import QGraphicsOpacityEffect, QLabel, QSizePolicy, QPushButton, QWidget
 from PyQt5 import QtWidgets, QtCore, QtGui
 import random
 import math
-
 from FFSettingsWindow import FFSettingsWindow
 from FFSettingsWindow import FFnumWindow
 from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QPalette, QColor, QIcon, QBrush, QPolygon
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QColor, QIcon, QBrush
 from PyQt5 import uic
 from dataBase import DataBase
 from results import resultsWindow
@@ -58,6 +57,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         global FFNum
         if mode == 1:
             uic.loadUi("UIv4.ui",self)
+            self.inst = Instruction(self.centralWidget())
+            self.inst.intoGame()
         elif mode == 2:
             uic.loadUi("case1.ui",self)
             pixmap = QPixmap("image/case1.jpg")
@@ -68,10 +69,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             FFNum = int(data["FFnumber"])
         #self.db = DataBase()
         #self.nw = InformationWindow(self.db)
-        #self.inst = Instruction(self.centralWidget())
-        #self.inst.intoGame()
         self.firefighterNum = FFNum
         self.subwindows = []
+        if os.path.exists("filename.json"):
+            with open("filename.json", 'r') as file:
+                data = json.load(file)
+            self.model_dir = data["filename"][:-5]
+            print(self.model_dir)
         self.setup_control()
         self.window_FFnum = FFnumWindow()
         self.window_FFnum.window_FF.updateFFnumSignal.connect(self.newFFnum)
@@ -84,6 +88,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             if self.mode == 1:
                 self.FFnetwork =Network(f"{self.model_dir}.xlsx", depot="N_D")
                 self.fireNetwork = Network(f"{self.model_dir}.xlsx", depot="N_F")
+
             elif self.mode == 2:
                 self.FFnetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_D")
                 self.fireNetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_F")
@@ -91,20 +96,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             for i in self.FFnetwork.nodeList:
                 node = Node(self.gamewidget, i)
                 if self.mode == 2:
-                    # node.setFlat(True)
-                    # tentList = [1,2,4,6,8,9,10,15,17,18,23]
-                    # forestList = [3,5,7,11,12,13,14,16,19,20,21,22]
-                    # if i.getNum() in tentList:
-                    #     node.setFixedSize(60,50)
-                    #     image1 = QIcon("image/tent.png")
-                    #     node.setIcon(image1)
-                    #     node.setIconSize(QtCore.QSize(50, 50))
-                    # elif i.getNum() in forestList:
-                    #     node.setFixedSize(75,50)
-                    #     image = QIcon("image/tree.png")
-                    #     node.setIcon(image)
-                    #     node.setIconSize(QtCore.QSize(60, 50))
-                    node.setFlat(False)
+                    node.setFlat(True)
+                    tentList = [1,2,4,6,8,9,10,15,17,18,23]
+                    forestList = [3,5,7,11,12,13,14,16,19,20,21,22]
+                    if i.getNum() in tentList:
+                        node.setFixedSize(60,50)
+                        image1 = QIcon("image/tent.png")
+                        node.setIcon(image1)
+                        node.setIconSize(QtCore.QSize(50, 50))
+                    elif i.getNum() in forestList:
+                        node.setFixedSize(60,50)
+                        image = QIcon("image/tree.png")
+                        node.setIcon(image)
+                        node.setIconSize(QtCore.QSize(60, 50))
                 node.clicked.connect(self.choose)
                 node.showSignal.connect(self.InfoShow)
                 self.nodeList.append(node)
@@ -140,6 +144,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.defendButton.clicked.connect(self.choose)
             self.checkBox.toggled.connect(self.idleLock)
             self.lcd_time.display(self.currentTime)
+            self.comboBox_network.activated[str].connect(self.comboBoxEvent)
+            if self.mode == 1:
+                self.button_guide.clicked.connect(self.showProblem)
+
         initUI()
 
         def NodeConnection():
@@ -238,7 +246,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if(self.gameTerminated):
             self.modelTime.stop()
             return
-        t=100000
+        (i, j, k, t)=(1,1,1,100000)
         ss=0
         for s in DataBase.K:
             (i1,j1,k1,t1) = (self.temp[s-1][0][0],self.temp[s-1][0][1],self.temp[s-1][0][2],self.temp[s-1][0][3])
@@ -253,13 +261,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         print((i,j,k,t) )
         print(f"t:{t}, cur: {self.currentTime}")
         if t == self.currentTime:
-           
             if i != j: 
                 self.choose()
                 print("消防員 {}在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(k, t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]))
                 self.consoleLabel.setText("在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]))
-            else:          
-                if DataBase.u_bar[f"({i}, {k}, {t})"] == 1:
+            else:       
+                print("u_bar: {}".format(DataBase.u_bar[f"({i}, {k}, {t})"]))   
+                if DataBase.u_bar[f"({i}, {k}, {t})"] > self.epsilon:
                     self.choose()
                     print("消防員 {}在時刻 {} 對node {} 進行保護, processing time: {}".format(k,t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.firefighterList[self.FFindex].rate_extinguish)))
                     self.consoleLabel.setText("在時刻 {} 對node {} 進行保護, processing time: {}".format(t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.firefighterList[self.FFindex].rate_extinguish)))
@@ -367,12 +375,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.timer.stop()
         self.result = resultsWindow(self.nodeList, self.currentTime)
         self.result.show()
-
+        if os.path.exists("filename.json"):
+            os.remove("filename.json")
 
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
         if(a0.key() == Qt.Key_S):
-                self.networkChange()
+            self.networkChange()
         if(a0.key() == Qt.Key_N):
             self.newNetwork()
         if(a0.key() == Qt.Key_Q):
@@ -416,13 +425,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if(self.showFFnetwork and self.showFireNetwork):
             self.showFireNetwork = False
             self.networkLabel.setText("FF network")
+            self.comboBox_network.setCurrentIndex(2)
         elif(self.showFFnetwork and not self.showFireNetwork):
             self.showFFnetwork = False
             self.showFireNetwork = True
             self.networkLabel.setText("Fire network")
+            self.comboBox_network.setCurrentIndex(1)
         elif(not self.showFFnetwork and self.showFireNetwork):
             self.showFFnetwork = True
             self.networkLabel.setText("Hybrid network")
+            self.comboBox_network.setCurrentIndex(0)
 
     def __nextAnim(self):
         self.anim.stop()
@@ -444,7 +456,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.anim.setDuration(250)
             
         initAnim(self)
-        self.anim.finished.connect(self.__nextAnim)
+        # self.anim.finished.connect(self.__nextAnim)
         self.anim.start()
 
 
@@ -507,7 +519,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def printStatus(func):
         def aa(self):
             ff = self.firefighterList[self.FFindex]
-            if(ff.isSelected() and self.sender() != ff.destination()):
+            if(ff.isSelected()):
                 return
             else:
                 text = func(self)
@@ -577,6 +589,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     finishList.append(i.getNum())
                     screenshot = ImageGrab.grab(self.screenshot_range)
                     screenshot.save(f"image/timescreenshot/time00{self.currentTime:03d}.png")
+                    print("timer stop")
                     self.timer.stop()
                     if self.mode == 1:
                         self.listWidget.addItem(text)
@@ -635,8 +648,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                             QPointF(j.x() + self.gamewidget.x() + j.width() / 2, j.y() + 5 / 2 * j.height()))
                     elif self.mode == 2:
                         qpainter.drawLine(
-                            QPointF(i.x()  + i.width() / 2, i.y() + 3 / 2 * i.height()),
-                            QPointF(j.x()  + j.width() / 2, j.y() + 3 / 2 * j.height()))
+                            QPointF(i.x()  +  2.1 * i.width() / 2, i.y() + 6 / 2 * i.height()),
+                            QPointF(j.x()  +  2.1 * j.width() / 2, j.y() + 6 / 2 * j.height()))
 
             for i in self.nodeList:
                 i.setText(str(i.getFireMinArrivalTime()))
@@ -651,9 +664,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                             QPointF(i.x() + self.gamewidget.x() + i.width() / 2, i.y() + 5 / 2 * i.height()),
                             QPointF(j.x() + self.gamewidget.x() + j.width() / 2, j.y() + 5 / 2 * j.height()))
                     elif self.mode == 2:
+                        qpen = QPen(Qt.black, 6, Qt.SolidLine)
+                        qpainter.setPen(qpen)
                         qpainter.drawLine(
                             QPointF(i.x()  + i.width() / 2, i.y() + 3 / 2 * i.height()),
                             QPointF(j.x()  + j.width() / 2, j.y() + 3 / 2 * j.height()))
+                        if i.getNodePercentage_FF(self.firefighterList[self.FFindex].rate_extinguish)>=0.5 and j.getNodePercentage_FF(self.firefighterList[self.FFindex].rate_extinguish)>=0.5 :
+                            qpen = QPen(Qt.yellow, 6, Qt.SolidLine)
+                            qpainter.setPen(qpen)
+                            qpainter.drawLine(
+                                QPointF(i.x() + i.width() / 2, i.y() + 3 / 2 * i.height()),
+                                QPointF(j.x() + j.width() / 2, j.y() + 3 / 2 * j.height()))
+
         for i in self.fire:
             for j in i.getArcs():
                     tempXpercent = (j["node"].x() + j["node"].width()/2 - i.x() - i.width()/2) * i.getArcPercentage_Fire(j)
@@ -663,7 +685,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     if self.mode == 1:
                         qpainter.drawLine(QPointF(i.x() + self.gamewidget.x() + i.width()/2, i.y() + 5/2*i.height()), QPointF(i.x() + self.gamewidget.x() + i.width()/2 + tempXpercent, i.y() + 5/2*i.height() + tempYpercent))
                     elif self.mode == 2:
-                        qpainter.drawLine(QPointF(i.x() + i.width()/2, i.y() + 3/2*i.height()), QPointF(i.x()  + i.width()/2 + tempXpercent, i.y() + 3/2*i.height() + tempYpercent))
+                        qpainter.drawLine(QPointF(i.x() + 2.1 * i.width()/2, i.y() + 6/2*i.height()), QPointF(i.x()  + 2.1 * i.width()/2 + tempXpercent, i.y() + 6/2*i.height() + tempYpercent))
                         current_x = int(i.x() + tempXpercent - 4*i.width()/2)
                         current_y = int(i.y() + tempYpercent - 3*i.height()/2)
                         qpainter.setPen(Qt.NoPen)
@@ -671,6 +693,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                         brush = QBrush(QColor(100, 0, 0, 2))
                         qpainter.setBrush(brush)
                         qpainter.drawEllipse(current_x, current_y, 150, 150)
+
 
         for i in self.firefighterList:
             if(i.destination() != None):
@@ -689,6 +712,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def closeEvent(self, event): #當主視窗關閉時關閉全部視窗
         # if os.path.exists("FFInfo.json"):
         #     os.remove("FFInfo.json")
+        if os.path.exists("filename.json"):
+            os.remove("filename.json")
         for subwindow in self.subwindows:
             subwindow.close()  # Close all open subwindows
         event.accept()
@@ -872,6 +897,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         import os
         p = sys.executable
         os.execl(p, p, *sys.argv)
+
+    def comboBoxEvent(self,text):
+        if(text == "Hybrid network"):
+            self.showFFnetwork = False
+            self.showFireNetwork = True
+        elif(text == "FF network"):
+            self.showFFnetwork = True
+            self.showFireNetwork = True
+        elif(text == "Fire network"):
+            self.showFFnetwork = True
+            self.showFireNetwork = False
+        self.networkChange()
 
 
 

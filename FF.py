@@ -223,8 +223,11 @@ class FireFighter(QLabel):
         self.timer_arrow.stop()
 
         for i in lst:
+            if not i.isBurned:
+                i.setFlat(False)
             i.setStyleSheet(i.getStyle())
             i.timer_nodeOpacity.stop()
+
 
     def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
         for i in self.curPos().getArcs():
