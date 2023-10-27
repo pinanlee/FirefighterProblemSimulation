@@ -40,6 +40,7 @@ class titleScreen(QtWidgets.QMainWindow):
             self.result.show()
             self.close()
 
+
     def buttonClicked(self):
         sender_button = self.sender()
         for i in self.buttonlist:

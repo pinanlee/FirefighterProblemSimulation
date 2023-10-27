@@ -6,9 +6,7 @@ from functools import partial
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QLabel, QSizePolicy, QPushButton, QWidget
 from PyQt5 import QtWidgets, QtCore, QtGui
-import random
 import math
-from FFSettingsWindow import FFSettingsWindow
 from FFSettingsWindow import FFnumWindow
 from FF import FireFighter
 from node import Node 
@@ -47,7 +45,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     availFF = 0
     screenshot_range = (290, 60, 1900, 751)
     gameTerminated = False
-    model_dir = "./network/FF2test/FFP_n20_no1"
+    model_dir = "./network/FF2test/FFP_n20_no1.xlsx"
     mode=1
 
     def __init__(self,mode):
@@ -66,8 +64,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
             FFNum = int(data["FFnumber"])
-        #self.db = DataBase()
-        #self.nw = InformationWindow(self.db)
         self.firefighterNum = FFNum
         self.subwindows = []
         if os.path.exists("filename.json"):
@@ -121,6 +117,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.setStyleSheet("background-color: rgb(100, 100, 100);")
             self.focusIndex = len(self.nodeList) - 1
             self.button_menu.clicked.connect(self.backMenu)
+            self.button_menu.setFlat(True)
             opacity_effect = QGraphicsOpacityEffect()
             opacity_effect.setOpacity(0.7)
             self.descriptionLabel.setGraphicsEffect(opacity_effect)
@@ -144,7 +141,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.comboBox_network.activated[str].connect(self.comboBoxEvent)
             if self.mode == 1:
                 self.button_guide.clicked.connect(self.showProblem)
-
+                self.button_guide.setFlat(True)
         initUI()
 
         def NodeConnection():
@@ -163,7 +160,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
             #初始化消防員
             self.updateMinTime()
-
             depot = next((i for i in self.nodeList if i.isDepot()), None)
             self.firefighterNum=int(self.FFnetwork.ffNum)
             if os.path.exists("FFInfo.json"): #若有自定義的情況
@@ -407,6 +403,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         import os
         p = sys.executable
         os.execl(p, p, *sys.argv)
+
 
     def networkChange(self):
         if(self.showFFnetwork and self.showFireNetwork):
