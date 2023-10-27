@@ -84,7 +84,7 @@ class Fire(QObject):
         self.fireSignal.emit("visual", opacity, self.__firePos.getNum())
 
     def getArcPercentage_Fire(self, arc): #獲得火在arc上的移動進度
-        return arc["fire-travel"]/ arc["travel-time"] if (arc in self.__arcs) else -1
+        return arc["fire-travel"] / arc["travel-time"] if (arc in self.__arcs) else -1
 
     def getArcs(self):
         return self.__arcs

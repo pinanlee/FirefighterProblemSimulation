@@ -3,7 +3,7 @@
 import json
 import os
 from functools import partial
-
+import pandas as pd
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF,pyqtSignal
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QVBoxLayout, QLabel, QSizePolicy, QPushButton, QWidget
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -49,7 +49,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     availFF = 0
     screenshot_range = (290, 60, 1900, 751)
     gameTerminated = False
-    model_dir = "./network/FF2test/FFP_n20_no1"
+    model_dir = "./network/FF2test/FFP_n20_no3"
     mode=1
 
     def __init__(self,mode):
@@ -84,7 +84,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             if self.mode == 1:
                 self.FFnetwork =Network(f"{self.model_dir}.xlsx", depot="N_D")
                 self.fireNetwork = Network(f"{self.model_dir}.xlsx", depot="N_F")
-            
             elif self.mode == 2:
                 self.FFnetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_D")
                 self.fireNetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_F")
@@ -158,9 +157,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.nodeList[fireDepot-1].onFire()
             self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
             #初始化消防員
-            self.updateMinTime()
 
             depot = next((i for i in self.nodeList if i.isDepot()), None)
+            self.networkUpdate(depot.getNum())
             self.firefighterNum=int(self.FFnetwork.ffNum)
             if os.path.exists("FFInfo.json"): #若有自定義的情況
                 with open("FFInfo.json", 'r') as file:
@@ -168,6 +167,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.FFInfoDict = data["FFinfo"]
                 for i in range(self.firefighterNum):
                     ff = FireFighter(self.gamewidget, i+1, depot)
+                    df = pd.read_excel(f"{self.model_dir}.xlsx", sheet_name=None)
+                    ff.rate_extinguish = df["ff_source"]["P"][i]
                     ff.FFSignal.connect(self.ffSignalDetermination)
                     depot.depotSetting()
                     self.firefighterList.append(ff)
@@ -183,6 +184,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             else:
                 for i in range(self.firefighterNum):
                     ff = FireFighter(self.gamewidget, i+1, depot)
+                    df = pd.read_excel(f"{self.model_dir}.xlsx", sheet_name=None)
+                    ff.rate_extinguish = df["ff_source"]["P"][i]
                     ff.FFSignal.connect(self.ffSignalDetermination)
                     depot.depotSetting()
                     self.firefighterList.append(ff)
@@ -192,7 +195,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.totalValue = self.fireNetwork.getTotalValue()
         self.progressBar.setValue(self.totalValue)
         self.selectFireFighter()
-
+        self.selectFireFighter()
         self.generateblockFF_gameWindow()
         self.updateFFStatus()
         
@@ -219,12 +222,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.epsilon = 1e-4
                 self.X = data["x"]
                 import ast
+                self.temp = []
                 for k in DataBase.K:
-                    self.temp = [ast.literal_eval(elem) for elem in self.X if ast.literal_eval(elem)[2] == k]
-        self.ctr = 0
+                    self.temp.append([ast.literal_eval(elem) for elem in self.X if ast.literal_eval(elem)[2] == k])
         self.modelTime = QTimer()
         self.modelTime.timeout.connect(self.modelAuto)
-        self.modelTime.setInterval(300)
+        self.modelTime.setInterval(100)
         self.modelTime.start()
 
     def modelAuto(self):
@@ -235,36 +238,42 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if(self.gameTerminated):
             self.modelTime.stop()
             return
-        if(self.ctr>=len(self.X)):
-                return
-        (i,j,k,t) = (self.temp[self.ctr][0],self.temp[self.ctr][1],self.temp[self.ctr][2],self.temp[self.ctr][3])
-        
-        while(self.X[f"({i}, {j}, {k}, {t})"] < self.epsilon) :
-            self.ctr+=1
-            if(self.ctr>=len(self.X)):
-                return
-            (i,j,k,t) = (self.temp[self.ctr][0],self.temp[self.ctr][1],self.temp[self.ctr][2],self.temp[self.ctr][3])
-
+        t=100000
+        ss=0
+        for s in DataBase.K:
+            (i1,j1,k1,t1) = (self.temp[s-1][0][0],self.temp[s-1][0][1],self.temp[s-1][0][2],self.temp[s-1][0][3])
+            while(self.X[f"({i1}, {j1}, {k1}, {t1})"] < self.epsilon) :
+                self.temp[s-1].pop(0)
+                (i1,j1,k1,t1) = (self.temp[s-1][0][0],self.temp[s-1][0][1],self.temp[s-1][0][2],self.temp[s-1][0][3])
+            if(t1 < t):
+                ss=s
+                (i,j,k,t) = (i1,j1,k1,t1)
         self.focusIndex = j-1
         self.FFindex = k-1
-
-        if i != j: 
-            self.choose()
-            self.consoleLabel.setText("在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]))
-        else:          
-            if DataBase.u_bar[f"({i}, {k}, {t})"] == 1:
+        print((i,j,k,t) )
+        print(f"t:{t}, cur: {self.currentTime}")
+        if t == self.currentTime:
+           
+            if i != j: 
                 self.choose()
-                self.consoleLabel.setText("在時刻 {} 對node {} 進行保護, processing time: {}".format(t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.firefighterList[self.FFindex].rate_extinguish)))
-            else:
-                self.assignIdle()
-                self.consoleLabel.setText("在時刻 {} 在node {} idle".format(t,i))  
-        if(self.currentTime >= DataBase.T):
-            self.modelTime.stop()
-            self.timer.stop()
-            self.finish()
-            return
-        if(t == self.currentTime):
-            self.ctr+=1
+                print("消防員 {}在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(k, t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]))
+                self.consoleLabel.setText("在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]))
+            else:          
+                if DataBase.u_bar[f"({i}, {k}, {t})"] == 1:
+                    self.choose()
+                    print("消防員 {}在時刻 {} 對node {} 進行保護, processing time: {}".format(k,t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.firefighterList[self.FFindex].rate_extinguish)))
+                    self.consoleLabel.setText("在時刻 {} 對node {} 進行保護, processing time: {}".format(t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.firefighterList[self.FFindex].rate_extinguish)))
+                else:
+                    self.assignIdle()
+                    print("消防員 {}在時刻 {} 在node {} idle".format(k,t,i))
+                    self.consoleLabel.setText("在時刻 {} 在node {} idle".format(t,i))  
+            if(self.currentTime >= DataBase.T):
+                self.modelTime.stop()
+                self.timer.stop()
+                self.finish()
+                return
+            if(t == self.currentTime):
+                self.temp[ss-1].pop(0)
 
     def howManyAvail(self):
         self.availFF = len([ff for ff in self.firefighterList if ff.getcumArrivalTime() == self.currentTime])
