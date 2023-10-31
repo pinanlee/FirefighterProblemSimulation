@@ -7,15 +7,13 @@ import pandas as pd
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QLabel, QSizePolicy, QPushButton, QWidget
 from PyQt5 import QtWidgets, QtCore, QtGui
-import random
 import math
-from FFSettingsWindow import FFSettingsWindow
 from FFSettingsWindow import FFnumWindow
 from FF import FireFighter
 from node import Node 
 from fireObject import Fire
 from network import Network
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QColor, QIcon, QBrush
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QFont, QCursor, QColor, QIcon, QBrush, QRegion
 from PyQt5 import uic
 from dataBase import DataBase
 from results import resultsWindow
@@ -49,6 +47,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     screenshot_range = (290, 60, 1900, 751)
     gameTerminated = False
     model_dir = "./network/FF2test/FFP_n20_no5"
+
     mode=1
 
     def __init__(self,mode):
@@ -102,10 +101,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                         node.setIcon(image1)
                         node.setIconSize(QtCore.QSize(50, 50))
                     elif i.getNum() in forestList:
-                        node.setFixedSize(60,50)
+                        node.setFixedSize(60,60)
                         image = QIcon("image/tree.png")
                         node.setIcon(image)
+                        node.setMask(QRegion(0, 0, 60, 60, QRegion.Ellipse))
                         node.setIconSize(QtCore.QSize(60, 50))
+                        # node.setIconSize(self.size())
                 node.clicked.connect(self.choose)
                 node.showSignal.connect(self.InfoShow)
                 self.nodeList.append(node)
@@ -121,6 +122,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.setStyleSheet("background-color: rgb(100, 100, 100);")
             self.focusIndex = len(self.nodeList) - 1
             self.button_menu.clicked.connect(self.backMenu)
+            self.button_menu.setFlat(True)
             opacity_effect = QGraphicsOpacityEffect()
             opacity_effect.setOpacity(0.7)
             self.descriptionLabel.setGraphicsEffect(opacity_effect)
@@ -144,7 +146,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.comboBox_network.activated[str].connect(self.comboBoxEvent)
             if self.mode == 1:
                 self.button_guide.clicked.connect(self.showProblem)
-
+                self.button_guide.setFlat(True)
         initUI()
 
         def NodeConnection():
@@ -162,7 +164,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.nodeList[fireDepot-1].onFire()
             self.fire[-1].fireSignal.connect(self.fireSignalDetermination)
             #初始化消防員
-
+            self.updateMinTime()
             depot = next((i for i in self.nodeList if i.isDepot()), None)
             self.networkUpdate(depot.getNum())
             self.firefighterNum=int(self.FFnetwork.ffNum)
@@ -416,6 +418,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         import os
         p = sys.executable
         os.execl(p, p, *sys.argv)
+
 
     def networkChange(self):
         if(self.showFFnetwork and self.showFireNetwork):
