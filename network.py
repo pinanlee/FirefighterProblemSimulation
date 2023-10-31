@@ -10,7 +10,7 @@ class Network:
         self.ffNum = 0
         self.__createNode(adjFile, depot)
         self.__connectNode(adjFile, depot)
-
+        self.FFrate=[]
 
     def __connectNode(self, adjFile, depot):
         df = pd.read_excel(adjFile, sheet_name=None)
@@ -23,6 +23,7 @@ class Network:
                     DataBase.tau.append(time)
                     self.nodeList[int(i["i"]) - 1].connectNode(self.nodeList[nodeNum], length, i["k"], time)
                 else:
+                    time = i["travel time"]
                     self.nodeList[int(i["i"]) - 1].arcAddTime(self.nodeList[nodeNum], i["k"], time)
                 self.ffNum = max(i["k"], self.ffNum)
         else:

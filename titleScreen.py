@@ -67,6 +67,9 @@ class titleScreen(QtWidgets.QMainWindow):
             df = pd.read_excel(file_path, sheet_name='coordinates', header=None)
             first_column = df.iloc[:,0]
             nn = first_column.count() - 1
+            df = pd.read_excel(file_path, sheet_name='firefighter_route', header=None)
+            first_column = df.iloc[:, 0]
+            ffn = first_column.iloc[-1]
             self.textBrowser_fs.setPlainText(str(fs))
             self.textBrowser_dn.setPlainText(str(dn))
             self.textBrowser_nn.setPlainText(str(nn))
@@ -86,7 +89,7 @@ class titleScreen(QtWidgets.QMainWindow):
             data = pd.read_excel(file_path, sheet_name='fire_source', header=None)
             dn = data.iat[1, 0]
             nn = 20
-            ffn = 1
+            ffn = 2
             self.textBrowser_fs.setPlainText(str(fs))
             self.textBrowser_dn.setPlainText(str(dn))
             self.textBrowser_nn.setPlainText(str(nn))
