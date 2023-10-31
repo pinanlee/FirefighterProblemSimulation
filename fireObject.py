@@ -1,4 +1,3 @@
-from node import Node
 from PyQt5.QtCore import pyqtSignal, QObject
 import math
 from nodeButtonController import NodeController

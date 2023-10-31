@@ -1,14 +1,10 @@
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QTimer, pyqtSignal,QRect
-from PyQt5.QtWidgets import QGraphicsOpacityEffect
-from PyQt5 import QtWidgets,QtCore,QtGui
-import math
+
+from PyQt5 import QtCore
 
 class NodeController():
     def __init__(self, i, pos: QtCore.QRect, value, burnTime, quantity):
         self.__pos = pos
         #variables
-        
         self.__no = i
         self.__initValue = value
         self.__value = value
@@ -113,7 +109,9 @@ class NodeController():
         return ratio if ratio >= 0 else 0
     
     def getNodePercentage_FF(self, rate): #獲得消防員在該node的燃燒進度
-        ratio = self.__ffProgress / int(self.__grassAmount / rate)
+        from math import ceil
+        #print(f"p: {self.__ffProgress}, e: {ceil(self.__grassAmount / rate)}")
+        ratio = self.__ffProgress / ceil(self.__grassAmount / rate)
         return ratio if ratio >= 0 else 0
 
     def updateStatus(self):

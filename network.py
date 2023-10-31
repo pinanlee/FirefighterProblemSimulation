@@ -1,6 +1,5 @@
 import pandas as pd
 from PyQt5 import QtCore
-from node import Node
 from nodeButtonController import NodeController
 from dataBase import DataBase
 

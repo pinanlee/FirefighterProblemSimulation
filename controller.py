@@ -48,7 +48,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     availFF = 0
     screenshot_range = (290, 60, 1900, 751)
     gameTerminated = False
-    model_dir = "./network/FF2test/FFP_n20_no3"
+    model_dir = "./network/FF2test/FFP_n20_no5"
     mode=1
 
     def __init__(self,mode):
@@ -67,15 +67,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             with open("FFInfo.json", 'r') as file:
                 data = json.load(file)
             FFNum = int(data["FFnumber"])
-        #self.db = DataBase()
-        #self.nw = InformationWindow(self.db)
         self.firefighterNum = FFNum
         self.subwindows = []
         if os.path.exists("filename.json"):
             with open("filename.json", 'r') as file:
                 data = json.load(file)
             self.model_dir = data["filename"][:-5]
-            print(self.model_dir)
         self.setup_control()
         self.window_FFnum = FFnumWindow()
         self.window_FFnum.window_FF.updateFFnumSignal.connect(self.newFFnum)
@@ -258,15 +255,14 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 (i,j,k,t) = (i1,j1,k1,t1)
         self.focusIndex = j-1
         self.FFindex = k-1
-        print((i,j,k,t) )
-        print(f"t:{t}, cur: {self.currentTime}")
+        # print((i,j,k,t) )
+        # print(f"t:{t}, cur: {self.currentTime}")
         if t == self.currentTime:
             if i != j: 
                 self.choose()
                 print("消防員 {}在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(k, t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]))
                 self.consoleLabel.setText("在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]))
-            else:       
-                print("u_bar: {}".format(DataBase.u_bar[f"({i}, {k}, {t})"]))   
+            else:         
                 if DataBase.u_bar[f"({i}, {k}, {t})"] > self.epsilon:
                     self.choose()
                     print("消防員 {}在時刻 {} 對node {} 進行保護, processing time: {}".format(k,t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.firefighterList[self.FFindex].rate_extinguish)))
@@ -576,6 +572,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.gameTerminated = all(i.isComplete() for i in self.fire)
             if self.gameTerminated:
                 self.finish()
+                if(self.modelTest):
+                    self.modelTime.stop()
+                return
             self.currentTime+=1
             for i in self.nodeList:
                 i.updateStatus()
@@ -584,18 +583,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             finishList = []
             for i in self.firefighterList:
                 i.updateStatus()
+                print(f"{i.getcumArrivalTime()}, {self.currentTime}")
                 (check ,text) = i.checkArrival(self.currentTime)
                 if(check):
                     finishList.append(i.getNum())
                     screenshot = ImageGrab.grab(self.screenshot_range)
                     screenshot.save(f"image/timescreenshot/time00{self.currentTime:03d}.png")
-                    print("timer stop")
                     self.timer.stop()
                     if self.mode == 1:
                         self.listWidget.addItem(text)
                         self.listWidget.scrollToItem(self.listWidget.item(self.listWidget.count() - 1))
-                    # self.FFindex = i.getNum() - 2
-                    # self.selectFireFighter()
                     self.howManyAvail()
 
                     if(not self.modelTest):
