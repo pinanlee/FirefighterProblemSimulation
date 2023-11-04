@@ -33,6 +33,7 @@ class titleScreen(QtWidgets.QMainWindow):
         self.startButton.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(3))
         self.button_file.clicked.connect(self.buttonfileEvent)
         self.checkBox.stateChanged.connect(self.checkboxEvent)
+        self.checkBox.setCheckState(2)
 
     def goto(self, mode):
         if(self.shift or mode == 2):
