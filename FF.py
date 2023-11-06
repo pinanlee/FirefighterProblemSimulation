@@ -26,9 +26,11 @@ class FireFighter(QLabel):
         self.__status = "Not Ready"
         #UI設定
         self.setStyleSheet("border: none; background: transparent;")
-        self.setPixmap(QPixmap("./image/firefighter.png"))
-        self.lower()
         self.pixmaploc = "./image/firefighter.png"
+        self.setPixmap(QPixmap(self.pixmaploc))
+        # self.setFixedSize()
+        self.lower()
+        
         self.curPos().defend()
         self.arrowLabel = QLabel(self.__widget)
         self.timer_arrow = QTimer(self)
@@ -41,6 +43,7 @@ class FireFighter(QLabel):
         self.setGeometry(QRect(self.curPos().x()+20, self.curPos().y(),self.curPos().width()+ 20, self.curPos().height()+20))
 
     def reset(self):
+        print("reset")
         self.__select = False 
         self.__travel = False 
         self.__process = False
@@ -223,7 +226,7 @@ class FireFighter(QLabel):
             i.timer_nodeOpacity.stop()
 
 
-    def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度
+    def getArcPercentage_FF(self, node): #獲得消防員在arc上的移動進度    
         for i in self.curPos().getArcs():
             if(i["nodeButton"] == node): 
                 ratio = self.__pathProgress/i["travel-time"][f"{self.__num}"]

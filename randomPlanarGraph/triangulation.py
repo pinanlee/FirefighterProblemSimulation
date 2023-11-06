@@ -21,11 +21,11 @@ def triangulate(nodes, randstream, mode='conform'):
 	else:
 		return 0'''
 def sorter(tri):
-	print(sorted(tri))
+	# print(sorted(tri))
 	return sorted(tri)
 
 def canonical_order(tris):
-	print(list(tris))
+	# print(list(tris))
 	return sorted(list(tris), key=sorter)
 
 def triangulate_pyhull(nodes, randstream):

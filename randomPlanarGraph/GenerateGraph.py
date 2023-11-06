@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 from random import Random
+import random
 import graphops 
 import graphio
 
-
+width=1500  #1000
+height=550 #1000
+node=30
+# fire_edges=55
+# firefighter_edges=70
+# seed=120
+seed = random.randint(1, 1000)
+radius=40
+data_idx = 3
 
 def default_seed():
 	import os, struct
@@ -15,14 +24,6 @@ def default_seed():
 		import time
 		return int(time.time()) | os.getpid()
 
-width=1500
-height=550
-node=30
-fire_edges=55
-firefighter_edges=70
-seed = default_seed()
-radius=40
-
 def make_streams(seed):
 	# since triangulator is specialised and might need its own random stream
 	# may as well stream the other steps too!
@@ -33,7 +34,7 @@ def make_streams(seed):
 		i += 1
 	return streams
 
-def main(st):
+def main_2nd(st, node, fire_edges, firefighter_edges, data_idx):
 	num_nodes = node
 	if st == 'fire':
 		num_edges = fire_edges
@@ -56,8 +57,33 @@ def main(st):
 	doubled_edges = graphops.double_up_edges(ext_edges, 0.0, streams['double'])
 
 	# write out to file
-	graphio.write(st, nodes, doubled_edges)
-	#print(doubled_edges)
+	graphio.write(st, nodes, doubled_edges, data_idx)
+
+# def main(st):
+# 	num_nodes = node
+# 	if st == 'fire':
+# 		num_edges = fire_edges
+# 	elif st == 'firefighter':
+# 		num_edges = firefighter_edges
+# 	streams = make_streams(seed)
+
+# 	# first generate some points in the plane, according to our constraints
+# 	nodes = graphops.generate_nodes(num_nodes, width, height, radius, streams['gen'])
+# 	num_nodes = len(nodes)
+# 	# find a delaunay triangulation, so we have a list of edges that will give planar graphs
+# 	tri_edges = graphops.triangulate(nodes, streams['tri'], 'conform')
+# 	# compute a spanning tree to ensure the graph is joined
+# 	span_edges = graphops.spanning_tree(nodes, tri_edges, streams['span'])
+	
+# 	# extend the tree with some more edges to achieve our target num_edges
+# 	# pick the extra ones from tri_edges to preserve planarity
+# 	ext_edges = graphops.extend_edges(span_edges, num_edges, tri_edges, 0.0, streams['ext'])
+# 	# randomly double some edges
+# 	doubled_edges = graphops.double_up_edges(ext_edges, 0.0, streams['double'])
+
+# 	# write out to file
+# 	graphio.write(st, nodes, doubled_edges, data_idx)
+# 	#print(doubled_edges)
 
 	# write out debug traces if specified -- usually not used
 	# if opts.debug_tris is not None:
@@ -66,6 +92,24 @@ def main(st):
 	# if opts.debug_span is not None:
 	# 	graphio.write(opts.debug_span, nodes, span_edges, opts.seed)
 	# 	print(span_edges)
+
+def generate_test_data(node, fire_edges, firefighter_edges, data_idx):
+	defaults = {
+		"width": 320,
+		"height": 240,
+		"nodes": 10,
+		"edges": None,
+		"radius": 40,
+		"double": 0.0,
+		"hair": 0.0,
+		#"seed": default_seed(),
+		"seed": 0,
+		"debug_trimode": 'conform',
+		"debug_tris": None,
+		"debug_span": None,
+	}
+	main_2nd("firefighter", node, fire_edges, firefighter_edges, data_idx)
+	main_2nd("fire", node, fire_edges, firefighter_edges, data_idx)
 
 if __name__=='__main__':
 	#import argparse
@@ -83,7 +127,7 @@ if __name__=='__main__':
 		"debug_tris": None,
 		"debug_span": None,
 	}
-
+	generate_test_data(20, 35, 35, 1)
 	# # argument types, for input-checking
 	# def posint(string):
 	# 	value = int(string)
@@ -132,5 +176,6 @@ if __name__=='__main__':
 	# options.edges = max(options.edges, options.nodes-1) # necessary to avoid a disjoint graph
 
 	# run!
-	main("firefighter")
-	main("fire")
+	# main("firefighter")
+	# print('tttttttttt')
+	# main("fire")

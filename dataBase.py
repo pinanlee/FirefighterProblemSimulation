@@ -13,7 +13,8 @@ class DataBase(QObject):
     dataUpdateSignal = pyqtSignal(str)
 
     P = {1:3,2:4} #各個消防單位時間處理的燃料量
-
+    epsilon = 1e-4
+    X={}
     NODE_POS = {}
     N=[]
     N_D=[]
@@ -29,7 +30,6 @@ class DataBase(QObject):
     process = {} #processing time
     H = {} #burning time
 
-    x = {}
     w = {}
     u = {}
     u_bar = {}

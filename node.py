@@ -1,7 +1,6 @@
-from PyQt5.QtGui import QPixmap, QCursor, QResizeEvent
+from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import QTimer, pyqtSignal, Qt
-from PyQt5.QtWidgets import QGraphicsOpacityEffect
-from PyQt5 import QtWidgets,QtCore,QtGui
+from PyQt5 import QtWidgets,QtCore
 from nodeButtonController import NodeController
 from nodePropertyVisualization import nodePropertyVis
 

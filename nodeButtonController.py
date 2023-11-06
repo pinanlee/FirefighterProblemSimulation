@@ -39,11 +39,15 @@ class NodeController():
 
     def defend(self):
         self.__protected = True
+        self.__burned = False
 
     def depotSetting(self):
         self.__protected = True
         self.__depot = True
         self.__style = "background-color: black;"
+
+    def fireDepotSetting(self):
+        self.__depot = True
 
     def getStyle(self):
         return self.__style
