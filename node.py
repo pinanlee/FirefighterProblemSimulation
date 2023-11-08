@@ -16,6 +16,7 @@ class Node(QtWidgets.QPushButton):
         self.timer_nodeOpacity = QTimer()
         self.timer_nodeOpacity.timeout.connect(self.opacityAffect)
         self.grassVisualize = nodePropertyVis(widgets,self.__nodeController)
+        self.show()
     
 
     #UI設定
@@ -64,8 +65,8 @@ class Node(QtWidgets.QPushButton):
     def setStyle(self, style) -> None:
         return self.__nodeController.setStyle(style)
 
-    def nextFFProgress(self):
-        self.__nodeController.ffProgressing()
+    def nextFFProgress(self, rate):
+        self.__nodeController.ffProgressing(rate)
 
     #get functions
 
@@ -113,3 +114,7 @@ class Node(QtWidgets.QPushButton):
     #一開始建立網路時使用
     def connectNode(self, node):
         self.__nodeController.connectButton(node)
+
+    def deleteLater(self) -> None:
+        self.grassVisualize.deleteLater()
+        super().deleteLater()

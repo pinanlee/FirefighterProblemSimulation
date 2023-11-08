@@ -44,7 +44,6 @@ class Fire(QObject):
                 else:
                     if(self.__fireExpandDetection(arc)):
                         arc["node"].onFire()
-                        #print("node {} is burned at time {}".format(arc["node"].getNum(), timer))
                         self.fireSignal.emit("burn", 0, arc["node"].getNum())
             if(all_arc_burned):
                 self.__finishSpread = True            

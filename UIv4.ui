@@ -635,6 +635,9 @@
       <height>151</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
     <widget class="QLabel" name="label_9">
      <property name="geometry">
       <rect>
@@ -668,6 +671,25 @@
      </property>
     </widget>
    </widget>
+   <widget class="QLabel" name="selectedFFlabel">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>200</y>
+      <width>120</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>image/left_arrow.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -675,7 +697,7 @@
      <x>0</x>
      <y>0</y>
      <width>1917</width>
-     <height>18</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="sizePolicy">

@@ -1,14 +1,14 @@
 from PyQt5.QtGui import QPixmap
 from node import Node
 from PyQt5.QtCore import QTimer, pyqtSignal, QRect, Qt
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QGraphicsOpacityEffect
 import math
+import os
 
 class FireFighter(QLabel):
     FFSignal = pyqtSignal(str, int)
     def __init__(self, widget, num, depot):
         super().__init__(widget)
-        self.__widget = widget
         self.__num = num
         self.__name = "firefighter " + str(num) #消防員編號
         self.__path = [depot] #紀錄FF經過的node
@@ -23,18 +23,29 @@ class FireFighter(QLabel):
         self.move_man = 4 #移動速率
         self.__destinationNode = None #下一個目的
         self.__pathProgress = 0
-        self.__status = "Not Ready"
+        self.__status = "Not ready"
         #UI設定
         self.setStyleSheet("border: none; background: transparent;")
-        self.pixmaploc = "./image/firefighter.png"
-        self.setPixmap(QPixmap(self.pixmaploc))
+
+        self.folder_path = "image/firefighter/"
+        for _, _, files in os.walk(self.folder_path):
+            self.pixmaploc = self.folder_path + files[self.__num-1]
+            
+        self.setPixmap(QPixmap(self.pixmaploc).scaled(self.size()))
         # self.setFixedSize()
         self.lower()
-        
-        self.curPos().defend()
-        self.arrowLabel = QLabel(self.__widget)
+        self.arrowLabel = QLabel(self.parentWidget())
         self.timer_arrow = QTimer(self)
+        self.show()
 
+    def deleteLater(self) -> None:
+        self.arrowLabel.deleteLater()
+        super().deleteLater()
+
+    def setOpacity(self, num):
+        opacity_effect = QGraphicsOpacityEffect()
+        opacity_effect.setOpacity(num)
+        self.setGraphicsEffect(opacity_effect)
 
     def getNum(self):
         return self.__num
@@ -43,17 +54,18 @@ class FireFighter(QLabel):
         self.setGeometry(QRect(self.curPos().x()+20, self.curPos().y(),self.curPos().width()+ 20, self.curPos().height()+20))
 
     def reset(self):
-        print("reset")
         self.__select = False 
         self.__travel = False 
         self.__process = False
         self.__destinationNode = None
         self.__arrivalTime = 0
         self.__pathProgress = 0
+        self.__status = "Not ready"
 
     def finishTimeSet(self, value):
         if(self.isIdle()):
             self.__arrivalTime = value
+            self.__status = "Idling"
         self.__cumArrivalTime += self.__arrivalTime
 
     def destination(self):
@@ -73,6 +85,7 @@ class FireFighter(QLabel):
 
     def process(self): #消防員標記為澆水中
         self.__process = True
+        self.__status = "Processing"
 
     def isProcess(self): #回傳是否消防員在澆水
         return self.__process
@@ -82,9 +95,11 @@ class FireFighter(QLabel):
 
     def traveling(self): #回傳是否消防員在移動
         self.__travel = True
+        self.__status = "Traveling"
 
     def selected(self): #消防員標記為被指派
         self.__select = True
+        self.__status = "Assigned!"
 
     def isSelected(self): #回傳是否消防員被指派
         return self.__select
@@ -113,7 +128,7 @@ class FireFighter(QLabel):
             self.__path.append(self.__destinationNode)
             self.newPos()
             self.reset()
-            self.FFSignal.emit("done", 0)
+            # self.FFSignal.emit("done", 0)
             return (True,text)
         if(self.__cumArrivalTime < timer):
             raise Exception("time didn't synchronized")
@@ -147,10 +162,10 @@ class FireFighter(QLabel):
         self.__destinationNode = node
         if(node != self.curPos()):
             self.__arrivalTime = self.curPos().getArc(self.__destinationNode)["travel-time"][f"{self.__num}"]
-            return "{} move to vertex {}".format(self.getName(), node.getNum())
+            return "Assign sucessful! : {} move to vertex {}".format(self.getName(), node.getNum())
         else:
             self.__arrivalTime = ceil(self.curPos().getProcessingTime() / self.rate_extinguish)
-            return "{} choose defend".format(self.getName()) if not self.curPos().isProtected() else "already protected"
+            return "Assign sucessful! : {} choose defend".format(self.getName()) if not self.curPos().isProtected() else "already protected"
 
     def __statusDetection(self, node) -> bool: #check assigned node's status (burned or not burned)
         return not node.isBurned()
@@ -162,7 +177,7 @@ class FireFighter(QLabel):
 
     def __calculateCurrentCapacity(self): #更新消防員在該node上的保護情況
         if(self.isProcess()):
-            self.curPos().nextFFProgress()
+            self.curPos().nextFFProgress(self.rate_extinguish)
 
     def __calculateCurrentFFArrive(self, arc): #更新消防員在arc上的移動情況
         if(self.__pathProgress < arc["travel-time"][f"{self.__num}"]):
@@ -187,7 +202,7 @@ class FireFighter(QLabel):
             elif new_y <= self.y()-110:
                 self.arrowdirection = 1
             self.arrowLabel.move(current_pos.x(), new_y)
-        self.arrowLabel = QLabel(self.__widget)
+        # self.arrowLabel = QLabel(self.parentWidget())
         if(self.__num == 1):
             arrow = QPixmap("image/arrow_redr.png")
         else:
@@ -235,15 +250,3 @@ class FireFighter(QLabel):
 
     def getStatus(self):
         return self.__status
-
-    def updateStatus(self):
-        if(self.isProcess()):
-            self.__status = "Processing"
-        elif(self.isTraveling()):
-            self.__status = "Traveling"
-        elif(self.isIdle()):
-            self.__status = "Not Ready"
-        elif(self.isSelected()):
-            self.__status = "Assigned!"
-        else:
-            self.__status = "Not Ready"

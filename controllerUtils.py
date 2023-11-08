@@ -23,6 +23,48 @@ from PIL import ImageGrab
 import pygetwindow as gw
 
 
+class AnimationTimer(QTimer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.setInterval(300)
+
+class flashTimer(QTimer):
+    def __init__(self, widget) -> None:
+        super().__init__()
+        self.opa = 0.1
+        self.ctr = 0
+        self.up = True
+        self.boss = widget
+        self.style = self.boss.styleSheet()
+        def flash():
+            if self.boss == None:
+                self.stop()
+                return
+            if self.ctr==3:
+                self.opa = 0.1
+                self.ctr = 0
+                self.up = True
+                self.boss.setStyleSheet(self.style)
+                self.stop()
+                return
+            if not self.up:
+                self.opa -= 0.1
+                if self.opa <= 0.1:
+                    self.up = True
+                    self.ctr+=1
+            else:    
+                self.opa += 0.1
+                if self.opa == 0.5:
+                    self.up = False
+            if self.boss != None:
+                self.boss.setStyleSheet(self.style[:-1] + f"\tbackground-color: rgba(255, 170, 0, {self.opa});" + "}")
+                return
+            # self.boss.setStyleSheet(self.style[:-1] + f"\tbackground-color: rgba(255, 170, 0, {self.opa});" + "}")
+        #self.boss.setStyleSheet(f"background-color: rgba(255, 170, 0, {self.opa});")        
+        self.setInterval(100)
+        self.timeout.connect(flash)
+
+
 class Controller_Utils:
     def UIInitialize(controller):
         if controller.mode == 1:
@@ -137,12 +179,13 @@ class Controller_Utils:
         controller.label_selectedFF.setText(controller.firefighterList[controller.FFindex].getName()) #UI SETTING: put here because the order of initialization
         
         controller.firefighterList[controller.FFindex].accessibleVisualize(controller.currentTime, controller.nodeList)
+        # controller.opacitySet()
         controller.generateblockFF_gameWindow()
-        controller.updateFFStatus()
-        controller.howManyAvail()
+        controller.availFF = controller.firefighterNum
         controller.criticalMessage = "firefighter available: {}".format(controller.availFF)
         controller.hintAnimate(controller.criticalMessage)
         controller.defendButton.setEnabled(not controller.firefighterList[controller.FFindex].curPos().isProtected())
+        controller.lcd_time.display(controller.currentTime)
         controller.setFocus()
 
     def getModelSolution(controller):
@@ -162,3 +205,28 @@ class Controller_Utils:
                 controller.temp = []
                 for k in DataBase.K:
                     controller.temp.append([ast.literal_eval(elem) for elem in DataBase.X if ast.literal_eval(elem)[2] == k and DataBase.X[f"({ast.literal_eval(elem)[0]}, {ast.literal_eval(elem)[1]}, {ast.literal_eval(elem)[2]}, {ast.literal_eval(elem)[3]})"] > DataBase.epsilon])
+    
+
+
+    def screenshot(range, time):
+        screenshot = ImageGrab.grab(range)
+        screenshot.save(f"image/timescreenshot/time00{time:03d}.png")
+
+    def firefighterMoveLogic(controller):
+        finishList = []
+        for i in controller.firefighterList:
+            (check ,text) = i.checkArrival(controller.currentTime)
+            if(check):
+                finishList.append(i.getNum())
+                controller.timer.stop()
+                controller.listWidget.addItem(text)
+                controller.listWidget.scrollToItem(controller.listWidget.item(controller.listWidget.count() - 1))
+                if(not controller.modelTest):
+                    controller.criticalMessage ="firefighter available: {}".format(controller.availFF) 
+                    controller.hintAnimate(controller.criticalMessage)
+                controller.defendButton.setEnabled(not i.curPos().isProtected())
+        return finishList
+    
+    def fireSpreadLogic(fireList):
+        for i in fireList:
+            i.fire_spread()

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from random import Random
 import random
-import graphops 
-import graphio
+from randomPlanarGraph import graphops 
+from randomPlanarGraph import graphio
 
 width=1500  #1000
 height=550 #1000
