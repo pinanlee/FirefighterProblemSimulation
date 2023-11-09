@@ -217,8 +217,6 @@ class FireFighter(QLabel):
         self.timer_arrow.stop()
 
         for i in lst:
-            if not i.isBurned:
-                i.setFlat(False)
             i.setStyleSheet(i.getStyle())
             i.timer_nodeOpacity.stop()
 

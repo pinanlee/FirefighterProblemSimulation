@@ -5,7 +5,7 @@ import os
 from functools import partial
 import pandas as pd
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
-from PyQt5.QtWidgets import QGraphicsOpacityEffect, QLabel, QSizePolicy, QPushButton, QWidget
+from PyQt5.QtWidgets import QGraphicsOpacityEffect, QLabel, QSizePolicy, QPushButton, QWidget, QGraphicsDropShadowEffect
 from PyQt5 import QtWidgets, QtCore, QtGui
 import math
 from FFSettingsWindow import FFnumWindow
@@ -706,7 +706,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     elif self.mode == 2:
                         qpainter.drawLine(QPointF(i.curPos().x()+ i.curPos().width()/2, i.curPos().y() + 3/2*i.curPos().height()), QPointF(i.curPos().x() + i.curPos().width()/2 + tempXpercent ,i.curPos().y() + 3/2*i.curPos().height()+tempYpercent))
 
-        self.update()
+        # self.update()
         qpainter.end()
 
     def closeEvent(self, event): #當主視窗關閉時關閉全部視窗

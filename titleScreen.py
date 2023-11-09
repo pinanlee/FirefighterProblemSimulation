@@ -6,6 +6,8 @@ from PyQt5.uic import loadUi
 from controller import MainWindow_controller
 import json
 import pandas as pd
+from simulationWindow import SimulationWindow
+
 
 class titleScreen(QtWidgets.QMainWindow):
     result = None
@@ -19,6 +21,7 @@ class titleScreen(QtWidgets.QMainWindow):
         self.buttonlist.append(self.button_tutorial)
         self.buttonlist.append(self.startButton)
         self.buttonlist.append(self.button_case)
+        self.buttonlist.append(self.button_simulation)
         for i in self.buttonlist:
             i.setCheckable(True)
             i.clicked.connect(self.buttonClicked)
@@ -31,16 +34,21 @@ class titleScreen(QtWidgets.QMainWindow):
         self.button_tutorial.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
         self.button_case.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(2))
         self.startButton.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(3))
+        self.button_simulation.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(4))
+        self.button_enter.clicked.connect(lambda: self.goto(3))
         self.button_file.clicked.connect(self.buttonfileEvent)
         self.checkBox.stateChanged.connect(self.checkboxEvent)
         self.checkBox.setCheckState(2)
 
     def goto(self, mode):
-        if(self.shift or mode == 2):
+        if(mode == 3) :
+            self.result = SimulationWindow()
+            self.result.show()
+            self.close()
+        elif self.shift or mode == 2:
             self.result = MainWindow_controller(mode)
             self.result.show()
             self.close()
-
 
     def buttonClicked(self):
         sender_button = self.sender()

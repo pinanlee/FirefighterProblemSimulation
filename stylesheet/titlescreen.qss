@@ -4,7 +4,7 @@
 }
 
 #widget_sidebar {
-    background-color: #313a46;
+    background-color: #C6D3DB;
 }
 
 #widget_sidebar QPushButton{
@@ -14,12 +14,14 @@
     padding: 8px 0 8px 15px;
     color: #788596
 }
+
 #widget_sidebar QPushButton:hover{
-    background-color: rgba(86, 101, 115, 0.5);
+    background-color: #4C5C6B;
+    color: #fff;
 }
 #widget_sidebar QPushButton:checked {
     color: #fff;
-    background-color: rgba(86, 101, 115, 0.5);
+    background-color: #4C5C6B;
     font-weight: bold;
 }
 
@@ -54,4 +56,44 @@
 #gamewidget {
     border: 1px solid #cccccc;
     border-radius: 3px;
+}
+
+#widget_selectbar {
+    background-color: #313a46;
+}
+
+#widget_selectbar QPushButton{
+    border: none;
+    border-radius: 3px;
+    padding: 8px 0 8px 15px;
+    color: #788596
+}
+
+#widget_selectbar QPushButton:hover{
+    background-color: rgba(86, 101, 115, 0.5);
+}
+#widget_selectbar QPushButton:checked {
+    color: #fff;
+    background-color: rgba(86, 101, 115, 0.5);
+    font-weight: bold;
+}
+
+#label_choose {
+    color: #fff;
+}
+
+#widget_leftbar {
+    background-color: #C6D3DB;
+}
+#widget_downbar {
+    background-color: #C6D3DB;
+}
+#widget_downmiddle {
+    background-color: #C6D3DB;
+}
+#widget_downright {
+    background-color: #C6D3DB;
+}
+#widget_progress {
+    background-color: #C6D3DB;
 }
