@@ -21,11 +21,11 @@ def triangulate(nodes, randstream, mode='conform'):
 	else:
 		return 0'''
 def sorter(tri):
-	print(sorted(tri))
+	# print(sorted(tri))
 	return sorted(tri)
 
 def canonical_order(tris):
-	print(list(tris))
+	# print(list(tris))
 	return sorted(list(tris), key=sorter)
 
 def triangulate_pyhull(nodes, randstream):
@@ -40,6 +40,6 @@ def triangulate_triangle(nodes, randstream):
 
 def triangulate_triangle_conform(nodes, randstream):
 	import triangle
-	data = triangle.triangulate({"vertices":nodes}, "DS0F")
+	data = randomPlanarGraph.triangle.triangulate({"vertices":nodes}, "DS0F")
 	tris = data["triangles"]
 	return tris

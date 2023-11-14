@@ -36,7 +36,8 @@ class Instruction(QLabel):
         self.prevButton.setGeometry(600,599,101,51)
         self.prevButton.setText("prev")
         self.prevButton.setEnabled(False)
-        self.prevButton.clicked.connect(self.prevImg)       
+        self.prevButton.clicked.connect(self.prevImg)  
+        self.intoGame()     
 
     def intoGame(self):
         self.setHidden(True)

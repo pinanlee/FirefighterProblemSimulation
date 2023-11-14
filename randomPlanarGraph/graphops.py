@@ -1,5 +1,5 @@
-from DisjointSet import *
-import triangulation
+from randomPlanarGraph.DisjointSet import DisjointSet
+from randomPlanarGraph import triangulation
 
 def generate_node(width, height, randstream):
 	return (randstream.randint(0, width-1), randstream.randint(0, height-1))

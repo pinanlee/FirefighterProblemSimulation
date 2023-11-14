@@ -42,7 +42,7 @@ class titleScreen(QtWidgets.QMainWindow):
 
     def goto(self, mode):
         if(mode == 3) :
-            self.result = SimulationWindow()
+            self.result = SimulationWindow(mode)
             self.result.show()
             self.close()
         elif self.shift or mode == 2:

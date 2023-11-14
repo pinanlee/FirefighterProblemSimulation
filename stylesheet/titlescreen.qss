@@ -59,7 +59,7 @@
 }
 
 #widget_selectbar {
-    background-color: #313a46;
+    background-color: #C6D3DB;
 }
 
 #widget_selectbar QPushButton{

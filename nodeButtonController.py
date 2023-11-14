@@ -36,14 +36,20 @@ class NodeController():
         #onFire setting
         self.__burned = True
         self.__style = f'background-color: rgba(255, 0, 0, {0.1});'
+        self.__status = "Burned"
 
     def defend(self):
         self.__protected = True
+        self.__burned = False
 
     def depotSetting(self):
         self.__protected = True
         self.__depot = True
+        self.__status = "Protected"
         self.__style = "background-color: black;"
+
+    def fireDepotSetting(self):
+        self.__depot = True
 
     def getStyle(self):
         return self.__style
@@ -59,9 +65,13 @@ class NodeController():
 
     def fireProgressing(self):
         self.__fireProgress+=1
+        if self.__fireProgress == self.__burningTime:
+            self.__status = "Damaged"
         
-    def ffProgressing(self):
+    def ffProgressing(self, rate):
         self.__ffProgress+=1
+        if self.getNodePercentage_FF(rate)==1:
+            self.__status = "Safe"
 
     def getFireProgress(self):
         return self.__fireProgress
@@ -110,21 +120,8 @@ class NodeController():
     
     def getNodePercentage_FF(self, rate): #獲得消防員在該node的燃燒進度
         from math import ceil
-        #print(f"p: {self.__ffProgress}, e: {ceil(self.__grassAmount / rate)}")
         ratio = self.__ffProgress / ceil(self.__grassAmount / rate)
         return ratio if ratio >= 0 else 0
-
-    def updateStatus(self):
-        if(self.__protected == True and self.__ffProgress > 0):
-            self.__status = "Protected"
-        elif (self.__protected == True and self.__ffProgress <= 0):
-            self.__status = "Safe"
-        elif (self.__burned == True and self.__fireProgress > 0):
-            self.__status = "Burned"
-        elif (self.__burned == True and self.__fireProgress == self.__burningTime):
-            self.__status = "Damaged"
-        else:
-            self.__status = "Normal"
 
     def arcAddTime(self, node, no, time):
         for i in self.__adjArc:

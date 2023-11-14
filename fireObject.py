@@ -31,8 +31,9 @@ class Fire(QObject):
         self.fireSignal.emit("burn", 0, self.__firePos.getNum())
 
     def fire_spread(self): #火焰傳遞邏輯
-        # if(self.__finishSpread):
-        #     return
+        if(self.__firePos.isProtected()):
+            self.__finishSpread = True
+            return
         if(self.__finishBurn):
             all_arc_burned = True
             for arc in self.__arcs:
@@ -43,7 +44,6 @@ class Fire(QObject):
                 else:
                     if(self.__fireExpandDetection(arc)):
                         arc["node"].onFire()
-                        #print("node {} is burned at time {}".format(arc["node"].getNum(), timer))
                         self.fireSignal.emit("burn", 0, arc["node"].getNum())
             if(all_arc_burned):
                 self.__finishSpread = True            

@@ -21,31 +21,6 @@
    <property name="contextMenuPolicy">
     <enum>Qt::ActionsContextMenu</enum>
    </property>
-   <widget class="QLabel" name="descriptionLabel">
-    <property name="geometry">
-     <rect>
-      <x>-1200</x>
-      <y>240</y>
-      <width>1091</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 178, 102, 255), stop:0.55 rgba(235, 148, 61, 255), stop:0.98 rgba(0, 0, 0, 255), stop:1 rgba(0, 0, 0, 0));</string>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QWidget" name="gamewidget" native="true">
     <property name="geometry">
      <rect>
@@ -731,7 +706,7 @@
       </font>
      </property>
      <property name="text">
-      <string>RA</string>
+      <string>Greedy</string>
      </property>
     </widget>
    </widget>
