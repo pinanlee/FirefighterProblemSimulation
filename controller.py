@@ -41,6 +41,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     model_dir = "./network/FF2test/FFP_n20_no5"
     mode=1
     blocklist=[]
+    nextTimeActivate = False
 
     def __init__(self,mode):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
@@ -129,6 +130,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.spinBox.setEnabled(not self.checkBox.isChecked())
 
     def currentSelectedFF(self):
+        print(self.FFindex)
         return self.firefighterList[self.FFindex]
 
     '''---------------------------------------firefighter signal-----------------------------------------'''
@@ -187,18 +189,19 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     '''------------------------------操作方式-----------------------------------'''
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
-        if(a0.key() == Qt.Key_S):
-            self.networkChange()
-        if(a0.key() == Qt.Key_N):
-            self.newNetwork()
-        if(a0.key() == Qt.Key_Q):
-            self.finish()
-        if(a0.key() == Qt.Key_X):
-            self.showProperty(1)
-        if(a0.key() == Qt.Key_Z):
-            self.showProperty(0)
-        if(a0.key() == Qt.Key_A):
-            self.modelTimeSet()
+        if not self.nextTimeActivate:
+            if(a0.key() == Qt.Key_S):
+                self.networkChange()
+            if(a0.key() == Qt.Key_N):
+                self.newNetwork()
+            if(a0.key() == Qt.Key_Q):
+                self.finish()
+            if(a0.key() == Qt.Key_X):
+                self.showProperty(1)
+            if(a0.key() == Qt.Key_Z):
+                self.showProperty(0)
+            if(a0.key() == Qt.Key_A):
+                self.modelTimeSet()
 
     def keyReleaseEvent(self, a0: QtGui.QKeyEvent) -> None:
         for i in self.nodeList:
@@ -257,11 +260,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         Controller_Utils.nodeConnection(self)
         Controller_Utils.depotInitialize(self)
         Controller_Utils.UIInformationInitialization(self)
-        # import subprocess
-        # import os
-        # subprocess.call("./randomPlanerGraph/GenerateGraph.py", shell=True)
-        # p = sys.executable
-        # os.execl(p, p, *sys.argv)
 
     def newFFnum(self):
         import os
@@ -404,9 +402,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
             finishList = Controller_Utils.firefighterMoveLogic(self)
             if(finishList):
-                # setattr(self.widget_downright, "flash_timer", flashTimer(self.widget_downright))
-                # self.flashTimerActivate(self.widget_downright)
-                
+                self.nextTimeActivate = False
                 self.availFF = len(finishList)
                 self.howManyAvail()
                 text = ""
@@ -430,7 +426,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 return
 
         if(not self.availFF):
-            
+            self.nextTimeActivate = True
             for ff in self.firefighterList:
                 if(not (ff.isTraveling() or ff.isProcess())):
                     ff.finishTimeSet(self.spinBox.value())
@@ -439,10 +435,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.timer = AnimationTimer()
             self.timer.timeout.connect(timeSkip)
             self.timer.start()
+            
         else:
             for i in self.firefighterList:
                 if not i.isSelected():
                     self.selectFireFighter(i.getNum())
+                    self.flashTimerActivate(self.blocklist[i.getNum()-1])
                     break
             self.howManyAvail()
         self.refreshBlock()

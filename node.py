@@ -117,4 +117,5 @@ class Node(QtWidgets.QPushButton):
 
     def deleteLater(self) -> None:
         self.grassVisualize.deleteLater()
+        self.showSignal.disconnect()
         super().deleteLater()

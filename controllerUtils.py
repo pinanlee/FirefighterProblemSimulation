@@ -58,9 +58,7 @@ class flashTimer(QTimer):
                     self.up = False
             if self.boss != None:
                 self.boss.setStyleSheet(self.style[:-1] + f"\tbackground-color: rgba(255, 170, 0, {self.opa});" + "}")
-                return
-            # self.boss.setStyleSheet(self.style[:-1] + f"\tbackground-color: rgba(255, 170, 0, {self.opa});" + "}")
-        #self.boss.setStyleSheet(f"background-color: rgba(255, 170, 0, {self.opa});")        
+                return     
         self.setInterval(100)
         self.timeout.connect(flash)
 

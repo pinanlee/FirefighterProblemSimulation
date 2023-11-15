@@ -223,11 +223,31 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt; Select or press 'S' to switch&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
+    <widget class="QLabel" name="selectedFFlabel">
+     <property name="geometry">
+      <rect>
+       <x>-40</x>
+       <y>240</y>
+       <width>131</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>image/left_arrow.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
     <zorder>label_background</zorder>
     <zorder>networkLabel</zorder>
     <zorder>widget_progress</zorder>
     <zorder>comboBox_network</zorder>
     <zorder>label_14</zorder>
+    <zorder>selectedFFlabel</zorder>
    </widget>
    <widget class="QWidget" name="widget_downbar" native="true">
     <property name="geometry">

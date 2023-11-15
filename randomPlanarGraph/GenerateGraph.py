@@ -40,6 +40,8 @@ def main_2nd(st, node, fire_edges, firefighter_edges, data_idx):
 		num_edges = fire_edges
 	elif st == 'firefighter':
 		num_edges = firefighter_edges
+	import time
+	import os
 	streams = make_streams(seed)
 
 	# first generate some points in the plane, according to our constraints
