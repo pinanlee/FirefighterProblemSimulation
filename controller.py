@@ -44,6 +44,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     mode=1
     blocklist=[]
     dashlineWidgetList = []
+    decisionRecordList = []
 
     def __init__(self,mode):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
@@ -424,7 +425,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.ffAccess_DashlineAnimation()
                 self.move_downbar()
             Controller_Utils.fireSpreadLogic(self.fire)
-            
+            self.decisionRecordList.append(self.record())
+            print(f'self.decisionRecordList{self.decisionRecordList}')
             self.lcd_time.display(self.currentTime)
 
             self.gameTerminated = all(i.isComplete() for i in self.fire) or self.currentTime == DataBase.T
@@ -458,11 +460,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def paintEvent(self, event):
         if self.mode == 1:
             qpainter = QPainter()
+            qpainter.begin(self)
             qpainter.setRenderHint(QPainter.Antialiasing)
         elif self.mode == 2 :
             qpainter = QPainter(self.label_background.pixmap())
+            qpainter.begin(self)
             qpainter.setRenderHint(QPainter.Antialiasing)
-        qpainter.begin(self)
         qpainter.setRenderHint(QPainter.Antialiasing)
         if(self.showFireNetwork):
             qpen = QPen(Qt.red, 4, Qt.SolidLine)
@@ -616,6 +619,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             start = QPointF(x1,y1)
             end = QPointF(x2,y2)
             painter.drawLine(start,end)
+            painter.end()
         def updateLine(widget):
             if widget.dashes == widget.length and widget.spaces == widget.length:
                 widget.dashes = 0
@@ -630,6 +634,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         dash_widget.paintEvent = paintEvent
         dash_widget.updateValue = updateLine
+
         return dash_widget
 
     def ffAccess_DashlineAnimation(self):
@@ -676,3 +681,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         widget.mousePressEvent = on_mouse_press
         widget.mouseMoveEvent = on_mouse_move
         widget.mouseReleaseEvent = on_mouse_release
+
+    def record(self):
+        timestamp_dict = {"FF":[],"Node":[],"Arc":[]}
+        def recordFF():
+            for i in self.firefighterList:
+                loc_x = i.x()
+                loc_y = i.y()
+                timestamp_dict["FF"].append((loc_x,loc_y))
+        recordFF()
+        print(timestamp_dict)
+        # def recordNode():
+        #     print("FF")
+        # def recordArc():
+        #     print("FF")
+        return timestamp_dict
