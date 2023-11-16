@@ -107,6 +107,27 @@
       <string>Introduction</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="button_simulation">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>330</y>
+       <width>211</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>11</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Simulation Player</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="widget_3" native="true">
     <property name="geometry">
@@ -183,7 +204,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QLabel" name="label_2">
@@ -449,6 +470,21 @@ In this problem, fire spreads from burned nodes to adjacent unprotected nodes, w
          <width>111</width>
          <height>31</height>
         </rect>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_5">
+      <widget class="QPushButton" name="button_enter">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>90</y>
+         <width>211</width>
+         <height>161</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
        </property>
       </widget>
      </widget>

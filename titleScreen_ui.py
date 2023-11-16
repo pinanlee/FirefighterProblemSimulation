@@ -56,6 +56,15 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.button_home.setFont(font)
         self.button_home.setObjectName("button_home")
+        self.button_simulation = QtWidgets.QPushButton(self.widget_sidebar)
+        self.button_simulation.setGeometry(QtCore.QRect(0, 330, 211, 71))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(11)
+        font.setBold(False)
+        font.setWeight(50)
+        self.button_simulation.setFont(font)
+        self.button_simulation.setObjectName("button_simulation")
         self.widget_3 = QtWidgets.QWidget(self.centralwidget)
         self.widget_3.setGeometry(QtCore.QRect(0, 0, 591, 461))
         self.widget_3.setObjectName("widget_3")
@@ -175,10 +184,16 @@ class Ui_MainWindow(object):
         self.textBrowser_nn.setGeometry(QtCore.QRect(430, 180, 111, 31))
         self.textBrowser_nn.setObjectName("textBrowser_nn")
         self.stackedWidget.addWidget(self.page_4)
+        self.page_5 = QtWidgets.QWidget()
+        self.page_5.setObjectName("page_5")
+        self.button_enter = QtWidgets.QPushButton(self.page_5)
+        self.button_enter.setGeometry(QtCore.QRect(160, 90, 211, 161))
+        self.button_enter.setObjectName("button_enter")
+        self.stackedWidget.addWidget(self.page_5)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -188,6 +203,7 @@ class Ui_MainWindow(object):
         self.startButton.setText(_translate("MainWindow", "Random Graph Mode"))
         self.button_tutorial.setText(_translate("MainWindow", "Tutorial"))
         self.button_home.setText(_translate("MainWindow", "Introduction"))
+        self.button_simulation.setText(_translate("MainWindow", "Simulation Player"))
         self.lable_pagetitle.setText(_translate("MainWindow", "FireFighter Simulator"))
         self.label_2.setText(_translate("MainWindow", "Due to global climate change, forest fires are causing severe ecological damage in many areas. Effectively containing the spread of fires has become an important issue that is highly relevant to the “firefighter problem” in operational research and graph theory. The firefighter problem aims to determine the optimal assignment of firefighters to protect the maximum number of nodes from catching fire. However, the traditional firefighter problem overly simplifies assumptions by modeling fire spread speed as constant and mandating that fire spreads across one edge per time unit. It also unrealistically assumes that firefighters can teleport between nodes instantly. In addition, fuel management for wildfire control focuses on managing flammable vegetation in forests and wilderness to reduce fire risk and impact. This study proposes incorporating fuel management data on each node’s value (resource richness), risk, estimated burn time, and bidirectional fire spread speed across edges into the firefighter problem formulation. We also impose more realistic constraints of firefighters traversing edges at a fixed speed and requiring a certain protection time at each node. This yields a practical moving firefighter problem for determining the minimum-loss firefighting strategy.\n"
 "In this problem, fire spreads from burned nodes to adjacent unprotected nodes, while firefighters can move from their current node to unburned nodes to protect them before proceeding along edges. \n"
@@ -206,3 +222,4 @@ class Ui_MainWindow(object):
         self.label_8.setText(_translate("MainWindow", "Depot node "))
         self.label_9.setText(_translate("MainWindow", "Fire Source"))
         self.label_6.setText(_translate("MainWindow", "Node numbers"))
+        self.button_enter.setText(_translate("MainWindow", "PushButton"))

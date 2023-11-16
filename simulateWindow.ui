@@ -21,75 +21,28 @@
    <property name="contextMenuPolicy">
     <enum>Qt::ActionsContextMenu</enum>
    </property>
-   <widget class="QLabel" name="descriptionLabel">
-    <property name="geometry">
-     <rect>
-      <x>-1200</x>
-      <y>240</y>
-      <width>1091</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial Rounded MT Bold</family>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0625 rgba(255, 255, 255, 255), stop:0.511364 rgba(255, 85, 0, 255), stop:1 rgba(255, 255, 255, 255));</string>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QWidget" name="gamewidget" native="true">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>10</x>
       <y>20</y>
-      <width>1611</width>
-      <height>721</height>
+      <width>1521</width>
+      <height>761</height>
      </rect>
     </property>
     <widget class="QWidget" name="widget_progress" native="true">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>660</y>
-       <width>1591</width>
+       <x>0</x>
+       <y>580</y>
+       <width>1521</width>
        <height>51</height>
       </rect>
      </property>
-     <widget class="QLabel" name="label_4">
-      <property name="geometry">
-       <rect>
-        <x>970</x>
-        <y>10</y>
-        <width>621</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>Arial Rounded MT Bold</family>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Objective: &quot;contain&quot; the fire (firefighter cannot extinguish fire)</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>60</x>
         <y>10</y>
         <width>141</width>
         <height>31</height>
@@ -108,9 +61,9 @@
      <widget class="QProgressBar" name="progressBar">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>220</x>
         <y>20</y>
-        <width>831</width>
+        <width>1271</width>
         <height>16</height>
        </rect>
       </property>
@@ -137,8 +90,8 @@
     <widget class="QComboBox" name="comboBox_network">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>610</y>
+       <x>1270</x>
+       <y>10</y>
        <width>251</width>
        <height>41</height>
       </rect>
@@ -168,420 +121,122 @@
       </property>
      </item>
     </widget>
-    <widget class="QLabel" name="networkLabel">
+    <widget class="QWidget" name="widget_leftbar" native="true">
      <property name="geometry">
       <rect>
-       <x>1330</x>
-       <y>10</y>
-       <width>281</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-       <pointsize>16</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Vulnerable Nodes:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="wordWrap">
-      <bool>false</bool>
-     </property>
-     <property name="margin">
-      <number>0</number>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_11">
-     <property name="geometry">
-      <rect>
-       <x>270</x>
+       <x>0</x>
        <y>630</y>
-       <width>211</width>
-       <height>16</height>
+       <width>1521</width>
+       <height>131</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-      </font>
-     </property>
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt; Select or press 'S' to switch&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_12">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>590</y>
-       <width>211</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0625 rgba(255, 255, 255, 255), stop:0.511364 rgba(255, 85, 0, 255), stop:1 rgba(255, 255, 255, 255));</string>
-     </property>
-     <property name="text">
-      <string>problem objective</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-    <widget class="QListWidget" name="fireArrivalListWidget">
-     <property name="geometry">
-      <rect>
-       <x>1330</x>
-       <y>70</y>
-       <width>271</width>
-       <height>471</height>
-      </rect>
-     </property>
-     <property name="resizeMode">
-      <enum>QListView::Fixed</enum>
-     </property>
-     <property name="viewMode">
-      <enum>QListView::IconMode</enum>
-     </property>
-     <property name="sortingEnabled">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QLabel" name="defendHintLabel">
-     <property name="geometry">
-      <rect>
-       <x>310</x>
-       <y>320</y>
-       <width>221</width>
-       <height>91</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0625 rgba(255, 255, 255, 255), stop:0.511364 rgba(255, 85, 0, 255), stop:1 rgba(255, 255, 255, 255));</string>
-     </property>
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;tips:&lt;/p&gt;&lt;p&gt;Press 'd' to defend,&lt;/p&gt;&lt;p&gt;Press 'i' to idle&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-    <widget class="QWidget" name="idleWidget" native="true">
-     <property name="geometry">
-      <rect>
-       <x>530</x>
-       <y>190</y>
-       <width>381</width>
-       <height>241</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <widget class="QPushButton" name="idleButton_2">
+     <widget class="QLCDNumber" name="lcd_time">
       <property name="geometry">
        <rect>
-        <x>130</x>
-        <y>160</y>
-        <width>101</width>
-        <height>71</height>
+        <x>730</x>
+        <y>0</y>
+        <width>151</width>
+        <height>41</height>
        </rect>
       </property>
-      <property name="font">
-       <font>
-        <family>Arial Rounded MT Bold</family>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Idle</string>
-      </property>
      </widget>
-     <widget class="QLabel" name="label_15">
+     <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>10</y>
-        <width>131</width>
+        <x>600</x>
+        <y>0</y>
+        <width>81</width>
         <height>41</height>
        </rect>
       </property>
       <property name="font">
        <font>
         <family>Arial Rounded MT Bold</family>
-        <pointsize>12</pointsize>
+        <pointsize>16</pointsize>
        </font>
+      </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
       </property>
       <property name="text">
-       <string>Set Idle time:</string>
+       <string>Time</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QSpinBox" name="spinBox_2">
+     <widget class="QSlider" name="horizontalSlider">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>80</y>
-        <width>171</width>
-        <height>61</height>
+        <x>510</x>
+        <y>50</y>
+        <width>471</width>
+        <height>22</height>
        </rect>
       </property>
-      <property name="font">
-       <font>
-        <family>Arial Rounded MT Bold</family>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="wrapping">
-       <bool>true</bool>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>300</number>
-      </property>
-      <property name="value">
-       <number>1</number>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QPushButton" name="cancelButton">
+     <widget class="QPushButton" name="button_temp">
       <property name="geometry">
        <rect>
-        <x>310</x>
-        <y>0</y>
-        <width>71</width>
+        <x>580</x>
+        <y>70</y>
+        <width>91</width>
         <height>51</height>
        </rect>
       </property>
-      <property name="font">
-       <font>
-        <family>Arial Rounded MT Bold</family>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
       <property name="text">
-       <string>X</string>
+       <string>prev decision</string>
       </property>
      </widget>
-    </widget>
-    <widget class="QPushButton" name="valueButton">
-     <property name="geometry">
-      <rect>
-       <x>1330</x>
-       <y>560</y>
-       <width>131</width>
-       <height>91</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-      </font>
-     </property>
-     <property name="text">
-      <string>Show
-Node Value</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="processButton">
-     <property name="geometry">
-      <rect>
-       <x>1470</x>
-       <y>560</y>
-       <width>131</width>
-       <height>91</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-      </font>
-     </property>
-     <property name="text">
-      <string>Show Firefighter
- Process Time</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="widget_leftbar" native="true">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>20</y>
-      <width>291</width>
-      <height>721</height>
-     </rect>
-    </property>
-    <widget class="QWidget" name="verticalLayoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>281</width>
-       <height>561</height>
-      </rect>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout"/>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>120</y>
-       <width>291</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-       <pointsize>16</pointsize>
-      </font>
-     </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>Firefighter lists:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-    <widget class="QLCDNumber" name="lcd_time">
-     <property name="geometry">
-      <rect>
-       <x>160</x>
-       <y>60</y>
-       <width>101</width>
-       <height>41</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="button_menu">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>61</width>
-       <height>71</height>
-      </rect>
-     </property>
-     <property name="toolTipDuration">
-      <number>0</number>
-     </property>
-     <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset>
-       <normaloff>image/home.png</normaloff>image/home.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>50</width>
-       <height>100</height>
-      </size>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>160</x>
-       <y>20</y>
-       <width>101</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-       <pointsize>16</pointsize>
-      </font>
-     </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>Time</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="button_guide">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>30</y>
-       <width>61</width>
-       <height>71</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset>
-       <normaloff>image/faq.png</normaloff>image/faq.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>45</width>
-       <height>80</height>
-      </size>
-     </property>
-    </widget>
-    <widget class="QLabel" name="selectedFFlabel">
-     <property name="geometry">
-      <rect>
-       <x>200</x>
-       <y>-10</y>
-       <width>120</width>
-       <height>71</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap>image/left_arrow.png</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
+     <widget class="QPushButton" name="button_play">
+      <property name="geometry">
+       <rect>
+        <x>700</x>
+        <y>70</y>
+        <width>51</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="button_stop">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>70</y>
+        <width>51</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pause</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="buttonsetTime">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>70</y>
+        <width>91</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>next decision</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="widget_downbar" native="true">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>1000</y>
+      <x>-1000</x>
+      <y>750</y>
       <width>921</width>
       <height>151</height>
      </rect>
@@ -745,9 +400,6 @@ Node Value</string>
       <property name="minimum">
        <number>1</number>
       </property>
-      <property name="maximum">
-       <number>300</number>
-      </property>
       <property name="value">
        <number>1</number>
       </property>
@@ -801,10 +453,10 @@ Node Value</string>
    <widget class="QWidget" name="widget_downmiddle" native="true">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>1000</y>
+      <x>1140</x>
+      <y>790</y>
       <width>391</width>
-      <height>151</height>
+      <height>111</height>
      </rect>
     </property>
     <widget class="QLabel" name="label_8">
@@ -835,7 +487,7 @@ Node Value</string>
        <x>10</x>
        <y>20</y>
        <width>371</width>
-       <height>121</height>
+       <height>81</height>
       </rect>
      </property>
      <property name="font">
@@ -858,14 +510,11 @@ Node Value</string>
    <widget class="QWidget" name="widget_downright" native="true">
     <property name="geometry">
      <rect>
-      <x>1330</x>
-      <y>750</y>
-      <width>571</width>
-      <height>151</height>
+      <x>10</x>
+      <y>790</y>
+      <width>1121</width>
+      <height>111</height>
      </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
     </property>
     <widget class="QLabel" name="label_9">
      <property name="geometry">
@@ -894,9 +543,170 @@ Node Value</string>
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>551</width>
+       <width>1091</width>
+       <height>81</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="widget_selectbar" native="true">
+    <property name="geometry">
+     <rect>
+      <x>1549</x>
+      <y>0</y>
+      <width>361</width>
+      <height>911</height>
+     </rect>
+    </property>
+    <widget class="QPushButton" name="button_user">
+     <property name="geometry">
+      <rect>
+       <x>-20</x>
+       <y>100</y>
+       <width>381</width>
        <height>121</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>USER</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_model">
+     <property name="geometry">
+      <rect>
+       <x>-20</x>
+       <y>220</y>
+       <width>381</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Model</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_aco">
+     <property name="geometry">
+      <rect>
+       <x>-10</x>
+       <y>340</y>
+       <width>371</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>ACO</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_ga">
+     <property name="geometry">
+      <rect>
+       <x>-10</x>
+       <y>460</y>
+       <width>371</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>GA</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_choose">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>30</y>
+       <width>211</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Choose a solution</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_menu">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>750</y>
+       <width>81</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="toolTipDuration">
+      <number>0</number>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>image/home.png</normaloff>image/home.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_ra">
+     <property name="geometry">
+      <rect>
+       <x>-20</x>
+       <y>580</y>
+       <width>381</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Greedy</string>
      </property>
     </widget>
    </widget>

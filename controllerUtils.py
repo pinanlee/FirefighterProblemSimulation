@@ -7,7 +7,7 @@ import os
 from functools import partial
 import pandas as pd
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
-from PyQt5.QtWidgets import QGraphicsOpacityEffect, QLabel, QSizePolicy, QPushButton, QWidget
+from PyQt5.QtWidgets import QGraphicsOpacityEffect, QLabel, QSizePolicy, QPushButton, QWidget, QGraphicsDropShadowEffect
 from PyQt5 import QtWidgets, QtCore, QtGui
 import math
 from FFSettingsWindow import FFnumWindow
@@ -20,8 +20,6 @@ from dataBase import DataBase
 from results import resultsWindow
 import sys
 from PIL import ImageGrab
-import pygetwindow as gw
-
 
 class AnimationTimer(QTimer):
     def __init__(self) -> None:
@@ -75,22 +73,43 @@ class Controller_Utils:
             uic.loadUi("case1.ui",controller)
             pixmap = QPixmap("image/case1.jpg")
             controller.label_background.setPixmap(pixmap)
+        elif controller.mode == 3:
+            uic.loadUi("simulateWindow.ui", controller)
+            controller.focusIndex = len(controller.nodeList) - 1
+            controller.actionNew.triggered.connect(controller.newNetwork)
+            controller.button_play.clicked.connect(controller.modelTimeSet)
+            controller.button_stop.clicked.connect(controller.stopSimulation)
+            controller.button_temp.clicked.connect(controller.startSimulation)
+            controller.buttonlist.append(controller.button_user)
+            controller.buttonlist.append(controller.button_model)
+            controller.buttonlist.append(controller.button_aco)
+            controller.buttonlist.append(controller.button_ga)
+            controller.buttonlist.append(controller.button_ra)
+            for i in controller.buttonlist:
+                i.setCheckable(True)
+                i.clicked.connect(controller.buttonClicked)
+            controller.button_model.setChecked(True)
 
         controller.button_menu.clicked.connect(controller.backMenu)
         controller.button_menu.setFlat(True)
         opacity_effect = QGraphicsOpacityEffect()
         opacity_effect.setOpacity(0.7)
-        controller.descriptionLabel.setGraphicsEffect(opacity_effect)
-        controller.actionAnimation.triggered.connect(controller.showFFWindow)
+        if controller.mode != 3:
+            controller.descriptionLabel.setGraphicsEffect(opacity_effect)
+            controller.actionAnimation.triggered.connect(controller.showFFWindow)
         controller.idleButton.clicked.connect(controller.assignIdle)
         controller.defendButton.clicked.connect(controller.choose)
         controller.checkBox.toggled.connect(controller.idleLock)
         controller.lcd_time.display(controller.currentTime)
         controller.comboBox_network.activated[str].connect(controller.comboBoxEvent)
-
+        controller.idleWidget.setVisible(False)
+        controller.cancelButton.clicked.connect(controller.cancelIdle)
+        controller.idleButton_2.clicked.connect(controller.assignIdle)
+        controller.valueButton.clicked.connect(controller.showValue)
+        controller.processButton.clicked.connect(controller.showProcess)
     
     def createNetworkInfrastructures(controller):
-        if controller.mode == 1:
+        if controller.mode == 1 or 3:
             controller.FFnetwork =Network(f"{controller.model_dir}.xlsx", depot="N_D")
             controller.fireNetwork = Network(f"{controller.model_dir}.xlsx", depot="N_F")
 
@@ -101,6 +120,7 @@ class Controller_Utils:
     def nodeListInitialize(controller):
         for i in controller.FFnetwork.nodeList:
             node = Node(controller.gamewidget, i)
+            node.raise_()
             if controller.mode == 2:
                 node.setFlat(True)
                 tentList = [1,2,4,6,8,9,10,15,17,18,23]
@@ -119,6 +139,11 @@ class Controller_Utils:
                     # node.setIconSize(controller.size())
             node.clicked.connect(controller.choose)
             node.showSignal.connect(controller.InfoShow)
+            shadow = QGraphicsDropShadowEffect()
+            shadow.setBlurRadius(5)
+            shadow.setXOffset(5)
+            shadow.setYOffset(5)
+            node.setGraphicsEffect(shadow)
             controller.nodeList.append(node)
             controller.totalValue+=node.getValue()    
 
@@ -170,15 +195,17 @@ class Controller_Utils:
                     controller.firefighterList.append(ff)
 
     def UIInformationInitialization(controller):
-        
+        controller.defendHintLabel.setVisible(False)
         controller.progressBar.setMaximum(controller.totalValue)
         controller.progressBar.setValue(controller.totalValue)
 
         controller.label_selectedFF.setText(controller.firefighterList[controller.FFindex].getName()) #UI SETTING: put here because the order of initialization
         
-        controller.firefighterList[controller.FFindex].accessibleVisualize(controller.currentTime, controller.nodeList)
-        # controller.opacitySet()
-        controller.generateblockFF_gameWindow()
+        # controller.firefighterList[controller.FFindex].accessibleVisualize(controller.currentTime, controller.nodeList)
+        
+        if controller.mode != 3:
+            controller.generateblockFF_gameWindow()
+        controller.selectFireFighter(controller.FFindex+1)
         controller.availFF = controller.firefighterNum
         controller.criticalMessage = "firefighter available: {}".format(controller.availFF)
         controller.hintAnimate(controller.criticalMessage)

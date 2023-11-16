@@ -57,10 +57,10 @@
     <widget class="QLabel" name="networkLabel">
      <property name="geometry">
       <rect>
-       <x>1380</x>
-       <y>20</y>
-       <width>211</width>
-       <height>71</height>
+       <x>1330</x>
+       <y>10</y>
+       <width>281</width>
+       <height>41</height>
       </rect>
      </property>
      <property name="font">
@@ -70,7 +70,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Hybrid network</string>
+      <string>Vulnerable Nodes</string>
      </property>
      <property name="wordWrap">
       <bool>false</bool>
@@ -117,7 +117,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Assign firefighters to new position or protect the current node</string>
+       <string>Objective: &quot;contain&quot; the fire (firefighter cannot extinguish fire)</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -223,23 +223,23 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt; Select or press 'S' to switch&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
-    <widget class="QLabel" name="selectedFFlabel">
+    <widget class="QListWidget" name="fireArrivalListWidget">
      <property name="geometry">
       <rect>
-       <x>-40</x>
-       <y>240</y>
-       <width>131</width>
-       <height>71</height>
+       <x>1340</x>
+       <y>70</y>
+       <width>251</width>
+       <height>581</height>
       </rect>
      </property>
-     <property name="text">
-      <string/>
+     <property name="resizeMode">
+      <enum>QListView::Fixed</enum>
      </property>
-     <property name="pixmap">
-      <pixmap>image/left_arrow.png</pixmap>
+     <property name="viewMode">
+      <enum>QListView::IconMode</enum>
      </property>
-     <property name="scaledContents">
-      <bool>true</bool>
+     <property name="sortingEnabled">
+      <bool>false</bool>
      </property>
     </widget>
     <zorder>label_background</zorder>
@@ -247,7 +247,7 @@
     <zorder>widget_progress</zorder>
     <zorder>comboBox_network</zorder>
     <zorder>label_14</zorder>
-    <zorder>selectedFFlabel</zorder>
+    <zorder>fireArrivalListWidget</zorder>
    </widget>
    <widget class="QWidget" name="widget_downbar" native="true">
     <property name="geometry">
@@ -577,6 +577,25 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="selectedFFlabel">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>0</y>
+       <width>131</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>image/left_arrow.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

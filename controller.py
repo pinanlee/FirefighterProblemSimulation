@@ -4,9 +4,11 @@ import json
 import os
 from functools import partial
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
-from PyQt5.QtWidgets import  QLabel, QSizePolicy, QPushButton, QWidget, QProgressBar
 from PyQt5 import QtWidgets, QtGui
 import math
+
+from PyQt5.QtWidgets import QWidget, QGraphicsOpacityEffect
+
 from FFSettingsWindow import FFnumWindow
 from FF import FireFighter
 from node import Node 
@@ -42,17 +44,15 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     mode=1
     blocklist=[]
     nextTimeActivate = False
+    dashlineWidgetList = []
+    showProperty = False
+    showProcessingTime = []
 
     def __init__(self,mode):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
         self.mode = mode
         self.flashtimer = []
         Controller_Utils.UIInitialize(self)
-
-        if os.path.exists("FFInfo.json"):
-            with open("FFInfo.json", 'r') as file:
-                data = json.load(file)
-            self.firefighterNum = int(data["FFnumber"])
         self.subwindows = []
         if os.path.exists("filename.json"):
             with open("filename.json", 'r') as file:
@@ -110,24 +110,31 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def showProblem(self):
         self.inst.show()
 
+    def cancelIdle(self):
+        self.setStyleSheet("")
+        self.idleWidget.setVisible(False)
+        self.descriptionLabel.setVisible(True)
+
     def assignIdle(self):
+        self.cancelIdle()
+        self.idleWidget.setVisible(False)
         if(self.currentSelectedFF().isSelected()):
             self.descriptionAnimate("Invaild assignment: No available firefighter")
             return 
         
-        if(self.currentSelectedFF().curPos().getFireMinArrivalTime() < self.currentTime + self.spinBox.value()):
+        if(self.currentSelectedFF().curPos().getFireMinArrivalTime() < self.currentTime + self.spinBox_2.value()):
             self.descriptionAnimate("Invaild assignment: fire will arrive during idle")
             return
 
         self.availFF -= 1
-        self.descriptionAnimate("Assign sucessful! : {} idle for {} time step(s)".format(self.currentSelectedFF().getName(), self.spinBox.value()))
+        self.descriptionAnimate("Assign sucessful! : {} idle for {} time step(s)".format(self.currentSelectedFF().getName(), self.spinBox_2.value()))
         self.nextTime()
         return "assign idle"
 
     def idleLock(self):
         if(self.checkBox.isChecked()):
-            self.spinBox.setValue(300)
-        self.spinBox.setEnabled(not self.checkBox.isChecked())
+            self.spinBox_2.setValue(300)
+        self.spinBox_2.setEnabled(not self.checkBox.isChecked())
 
     def currentSelectedFF(self):
         print(self.FFindex)
@@ -154,6 +161,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in self.FFnetwork.nodeList:
             i.setFireMinArrivalTime(self.fireNetwork.nodeList[i.getNum()-1].getFireMinArrivalTime())
 
+        self.FFnetwork.nodeList.sort(key= lambda x : x.getFireMinArrivalTime())
+        self.fireArrivalListWidget.clear()
+        for index, i in enumerate(self.FFnetwork.nodeList):
+            time = i.getFireMinArrivalTime()
+            if time > 0 and time < 10000:
+                self.fireArrivalListWidget.addItem(f"{index}. node {i.getNum()} (will burn at time {time})")
 
     '''------------------------------------------fire signal---------------------------------------------'''
     def fireSignalDetermination(self, text, opacity = 0, no = 0):
@@ -173,7 +186,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.nodeList[no-1].setStyle(f'background-color: rgba(255, 0, 0, {opacity}); color: white;')
         if(opacity==1):
             self.nodeList[no - 1].setStyle(f'background-color: rgba(139, 0, 0, {opacity}); color: white;')
-            
+
         self.nodeList[no-1].setStyleSheet(self.nodeList[no-1].getStyle())
         self.totalValue = self.fireNetwork.getTotalValue()
         self.progressBar.setValue(self.totalValue)
@@ -194,12 +207,21 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.networkChange()
             if(a0.key() == Qt.Key_N):
                 self.newNetwork()
+            if(a0.key() == Qt.Key_D):
+                self.focusIndex = self.currentSelectedFF().curPos().getNum()-1
+                self.choose()
+            if(a0.key() == Qt.Key_I):
+                self.idleWidget.setVisible(True)
+                self.idleWidget.setStyleSheet("border: 2px solid ;background-color: white;")
+                self.idleWidget.raise_()
+                self.setStyleSheet("background-color: grey;")
+                self.descriptionLabel.setVisible(False)
             if(a0.key() == Qt.Key_Q):
                 self.finish()
-            if(a0.key() == Qt.Key_X):
-                self.showProperty(1)
-            if(a0.key() == Qt.Key_Z):
-                self.showProperty(0)
+            # if(a0.key() == Qt.Key_X):
+            #     self.showProperty(1)
+            # if(a0.key() == Qt.Key_Z):
+            #     self.showProperty(0)
             if(a0.key() == Qt.Key_A):
                 self.modelTimeSet()
 
@@ -207,22 +229,46 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in self.nodeList:
             i.grassVisualize.hide()
 
-    def showProperty(self, key):
-        for i in self.nodeList:
-            if(key):
-                i.grassVisualize.showGrassValue()
-                i.grassVisualize.setText(str(math.ceil(i.getProcessingTime()/self.currentSelectedFF().rate_extinguish)))
-            else:
+    # def showProperty(self, key):
+    #     for i in self.nodeList:
+    #         if(key):
+    #             i.grassVisualize.showGrassValue()
+    #             i.grassVisualize.setText(str(math.ceil(i.getProcessingTime()/self.currentSelectedFF().rate_extinguish)))
+    #         else:
+    #             i.grassVisualize.showValue()
+    #             i.grassVisualize.setText(str(i.getValue()))
+    #         i.grassVisualize.show()
+
+    def showValue(self):
+        if not self.showProperty:
+            self.showProperty = True
+            for i in self.nodeList:
                 i.grassVisualize.showValue()
                 i.grassVisualize.setText(str(i.getValue()))
-            i.grassVisualize.show()
+                i.grassVisualize.show()
+                i.grassVisualize.raise_()
+        else:
+            self.showProperty = False
+            for i in self.nodeList:
+                i.grassVisualize.hide() 
+
+    def showProcess(self):
+        if not self.showProcessingTime:
+            self.showProcessingTime = True
+            for i in self.nodeList:
+                i.grassVisualize.showGrassValue()
+                i.grassVisualize.setText(str(math.ceil(i.getProcessingTime()/self.currentSelectedFF().rate_extinguish)))
+                i.grassVisualize.show()
+                i.grassVisualize.raise_()
+        else:
+            self.showProcessingTime = False
+            for i in self.nodeList:
+                i.grassVisualize.hide() 
 
     def newNetwork(self):
         from randomPlanarGraph.GenerateGraph import generate_test_data
         generate_test_data(20, 35, 35, 1)
         self.model_dir = "./randomPlanarGraph/data/FFP_n20_no1"
-        # for _, _, files in os.walk("./randomPlanarGraph/data/"):
-        #     self.model_dir = "./randomPlanarGraph/data" + files[self.__num-1:-5]
         for i in self.nodeList:
             i.deleteLater()
         for i in self.firefighterList:
@@ -296,8 +342,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.descriptionLabel.setText(text)
             self.descriptionLabel.raise_()
             self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
-            self.anim.setStartValue(QPoint(2200, 600))
-            self.anim.setEndValue(QPoint(800, 600))
+            self.anim.setStartValue(QPoint(-1200, 800))
+            self.anim.setEndValue(QPoint(0, 800))
             self.anim.setDuration(250)
             
         initAnim(self)
@@ -337,6 +383,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.hintAnimate(text)
 
     def selectFireFighter(self, index): #切換選擇消防員
+        
         self.currentSelectedFF().closeaccessibleVisualize(self.nodeList)
         self.FFindex = index - 1
         self.opacitySet()
@@ -346,6 +393,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.currentSelectedFF().accessibleVisualize(self.currentTime, self.nodeList)
         # self.refreshBlock()
         self.label_selectedFF.setText(self.currentSelectedFF().getName())
+        self.ffAccess_DashlineAnimation()
 
     def opacitySet(self): #調整FF的opacity
         for index,block in enumerate(self.blocklist):
@@ -368,7 +416,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def choose(self): #指派消防員移動至給定node
         send = None
         if(not self.modelTest):
-            send = self.currentSelectedFF().curPos() if self.sender().objectName() == "defendButton" else self.sender()
+            if self.sender() == None:
+                send = self.nodeList[self.focusIndex]
+            else:
+                send = self.currentSelectedFF().curPos() if self.sender().objectName() == "defendButton" else self.sender()
         else:
             send = self.nodeList[self.focusIndex]
         text = self.checkStatus(send)
@@ -380,6 +431,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return text
 
     def refreshBlock(self):
+        
         for index,block in enumerate(self.blocklist):
             block.setStatus(self.firefighterList[index].getStatus())
             # block.title_label_ready_des.setText(self.firefighterList[index].getStatus())
@@ -396,7 +448,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return text
         
     def nextTime(self): #跳轉至下一個時間點
-        def timeSkip():           
+        def timeSkip():
             Controller_Utils.screenshot(self.screenshot_range, self.currentTime)
             self.currentTime+=1
 
@@ -414,6 +466,13 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.selectFireFighter(finishList[0])
                 self.descriptionAnimate("firefighter {} has finished task".format(text[:-2]))
                 
+                self.defendHintLabel.setVisible(True)
+                opacity_effect = QGraphicsOpacityEffect()
+                opacity_effect.setOpacity(0.9)
+                self.defendHintLabel.setGraphicsEffect(opacity_effect)
+                self.defendHintLabel.setGeometry(self.currentSelectedFF().x()+30, self.currentSelectedFF().y(), self.defendHintLabel.width(), self.defendHintLabel.height())
+                self.defendHintLabel.lower()
+
                 self.refreshBlock()
             Controller_Utils.fireSpreadLogic(self.fire)
             
@@ -425,13 +484,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.finish()
                 return
 
+
+        self.deleteDashWidget()
         if(not self.availFF):
             self.nextTimeActivate = True
             for ff in self.firefighterList:
                 if(not (ff.isTraveling() or ff.isProcess())):
-                    ff.finishTimeSet(self.spinBox.value())
+                    ff.finishTimeSet(self.spinBox_2.value())
                     ff.closeaccessibleVisualize(self.nodeList)
                 ff.move()
+            
             self.timer = AnimationTimer()
             self.timer.timeout.connect(timeSkip)
             self.timer.start()
@@ -443,6 +505,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.flashTimerActivate(self.blocklist[i.getNum()-1])
                     break
             self.howManyAvail()
+        self.defendHintLabel.setVisible(False)    
         self.refreshBlock()
 
     def onSubWindowPageChanged(self, index):
@@ -526,6 +589,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.update()
         qpainter.end()
 
+
     def closeEvent(self, event): #當主視窗關閉時關閉全部視窗
         # if os.path.exists("FFInfo.json"):
         #     os.remove("FFInfo.json")
@@ -574,3 +638,68 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.showFFnetwork = True
             self.showFireNetwork = False
         self.networkChange()
+
+    def dashlineAnimation(self,parent,x1,y1,x2,y2):
+        dash_widget = QWidget(parent)
+        dash_widget.raise_()
+        # dash_widget.setStyleSheet(f'background-color: red;') //用來看dash_widget大小的
+        for tmp in self.nodeList:
+            tmp.raise_()
+        dash_widget.setGeometry(0, 0, 1000, 1000)
+        dash_widget.length = 6
+        dash_widget.width = 4
+        dash_widget.lineStep = 1
+        dash_widget.speed = 100
+        dash_widget.lineColor = Qt.blue
+        dash_widget.dashes = dash_widget.length
+        dash_widget.spaces = dash_widget.length
+        dash_widget.dashPattern = [dash_widget.length] * 20
+        dash_widget.timer = QTimer(dash_widget)
+        dash_widget.timer.timeout.connect(lambda: updateLine(dash_widget))
+        dash_widget.timer.start(dash_widget.speed)
+
+        def paintEvent(event):
+            painter = QPainter(dash_widget)
+            painter.setRenderHints(QPainter.Antialiasing)
+            pen = QPen()
+            pen.setWidth(dash_widget.width)
+            pen.setColor(dash_widget.lineColor)
+            pen.setDashPattern(dash_widget.dashPattern)
+            painter.setPen(pen)
+            start = QPointF(x1,y1)
+            end = QPointF(x2,y2)
+            painter.drawLine(start,end)
+            
+        def updateLine(widget):
+            if widget.dashes == widget.length and widget.spaces == widget.length:
+                widget.dashes = 0
+                widget.spaces = 0
+            if widget.dashes == 0 and widget.spaces < widget.length:
+                widget.spaces += widget.lineStep
+            elif widget.spaces == widget.length and widget.dashes < widget.length:
+                widget.dashes += widget.lineStep
+            widget.dashPattern[0] = widget.dashes
+            widget.dashPattern[1] = widget.spaces
+            widget.update()
+
+        dash_widget.paintEvent = paintEvent
+        dash_widget.updateValue = updateLine
+        return dash_widget
+
+    def ffAccess_DashlineAnimation(self):
+        i=self.currentSelectedFF()
+        for j in (i.curPos().getNeighbors()):
+            node = i.curPos()
+            x1 = node.x()+ node.width() / 2
+            y1 = node.y() + node.height() / 2
+            x2 = j.x() + j.width() / 2
+            y2 = j.y() + j.height() / 2
+            drawingWidget = self.dashlineAnimation(self.gamewidget,x1,y1,x2,y2)
+            self.dashlineWidgetList.append(drawingWidget)
+            drawingWidget.show()
+
+    def deleteDashWidget(self):
+        for i in self.dashlineWidgetList:
+            i.deleteLater()
+        print(self.dashlineWidgetList)
+        self.dashlineWidgetList = []

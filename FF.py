@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QPixmap
 from node import Node
-from PyQt5.QtCore import QTimer, pyqtSignal, QRect, Qt
+from PyQt5.QtCore import QTimer, pyqtSignal, QRect
 from PyQt5.QtWidgets import QLabel, QGraphicsOpacityEffect
 import math
 import os
@@ -215,16 +215,16 @@ class FireFighter(QLabel):
         self.timer_arrow.timeout.connect(arrowAnimation)
         self.timer_arrow.start(200)
 
+
         if(not self.isTraveling() or not self.isProcess()):
             accessibleNeighbors = [neighbor for neighbor in self.curPos().getNeighbors() if not neighbor.isBurned()]
             if(not accessibleNeighbors):
                 self.FFSignal.emit("trapped", self.__num)
             for i in accessibleNeighbors:
                 if (i.getFireMinArrivalTime() >= timer + math.ceil(self.curPos().getArc(i)["travel-time"][f"{self.__num}"])):
-                    i.timer_nodeOpacity.start(100)                
+                    i.timer_nodeOpacity.start(100)
             for i in (self.curPos().getNeighbors()):
                 i.setFlat(False)
-
             if(not self.curPos().isProtected()):
                 self.curPos().timer_nodeOpacity.start(100)
 
@@ -235,8 +235,6 @@ class FireFighter(QLabel):
         self.timer_arrow.stop()
 
         for i in lst:
-            if not i.isBurned:
-                i.setFlat(False)
             i.setStyleSheet(i.getStyle())
             i.timer_nodeOpacity.stop()
 
