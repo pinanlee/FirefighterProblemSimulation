@@ -7,7 +7,7 @@ from PyQt5.QtCore import QTimer, QPropertyAnimation, QPoint, Qt, QPointF
 from PyQt5 import QtWidgets, QtGui
 import math
 
-from PyQt5.QtWidgets import QWidget, QGraphicsOpacityEffect
+from PyQt5.QtWidgets import QWidget, QGraphicsOpacityEffect, QListWidgetItem
 
 from FFSettingsWindow import FFnumWindow
 from FF import FireFighter
@@ -47,6 +47,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     dashlineWidgetList = []
     showProperty = False
     showProcessingTime = []
+    decisionRecordList = []
 
     def __init__(self,mode):
         super().__init__() # in python3, super(Class, self).xxx = super().xxx
@@ -62,6 +63,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.window_FFnum = FFnumWindow()
         self.window_FFnum.window_FF.updateFFnumSignal.connect(self.newFFnum)
         self.block_completelist = []
+        self.ffAccess_DashlineAnimation()
+        self.move_downbar()
+        self.make_draggable(self.widget_downbar)
 
 
     '''------------------------------------初始化--------------------------------------------------------'''
@@ -165,8 +169,18 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.fireArrivalListWidget.clear()
         for index, i in enumerate(self.FFnetwork.nodeList):
             time = i.getFireMinArrivalTime()
-            if time > 0 and time < 10000:
-                self.fireArrivalListWidget.addItem(f"{index}. node {i.getNum()} (will burn at time {time})")
+            if time > 0 and time < 10000 and not i.isBurned():
+                item = QListWidgetItem(f"node {i.getNum()} (burn at time {time})")
+                font = QFont("Arial Rounded MT bold", 12)
+                item.setFont(font)
+                self.fireArrivalListWidget.addItem(item)
+        self.fireArrivalListWidget.itemClicked.connect(self.on_item_clicked)
+                
+    def on_item_clicked(self, item):
+        test = item.text().split()
+        self.nodeList[int(test[1]) - 1].grassVisualize.showValue()
+        self.nodeList[int(test[1]) - 1].grassVisualize.setText(str(self.nodeList[int(test[1]) - 1].getValue()))
+        self.nodeList[int(test[1]) - 1].grassVisualize.raise_()
 
     '''------------------------------------------fire signal---------------------------------------------'''
     def fireSignalDetermination(self, text, opacity = 0, no = 0):
@@ -211,11 +225,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.focusIndex = self.currentSelectedFF().curPos().getNum()-1
                 self.choose()
             if(a0.key() == Qt.Key_I):
-                self.idleWidget.setVisible(True)
-                self.idleWidget.setStyleSheet("border: 2px solid ;background-color: white;")
-                self.idleWidget.raise_()
-                self.setStyleSheet("background-color: grey;")
-                self.descriptionLabel.setVisible(False)
+                self.showAdvanceIdle()
             if(a0.key() == Qt.Key_Q):
                 self.finish()
             # if(a0.key() == Qt.Key_X):
@@ -229,6 +239,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in self.nodeList:
             i.grassVisualize.hide()
 
+    def showAdvanceIdle(self):
+        self.idleWidget.setVisible(True)
+        self.idleWidget.setStyleSheet("border: 2px solid ;background-color: white;")
+        self.idleWidget.raise_()
+        self.setStyleSheet("background-color: grey;")
+        self.descriptionLabel.setVisible(False)        
     # def showProperty(self, key):
     #     for i in self.nodeList:
     #         if(key):
@@ -330,8 +346,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def __nextAnim(self):
         self.anim.stop()
         self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
-        self.anim.setStartValue(QPoint(800, 710))
-        self.anim.setEndValue(QPoint(2200, 710))
+        self.anim.setStartValue(QPoint(300, 690))
+        self.anim.setEndValue(QPoint(2200, 680))
         self.anim.setDuration(250)
         def start():
             self.anim.start()
@@ -342,10 +358,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             self.descriptionLabel.setText(text)
             self.descriptionLabel.raise_()
             self.anim = QPropertyAnimation(self.descriptionLabel, b"pos")
-            self.anim.setStartValue(QPoint(-1200, 800))
-            self.anim.setEndValue(QPoint(0, 800))
-            self.anim.setDuration(250)
-            
+            self.anim.setStartValue(QPoint(-1200, 680))
+            self.anim.setEndValue(QPoint(300, 680))
+            self.anim.setDuration(150)
+            self.anim.finished.connect(self.__nextAnim)
         initAnim(self)
         self.anim.start()
 
@@ -431,7 +447,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return text
 
     def refreshBlock(self):
-        
         for index,block in enumerate(self.blocklist):
             block.setStatus(self.firefighterList[index].getStatus())
             # block.title_label_ready_des.setText(self.firefighterList[index].getStatus())
@@ -464,20 +479,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.flashTimerActivate(self.blocklist[i-1])
                     text += str(i) + ", "
                 self.selectFireFighter(finishList[0])
-                self.descriptionAnimate("firefighter {} has finished task".format(text[:-2]))
-                
-                self.defendHintLabel.setVisible(True)
-                opacity_effect = QGraphicsOpacityEffect()
-                opacity_effect.setOpacity(0.9)
-                self.defendHintLabel.setGraphicsEffect(opacity_effect)
-                self.defendHintLabel.setGeometry(self.currentSelectedFF().x()+30, self.currentSelectedFF().y(), self.defendHintLabel.width(), self.defendHintLabel.height())
-                self.defendHintLabel.lower()
+                # self.descriptionAnimate("firefighter {} has finished task".format(text[:-2]))
+
 
                 self.refreshBlock()
+                self.ffAccess_DashlineAnimation()
+                self.move_downbar()
             Controller_Utils.fireSpreadLogic(self.fire)
-            
+            self.decisionRecordList.append(self.record())
+            print(f'self.decisionRecordList{self.decisionRecordList}')
             self.lcd_time.display(self.currentTime)
-            
 
             self.gameTerminated = all(i.isComplete() for i in self.fire) or self.currentTime == DataBase.T
             if self.gameTerminated:
@@ -488,6 +499,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.deleteDashWidget()
         if(not self.availFF):
             self.nextTimeActivate = True
+
+            self.deleteDashWidget()
+            self.widget_downbar.setVisible(False)
+            
             for ff in self.firefighterList:
                 if(not (ff.isTraveling() or ff.isProcess())):
                     ff.finishTimeSet(self.spinBox_2.value())
@@ -505,7 +520,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                     self.flashTimerActivate(self.blocklist[i.getNum()-1])
                     break
             self.howManyAvail()
-        self.defendHintLabel.setVisible(False)    
         self.refreshBlock()
 
     def onSubWindowPageChanged(self, index):
@@ -645,9 +659,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # dash_widget.setStyleSheet(f'background-color: red;') //用來看dash_widget大小的
         for tmp in self.nodeList:
             tmp.raise_()
+        self.widget_downbar.raise_()
         dash_widget.setGeometry(0, 0, 1000, 1000)
         dash_widget.length = 6
-        dash_widget.width = 4
+        dash_widget.width = 5
         dash_widget.lineStep = 1
         dash_widget.speed = 100
         dash_widget.lineColor = Qt.blue
@@ -669,7 +684,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             start = QPointF(x1,y1)
             end = QPointF(x2,y2)
             painter.drawLine(start,end)
-            
+            painter.end()
         def updateLine(widget):
             if widget.dashes == widget.length and widget.spaces == widget.length:
                 widget.dashes = 0
@@ -684,6 +699,7 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
         dash_widget.paintEvent = paintEvent
         dash_widget.updateValue = updateLine
+
         return dash_widget
 
     def ffAccess_DashlineAnimation(self):
@@ -701,5 +717,46 @@ class MainWindow_controller(QtWidgets.QMainWindow):
     def deleteDashWidget(self):
         for i in self.dashlineWidgetList:
             i.deleteLater()
-        print(self.dashlineWidgetList)
         self.dashlineWidgetList = []
+
+    def move_downbar(self):
+        self.widget_downbar.setVisible(True)
+        loc_x = self.firefighterList[self.FFindex].x() + self.firefighterList[self.FFindex].width()
+        loc_y = self.firefighterList[self.FFindex].y()
+        self.widget_downbar.move(loc_x,loc_y)
+    def make_draggable(self,widget):
+        dragging = False
+        offset = QPoint()
+
+        def on_mouse_press(event):
+            nonlocal dragging, offset #nonlocal: 讓巢狀function的內部function同步修改外部variable值
+            if event.buttons() == Qt.LeftButton:
+                dragging = True
+                offset = event.pos()
+        def on_mouse_move(event):
+            nonlocal dragging, offset
+            if dragging:
+                widget.move(widget.mapToParent(event.pos() - offset))
+        def on_mouse_release(event):
+            nonlocal dragging
+            if event.button() == Qt.LeftButton:
+                dragging = False
+
+        widget.mousePressEvent = on_mouse_press
+        widget.mouseMoveEvent = on_mouse_move
+        widget.mouseReleaseEvent = on_mouse_release
+
+    def record(self):
+        timestamp_dict = {"FF":[],"Node":[],"Arc":[]}
+        def recordFF():
+            for i in self.firefighterList:
+                loc_x = i.x()
+                loc_y = i.y()
+                timestamp_dict["FF"].append((loc_x,loc_y))
+        recordFF()
+        print(timestamp_dict)
+        # def recordNode():
+        #     print("FF")
+        # def recordArc():
+        #     print("FF")
+        return timestamp_dict

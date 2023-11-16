@@ -97,7 +97,7 @@ class Controller_Utils:
         if controller.mode != 3:
             controller.descriptionLabel.setGraphicsEffect(opacity_effect)
             controller.actionAnimation.triggered.connect(controller.showFFWindow)
-        controller.idleButton.clicked.connect(controller.assignIdle)
+        controller.idleButton.clicked.connect(controller.showAdvanceIdle)
         controller.defendButton.clicked.connect(controller.choose)
         controller.checkBox.toggled.connect(controller.idleLock)
         controller.lcd_time.display(controller.currentTime)
@@ -107,6 +107,7 @@ class Controller_Utils:
         controller.idleButton_2.clicked.connect(controller.assignIdle)
         controller.valueButton.clicked.connect(controller.showValue)
         controller.processButton.clicked.connect(controller.showProcess)
+        
     
     def createNetworkInfrastructures(controller):
         if controller.mode == 1 or 3:
@@ -195,7 +196,6 @@ class Controller_Utils:
                     controller.firefighterList.append(ff)
 
     def UIInformationInitialization(controller):
-        controller.defendHintLabel.setVisible(False)
         controller.progressBar.setMaximum(controller.totalValue)
         controller.progressBar.setValue(controller.totalValue)
 
