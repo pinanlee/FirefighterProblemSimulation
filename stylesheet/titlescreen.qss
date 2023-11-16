@@ -87,6 +87,9 @@
 }
 #widget_downbar {
     background-color: #C6D3DB;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 10px;
 }
 #widget_downmiddle {
     background-color: #C6D3DB;

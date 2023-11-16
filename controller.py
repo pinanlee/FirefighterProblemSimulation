@@ -59,6 +59,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.window_FFnum = FFnumWindow()
         self.window_FFnum.window_FF.updateFFnumSignal.connect(self.newFFnum)
         self.block_completelist = []
+        self.ffAccess_DashlineAnimation()
+        self.move_downbar()
+        self.make_draggable(self.widget_downbar)
 
 
     '''------------------------------------初始化--------------------------------------------------------'''
@@ -380,7 +383,6 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         return text
 
     def refreshBlock(self):
-        self.ffAccess_DashlineAnimation()
         for index,block in enumerate(self.blocklist):
             block.setStatus(self.firefighterList[index].getStatus())
             # block.title_label_ready_des.setText(self.firefighterList[index].getStatus())
@@ -419,10 +421,11 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 self.descriptionAnimate("firefighter {} has finished task".format(text[:-2]))
                 
                 self.refreshBlock()
+                self.ffAccess_DashlineAnimation()
+                self.move_downbar()
             Controller_Utils.fireSpreadLogic(self.fire)
             
             self.lcd_time.display(self.currentTime)
-            
 
             self.gameTerminated = all(i.isComplete() for i in self.fire) or self.currentTime == DataBase.T
             if self.gameTerminated:
@@ -430,6 +433,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
                 return
 
         if(not self.availFF):
+            self.deleteDashWidget()
+            self.widget_downbar.setVisible(False)
             
             for ff in self.firefighterList:
                 if(not (ff.isTraveling() or ff.isProcess())):
@@ -586,9 +591,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         # dash_widget.setStyleSheet(f'background-color: red;') //用來看dash_widget大小的
         for tmp in self.nodeList:
             tmp.raise_()
+        self.widget_downbar.raise_()
         dash_widget.setGeometry(0, 0, 1000, 1000)
         dash_widget.length = 6
-        dash_widget.width = 4
+        dash_widget.width = 5
         dash_widget.lineStep = 1
         dash_widget.speed = 100
         dash_widget.lineColor = Qt.blue
@@ -643,3 +649,30 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         for i in self.dashlineWidgetList:
             i.deleteLater()
         self.dashlineWidgetList = []
+
+    def move_downbar(self):
+        self.widget_downbar.setVisible(True)
+        loc_x = self.firefighterList[self.FFindex].x() + self.firefighterList[self.FFindex].width()
+        loc_y = self.firefighterList[self.FFindex].y()
+        self.widget_downbar.move(loc_x,loc_y)
+    def make_draggable(self,widget):
+        dragging = False
+        offset = QPoint()
+
+        def on_mouse_press(event):
+            nonlocal dragging, offset #nonlocal: 讓巢狀function的內部function同步修改外部variable值
+            if event.buttons() == Qt.LeftButton:
+                dragging = True
+                offset = event.pos()
+        def on_mouse_move(event):
+            nonlocal dragging, offset
+            if dragging:
+                widget.move(widget.mapToParent(event.pos() - offset))
+        def on_mouse_release(event):
+            nonlocal dragging
+            if event.button() == Qt.LeftButton:
+                dragging = False
+
+        widget.mousePressEvent = on_mouse_press
+        widget.mouseMoveEvent = on_mouse_move
+        widget.mouseReleaseEvent = on_mouse_release
