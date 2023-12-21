@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Firefighter Problem Simulation</string>
+   <string>FF Simulator</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="contextMenuPolicy">

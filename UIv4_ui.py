@@ -89,14 +89,6 @@ class Ui_MainWindow(object):
         self.label_11.setGeometry(QtCore.QRect(270, 630, 211, 16))
         self.label_11.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_11.setObjectName("label_11")
-        self.label_12 = QtWidgets.QLabel(self.gamewidget)
-        self.label_12.setGeometry(QtCore.QRect(1100, 460, 211, 61))
-        font = QtGui.QFont()
-        font.setFamily("Arial Rounded MT Bold")
-        self.label_12.setFont(font)
-        self.label_12.setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0625 rgba(255, 255, 255, 255), stop:0.511364 rgba(255, 85, 0, 255), stop:1 rgba(255, 255, 255, 255));")
-        self.label_12.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_12.setObjectName("label_12")
         self.fireArrivalListWidget = QtWidgets.QListWidget(self.gamewidget)
         self.fireArrivalListWidget.setGeometry(QtCore.QRect(1330, 70, 271, 471))
         self.fireArrivalListWidget.setResizeMode(QtWidgets.QListView.Fixed)
@@ -327,12 +319,11 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Firefighter Problem Simulation"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "FF Simulator"))
         self.descriptionLabel.setText(_translate("MainWindow", "TextLabel"))
         self.defendButton.setText(_translate("MainWindow", "Defend"))
         self.idleButton.setText(_translate("MainWindow", "Idle"))
         self.networkLabel.setText(_translate("MainWindow", "Vulnerable Nodes:"))
-        self.label_12.setText(_translate("MainWindow", "problem objective"))
         self.fireArrivalListWidget.setSortingEnabled(False)
         self.idleButton_2.setText(_translate("MainWindow", "Idle"))
         self.label_15.setText(_translate("MainWindow", "Set Idle time:"))

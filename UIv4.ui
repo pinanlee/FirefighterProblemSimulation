@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Firefighter Problem Simulation</string>
+   <string>FF Simulator</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -206,30 +206,6 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_12">
-     <property name="geometry">
-      <rect>
-       <x>1100</x>
-       <y>460</y>
-       <width>211</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Arial Rounded MT Bold</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0625 rgba(255, 255, 255, 255), stop:0.511364 rgba(255, 85, 0, 255), stop:1 rgba(255, 255, 255, 255));</string>
-     </property>
-     <property name="text">
-      <string>problem objective</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
      </property>
     </widget>
     <widget class="QListWidget" name="fireArrivalListWidget">

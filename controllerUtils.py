@@ -102,12 +102,6 @@ class Controller_Utils:
         controller.checkBox.toggled.connect(controller.idleLock)
         controller.lcd_time.display(controller.currentTime)
         controller.comboBox_network.activated[str].connect(controller.comboBoxEvent)
-        controller.idleWidget.setVisible(False)
-        controller.cancelButton.clicked.connect(controller.cancelIdle)
-        controller.idleButton_2.clicked.connect(controller.assignIdle)
-        controller.valueButton.clicked.connect(controller.showValue)
-        controller.processButton.clicked.connect(controller.showProcess)
-        
     
     def createNetworkInfrastructures(controller):
         if controller.mode == 1 or 3:

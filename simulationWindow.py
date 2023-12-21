@@ -72,6 +72,14 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.modelTime.setInterval(300)
         self.modelTime.start()
 
+    def showAdvanceIdle(self):
+        return
+        self.idleWidget.setVisible(True)
+        self.idleWidget.setStyleSheet("border: 2px solid ;background-color: white;")
+        self.idleWidget.raise_()
+        self.setStyleSheet("background-color: grey;")
+        self.descriptionLabel.setVisible(False)   
+
     def modelAuto(self):
         assignCandidate = [self.temp[s - 1][0] for s in DataBase.K]
         assignCandidate.sort(key=lambda x: x[3])

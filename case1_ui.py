@@ -305,7 +305,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Firefighter Problem Simulation"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "FF Simulator"))
         self.descriptionLabel.setText(_translate("MainWindow", "TextLabel"))
         self.networkLabel.setText(_translate("MainWindow", "Vulnerable Nodes"))
         self.fireArrivalListWidget.setSortingEnabled(False)

@@ -4,9 +4,9 @@ import random
 from randomPlanarGraph import graphops 
 from randomPlanarGraph import graphio
 
-width=1500  #1000
+width=1200  #1000
 height=550 #1000
-node=30
+node=10
 # fire_edges=55
 # firefighter_edges=70
 # seed=120
@@ -129,7 +129,7 @@ if __name__=='__main__':
 		"debug_tris": None,
 		"debug_span": None,
 	}
-	generate_test_data(20, 35, 35, 1)
+	generate_test_data(15, 30, 30, 1)
 	# # argument types, for input-checking
 	# def posint(string):
 	# 	value = int(string)

@@ -75,7 +75,12 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         Controller_Utils.nodeConnection(self)
         Controller_Utils.depotInitialize(self)
         Controller_Utils.UIInformationInitialization(self)
-        
+        self.idleWidget.setVisible(False)
+        self.idleButton_2.clicked.connect(self.assignIdle)        
+        self.cancelButton.clicked.connect(self.cancelIdle)
+        self.valueButton.clicked.connect(self.showValue)
+        self.processButton.clicked.connect(self.showProcess)
+
     def modelTimeSet(self):
         Controller_Utils.getModelSolution(self)
         self.modelTime = QTimer()
@@ -220,7 +225,9 @@ class MainWindow_controller(QtWidgets.QMainWindow):
             if(a0.key() == Qt.Key_S):
                 self.networkChange()
             if(a0.key() == Qt.Key_N):
+                self.deleteDashWidget()
                 self.newNetwork()
+
             if(a0.key() == Qt.Key_D):
                 self.focusIndex = self.currentSelectedFF().curPos().getNum()-1
                 self.choose()
@@ -283,8 +290,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def newNetwork(self):
         from randomPlanarGraph.GenerateGraph import generate_test_data
-        generate_test_data(20, 35, 35, 1)
-        self.model_dir = "./randomPlanarGraph/data/FFP_n20_no1"
+        generate_test_data(15, 25, 35, 1)
+        self.model_dir = "./randomPlanarGraph/data/FFP_n15_no1"
         for i in self.nodeList:
             i.deleteLater()
         for i in self.firefighterList:

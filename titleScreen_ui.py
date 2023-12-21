@@ -92,11 +92,17 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addItem(spacerItem)
         self.stackedWidget = QtWidgets.QStackedWidget(self.widget_3)
         self.stackedWidget.setGeometry(QtCore.QRect(10, 70, 561, 381))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(12)
+        self.stackedWidget.setFont(font)
         self.stackedWidget.setObjectName("stackedWidget")
         self.page = QtWidgets.QWidget()
         self.page.setObjectName("page")
         self.label_2 = QtWidgets.QLabel(self.page)
-        self.label_2.setGeometry(QtCore.QRect(10, 20, 511, 111))
+        self.label_2.setGeometry(QtCore.QRect(10, 20, 511, 361))
+        self.label_2.setScaledContents(False)
+        self.label_2.setWordWrap(True)
         self.label_2.setObjectName("label_2")
         self.stackedWidget.addWidget(self.page)
         self.page_2 = QtWidgets.QWidget()
@@ -124,6 +130,7 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_3.setFont(font)
+        self.label_3.setWordWrap(True)
         self.label_3.setObjectName("label_3")
         self.stackedWidget.addWidget(self.page_3)
         self.page_4 = QtWidgets.QWidget()
@@ -193,7 +200,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -205,9 +212,7 @@ class Ui_MainWindow(object):
         self.button_home.setText(_translate("MainWindow", "Introduction"))
         self.button_simulation.setText(_translate("MainWindow", "Simulation Player"))
         self.lable_pagetitle.setText(_translate("MainWindow", "FireFighter Simulator"))
-        self.label_2.setText(_translate("MainWindow", "Due to global climate change, forest fires are causing severe ecological damage in many areas. Effectively containing the spread of fires has become an important issue that is highly relevant to the “firefighter problem” in operational research and graph theory. The firefighter problem aims to determine the optimal assignment of firefighters to protect the maximum number of nodes from catching fire. However, the traditional firefighter problem overly simplifies assumptions by modeling fire spread speed as constant and mandating that fire spreads across one edge per time unit. It also unrealistically assumes that firefighters can teleport between nodes instantly. In addition, fuel management for wildfire control focuses on managing flammable vegetation in forests and wilderness to reduce fire risk and impact. This study proposes incorporating fuel management data on each node’s value (resource richness), risk, estimated burn time, and bidirectional fire spread speed across edges into the firefighter problem formulation. We also impose more realistic constraints of firefighters traversing edges at a fixed speed and requiring a certain protection time at each node. This yields a practical moving firefighter problem for determining the minimum-loss firefighting strategy.\n"
-"In this problem, fire spreads from burned nodes to adjacent unprotected nodes, while firefighters can move from their current node to unburned nodes to protect them before proceeding along edges. \n"
-""))
+        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p>The Moving firefighter problem considering fuel management aims to determine the optimal assignment of firefighters to protect the maximum number of nodes from catching fire. </p><p>This study proposes incorporating fuel management data on each node’s value (resource richness), risk, estimated burn time, and bidirectional fire spread speed across edges into the firefighter problem formulation. We also impose more realistic constraints of firefighters traversing edges at a fixed speed and requiring a certain protection time at each node. This yields a practical moving firefighter problem for determining the minimum-loss firefighting strategy.</p><p>In this problem, fire spreads from burned nodes to adjacent unprotected nodes, while firefighters can move from their current node to unburned nodes to protect them before proceeding along edges. </p><p><br/></p></body></html>"))
         self.button_case1.setText(_translate("MainWindow", "case1"))
         self.label_casename.setText(_translate("MainWindow", "2021玉山森林大火"))
         self.label_3.setText(_translate("MainWindow", "2021年5月15日，森林火勢延燒達12天，延燒面積達79.7公頃，森林區被害全損面積達22.0877公頃\n"

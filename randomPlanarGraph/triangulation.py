@@ -40,6 +40,6 @@ def triangulate_triangle(nodes, randstream):
 
 def triangulate_triangle_conform(nodes, randstream):
 	import triangle
-	data = randomPlanarGraph.triangle.triangulate({"vertices":nodes}, "DS0F")
+	data = triangle.triangulate({"vertices":nodes}, "DS0F")
 	tris = data["triangles"]
 	return tris
