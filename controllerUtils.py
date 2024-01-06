@@ -102,7 +102,8 @@ class Controller_Utils:
         controller.checkBox.toggled.connect(controller.idleLock)
         controller.lcd_time.display(controller.currentTime)
         controller.comboBox_network.activated[str].connect(controller.comboBoxEvent)
-    
+        
+
     def createNetworkInfrastructures(controller):
         if controller.mode == 1 or 3:
             controller.FFnetwork =Network(f"{controller.model_dir}.xlsx", depot="N_D")
@@ -111,6 +112,7 @@ class Controller_Utils:
         elif controller.mode == 2:
             controller.FFnetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_D")
             controller.fireNetwork = Network("./network/case1/FFP_case1.xlsx", depot="N_F") 
+        
 
     def nodeListInitialize(controller):
         for i in controller.FFnetwork.nodeList:
@@ -141,13 +143,13 @@ class Controller_Utils:
             node.setGraphicsEffect(shadow)
             controller.nodeList.append(node)
             controller.totalValue+=node.getValue()    
-
+        
     def nodeConnection(controller):
         for sourceNode in controller.nodeList:
             for arc in sourceNode.getArcs():
                 destNode = controller.nodeList[arc["node"].getNum()-1]
                 sourceNode.connectNode(destNode)
-
+        
     def depotInitialize(controller):
         #初始化火
         fireDepot = next((i.getNum() for i in controller.fireNetwork.nodeList if i.isDepot()), None)
@@ -211,10 +213,11 @@ class Controller_Utils:
         controller.modelTest = True
         if os.path.exists(f"{controller.model_dir}_data.json"): 
             with open(f"{controller.model_dir}_data.json", 'r') as file:
+                print("g")
                 data = json.load(file)
                 
                 DataBase.T = data["T"][-1]
-                DataBase.tau = data["tau"]
+                # DataBase.tau = data["tau"]
                 DataBase.Q = data["q"]
                 DataBase.b = data["b"]
                 DataBase.u_bar = data["u_bar"]

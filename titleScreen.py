@@ -88,7 +88,8 @@ class titleScreen(QtWidgets.QMainWindow):
 
     def checkboxEvent(self):
         if self.checkBox.isChecked():
-            file_path = "./network/FF2test/FFP_n20_no1.xlsx"
+            # file_path = "./network/FF2test/FFP_n20_no1.xlsx"   # original default
+            file_path = "./network/FFP_n10_no2.xlsx"
             temp = {"filename": file_path}
             with open('filename.json', 'w') as file:
                 json.dump(temp, file)

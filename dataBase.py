@@ -14,7 +14,7 @@ class DataBase(QObject):
     K = set() #K=消防員集合
     A_p = []
     A_f = []
-    tau = [] #travel time set
+    # tau = [] #travel time set
     lamb = [] #spread time set
     T = [] #時間list
     Q = {} #quantity

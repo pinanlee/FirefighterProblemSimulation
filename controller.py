@@ -98,16 +98,16 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         if t == self.currentTime:
             if i != j: 
                 self.choose()
-                text = "消防員 {}在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(k, t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]) 
+                # text = "消防員 {}在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(k, t, i, j, DataBase.tau[f"({i}, {j}, {float(k)})"]) 
             else:         
                 if DataBase.u_bar[f"({i}, {k}, {t})"] > DataBase.epsilon:
                     self.choose()
-                    text = "消防員 {}在時刻 {} 對node {} 進行保護, processing time: {}".format(k,t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.currentSelectedFF().rate_extinguish)) 
+                    # text = "消防員 {}在時刻 {} 對node {} 進行保護, processing time: {}".format(k,t,i, math.ceil(DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.currentSelectedFF().rate_extinguish)) 
                 else:
                     self.assignIdle()
-                    text = "消防員 {}在時刻 {} 在node {} idle".format(k,t,i)
-            print(text)
-            self.consoleLabel.setText(text)
+                    # text = "消防員 {}在時刻 {} 在node {} idle".format(k,t,i)
+            # print(text)
+            # self.consoleLabel.setText(text)
             self.temp[k-1].append(self.temp[k-1].pop(0))
         
 
@@ -214,8 +214,8 @@ class MainWindow_controller(QtWidgets.QMainWindow):
         self.timer.stop()
         if(self.modelTest):
             self.modelTime.stop()
-        self.result = resultsWindow(self.nodeList, self.currentTime)
-        self.result.show()
+        # self.result = resultsWindow(self.nodeList, self.currentTime)
+        # self.result.show()
         if os.path.exists("filename.json"):
             os.remove("filename.json")
 
@@ -290,8 +290,10 @@ class MainWindow_controller(QtWidgets.QMainWindow):
 
     def newNetwork(self):
         from randomPlanarGraph.GenerateGraph import generate_test_data
-        generate_test_data(15, 25, 35, 1)
-        self.model_dir = "./randomPlanarGraph/data/FFP_n15_no1"
+        # generate_test_data(15, 25, 35, 1)
+        # self.model_dir = "./randomPlanarGraph/data/FFP_n15_no1"
+        self.model_dir = "./network/FFP_n10_no2"
+
         for i in self.nodeList:
             i.deleteLater()
         for i in self.firefighterList:

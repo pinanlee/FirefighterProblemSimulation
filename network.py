@@ -19,7 +19,8 @@ class Network:
                 if self.nodeList[int(i["i"]) - 1].getArc(self.nodeList[nodeNum]) == None:
                     length = int(i["d"])
                     time = i["travel time"]
-                    DataBase.tau.append(time)
+                    
+                    # DataBase.tau.append(time)
                     self.nodeList[int(i["i"]) - 1].connectNode(self.nodeList[nodeNum], length, i["k"], time)
                 else:
                     time = i["travel time"]

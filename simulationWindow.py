@@ -64,6 +64,59 @@ class SimulationWindow(QtWidgets.QMainWindow):
         Controller_Utils.nodeConnection(self)
         Controller_Utils.depotInitialize(self)
         Controller_Utils.UIInformationInitialization(self)
+        self.button_ga.clicked.connect(self.otherAlgo)
+        self.button_model.clicked.connect(self.otherAlgo)
+        self.button_aco.clicked.connect(self.otherAlgo)
+        self.button_ra.clicked.connect(self.otherAlgo)
+        self.button_user.clicked.connect(self.otherAlgo)
+
+
+
+
+    def test(self):
+        print("hello")
+
+    '-------------1222new-------------'
+    def otherAlgo(self):
+        for i in self.nodeList:
+            i.deleteLater()
+        for i in self.firefighterList:
+            i.deleteLater()
+        for i in self.fire:
+            i.deleteLater()
+        for i in self.labels:
+            i.deleteLater()
+        del self.FFnetwork
+        del self.fireNetwork
+        for i in self.blocklist:
+            i.flash_timer.stop()
+            i.deleteLater()
+        self.modelTest : bool = False
+        self.fire : list[Fire] = []
+        self.nodeList : list[Node] = []
+        self.firefighterList : list[FireFighter] = [] #store all firefighter (class: FireFighter)
+        self.firefighterNum = 1
+        self.FFindex = 0 
+        self.labels : QtWidgets.QLabel = []
+        self.timer = QTimer()
+        self.currentTime = 0
+        self.pageList = -1
+        self.FFnetwork : Network = None
+        self.fireNetwork : Network = None
+        self.showFFnetwork : bool = True
+        self.showFireNetwork : bool = True
+        self.FFInfoDict = []
+        self.totalValue = 0
+        self.availFF = 0
+        self.gameTerminated = False
+        self.blocklist=[]
+        Controller_Utils.createNetworkInfrastructures(self)
+        Controller_Utils.nodeListInitialize(self)
+        Controller_Utils.nodeConnection(self)
+        Controller_Utils.depotInitialize(self)
+        Controller_Utils.UIInformationInitialization(self)
+
+    '--------------------------------'
 
     def modelTimeSet(self):
         Controller_Utils.getModelSolution(self)
@@ -90,18 +143,20 @@ class SimulationWindow(QtWidgets.QMainWindow):
         if t == self.currentTime:
             if i != j:
                 self.choose()
-                text = "消防員 {}在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(k, t, i, j, DataBase.tau[
-                    f"({i}, {j}, {float(k)})"])
+                # text = "消防員 {}在時刻 {} 從node {} 移動到 node {} ,travel time: {}".format(k, t, i, j, DataBase.tau[
+                #     f"({i}, {j}, {float(k)})"])
+                # 報告前一晚註解掉防止出錯
             else:
                 if DataBase.u_bar[f"({i}, {k}, {t})"] > DataBase.epsilon:
                     self.choose()
-                    text = "消防員 {}在時刻 {} 對node {} 進行保護, processing time: {}".format(k, t, i, math.ceil(
-                        DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.currentSelectedFF().rate_extinguish))
+                    # text = "消防員 {}在時刻 {} 對node {} 進行保護, processing time: {}".format(k, t, i, math.ceil(
+                    #     DataBase.Q[f"{i}"] * DataBase.b[f"{i}"] / self.currentSelectedFF().rate_extinguish))
+                    # 報告前一晚註解掉防止出錯
                 else:
                     self.assignIdle()
                     text = "消防員 {}在時刻 {} 在node {} idle".format(k, t, i)
-            print(text)
-            self.consoleLabel.setText(text)
+            # print(text) #報告前一晚註解掉防止出錯
+            # self.consoleLabel.setText(text)
             self.temp[k - 1].append(self.temp[k - 1].pop(0))
 
     def howManyAvail(self):
@@ -186,8 +241,8 @@ class SimulationWindow(QtWidgets.QMainWindow):
         self.timer.stop()
         if (self.modelTest):
             self.modelTime.stop()
-        self.result = resultsWindow(self.nodeList, self.currentTime)
-        self.result.show()
+        # self.result = resultsWindow(self.nodeList, self.currentTime)
+        # self.result.show()
         if os.path.exists("filename.json"):
             os.remove("filename.json")
 

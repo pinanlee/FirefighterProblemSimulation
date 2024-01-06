@@ -59,7 +59,6 @@ class InformationWindow(QtWidgets.QMainWindow):
         self.pageFF.layout.addWidget(blockFF)
         self.pageFF.setLayout(self.pageFF.layout)
 
-
     '''------------------------------Information Window  UI settings-----------------------------------'''
     def ui(self): #用於Information Window ui的手動設計
         #增加分頁物件
